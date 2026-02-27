@@ -1,5 +1,6 @@
 import { LayoutDashboard, Users, Home, Calendar, Settings, TrendingUp, LogOut } from "lucide-react";
 import { useNavigate, useLocation } from "react-router-dom";
+import { useAuth } from "@/hooks/useAuth";
 
 const navItems = [
   { icon: LayoutDashboard, label: "Dashboard", path: "/" },
@@ -17,12 +18,18 @@ interface CrmSidebarProps {
 const CrmSidebar = ({ activeItem }: CrmSidebarProps) => {
   const navigate = useNavigate();
   const location = useLocation();
+  const { user, logout } = useAuth();
 
   const getIsActive = (item: typeof navItems[0]) => {
     if (activeItem) return item.label === activeItem;
     if (item.path !== "/" && location.pathname.startsWith(item.path)) return true;
     if (item.label === "Dashboard") return location.pathname === "/";
     return false;
+  };
+
+  const handleLogout = async () => {
+    await logout();
+    navigate("/login");
   };
 
   return (
@@ -62,13 +69,19 @@ const CrmSidebar = ({ activeItem }: CrmSidebarProps) => {
       <div className="p-3 border-t border-sidebar-border">
         <div className="flex items-center gap-3 px-3 py-2">
           <div className="w-8 h-8 rounded-full bg-sidebar-accent flex items-center justify-center text-xs font-semibold text-sidebar-accent-foreground">
-            JR
+            {user?.name?.charAt(0).toUpperCase() || "U"}
           </div>
           <div className="flex-1 min-w-0">
-            <p className="text-sm font-medium text-sidebar-accent-foreground truncate">João Reis</p>
-            <p className="text-[11px] text-sidebar-foreground/60 truncate">CRECI 12345</p>
+            <p className="text-sm font-medium text-sidebar-accent-foreground truncate">{user?.name || "Usuário"}</p>
+            <p className="text-[11px] text-sidebar-foreground/60 truncate">{user?.role === "admin" ? "Admin" : "Agent"}</p>
           </div>
-          <LogOut className="w-4 h-4 text-sidebar-foreground/40 hover:text-sidebar-foreground cursor-pointer" />
+          <button
+            onClick={handleLogout}
+            className="p-1 text-sidebar-foreground/40 hover:text-sidebar-foreground hover:bg-sidebar-accent/30 rounded transition-colors"
+            title="Logout"
+          >
+            <LogOut className="w-4 h-4" />
+          </button>
         </div>
       </div>
     </aside>

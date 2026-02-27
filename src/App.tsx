@@ -1,8 +1,11 @@
+import { useEffect } from "react";
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
+import { ProtectedRoute } from "@/components/ProtectedRoute";
+import { useAuthStore } from "@/stores/authStore";
 import Index from "./pages/Index";
 import Login from "./pages/Login";
 import Visits from "./pages/Visits";
@@ -17,26 +20,105 @@ import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
 
+const AppRoutes = () => {
+  const checkAuth = useAuthStore((state) => state.checkAuth);
+
+  useEffect(() => {
+    checkAuth();
+  }, [checkAuth]);
+
+  return (
+    <Routes>
+      {/* Rotas Públicas */}
+      <Route path="/login" element={<Login />} />
+
+      {/* Rotas Protegidas */}
+      <Route
+        path="/"
+        element={
+          <ProtectedRoute>
+            <Index />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/leads"
+        element={
+          <ProtectedRoute>
+            <Leads />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/visits"
+        element={
+          <ProtectedRoute>
+            <Visits />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/visits/new"
+        element={
+          <ProtectedRoute>
+            <NewVisit />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/properties"
+        element={
+          <ProtectedRoute>
+            <Properties />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/properties/new"
+        element={
+          <ProtectedRoute>
+            <PropertyRegister />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/properties/:id"
+        element={
+          <ProtectedRoute>
+            <PropertyDetail />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/analytics"
+        element={
+          <ProtectedRoute>
+            <Analytics />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/settings"
+        element={
+          <ProtectedRoute>
+            <Settings />
+          </ProtectedRoute>
+        }
+      />
+
+      {/* Rota 404 - deve ser última */}
+      <Route path="*" element={<NotFound />} />
+    </Routes>
+  );
+};
+
 const App = () => (
   <QueryClientProvider client={queryClient}>
     <TooltipProvider>
       <Toaster />
       <Sonner />
       <BrowserRouter>
-        <Routes>
-          <Route path="/" element={<Index />} />
-          <Route path="/login" element={<Login />} />
-          <Route path="/leads" element={<Leads />} />
-          <Route path="/visits" element={<Visits />} />
-          <Route path="/visits/new" element={<NewVisit />} />
-          <Route path="/properties" element={<Properties />} />
-          <Route path="/properties/new" element={<PropertyRegister />} />
-          <Route path="/properties/:id" element={<PropertyDetail />} />
-          <Route path="/analytics" element={<Analytics />} />
-          <Route path="/settings" element={<Settings />} />
-          {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
-          <Route path="*" element={<NotFound />} />
-        </Routes>
+        <AppRoutes />
       </BrowserRouter>
     </TooltipProvider>
   </QueryClientProvider>

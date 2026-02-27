@@ -3,34 +3,58 @@ import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Home, Eye, EyeOff } from "lucide-react";
+import { Home, Eye, EyeOff, Loader2 } from "lucide-react";
+import { useAuth } from "@/hooks/useAuth";
+import { useToast } from "@/hooks/use-toast";
 
 const Login = () => {
   const navigate = useNavigate();
-  const [isLogin, setIsLogin] = useState(true);
+  const { login, isLoading } = useAuth();
+  const { toast } = useToast();
+  const [isLoginMode, setIsLoginMode] = useState(true);
   const [showPassword, setShowPassword] = useState(false);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [name, setName] = useState("");
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    navigate("/");
+
+    if (!email || !password) {
+      toast({
+        title: "Erro",
+        description: "E-mail e senha são obrigatórios",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    try {
+      await login({ email, password });
+      toast({
+        title: "Sucesso",
+        description: "Login realizado com sucesso!",
+      });
+      navigate("/");
+    } catch (error) {
+      toast({
+        title: "Erro ao fazer login",
+        description:
+          error instanceof Error ? error.message : "Tente novamente mais tarde",
+        variant: "destructive",
+      });
+    }
   };
 
   return (
     <div className="min-h-screen bg-background flex">
-      {/* Left - Branding */}
       <div className="hidden lg:flex lg:w-1/2 relative bg-card items-center justify-center p-12">
         <div className="absolute inset-0 bg-gradient-to-br from-primary/10 via-transparent to-primary/5" />
         <div className="relative z-10 max-w-md">
           <div className="flex items-center gap-3 mb-8">
-            <div className="w-12 h-12 rounded-xl bg-primary flex items-center justify-center">
-              <Home className="w-6 h-6 text-primary-foreground" />
-            </div>
-            <span className="text-2xl font-bold text-foreground">ImobCRM</span>
+            <span className="text-4xl text-center font-bold text-foreground">AIMOB CRM + IA + Meta Business</span>
           </div>
-          <h1 className="text-4xl font-bold text-foreground leading-tight mb-4">
+          <h1 className="text-2xl font-bold text-foreground leading-tight mb-4">
             Gerencie seus imóveis e leads com inteligência
           </h1>
           <p className="text-muted-foreground text-lg">
@@ -54,28 +78,26 @@ const Login = () => {
         </div>
       </div>
 
-      {/* Right - Form */}
       <div className="flex-1 flex items-center justify-center p-6 sm:p-12">
         <div className="w-full max-w-sm">
-          {/* Mobile logo */}
           <div className="flex items-center gap-2 mb-8 lg:hidden">
             <div className="w-10 h-10 rounded-lg bg-primary flex items-center justify-center">
               <Home className="w-5 h-5 text-primary-foreground" />
             </div>
-            <span className="text-xl font-bold text-foreground">ImobCRM</span>
+            <span className="text-xl font-bold text-foreground">AIMOB CRM</span>
           </div>
 
           <h2 className="text-2xl font-bold text-foreground">
-            {isLogin ? "Bem-vindo de volta" : "Criar conta"}
+            {isLoginMode ? "Bem-vindo(a) de volta!" : "Criar conta"}
           </h2>
           <p className="text-sm text-muted-foreground mt-1 mb-8">
-            {isLogin
-              ? "Entre com suas credenciais para acessar o painel"
+            {isLoginMode
+              ? "Entre com suas credenciais para acessar o seu CRM"
               : "Preencha os dados para começar a usar o CRM"}
           </p>
 
           <form onSubmit={handleSubmit} className="space-y-4">
-            {!isLogin && (
+            {!isLoginMode && (
               <div className="space-y-2">
                 <Label htmlFor="name">Nome completo</Label>
                 <Input
@@ -84,6 +106,7 @@ const Login = () => {
                   value={name}
                   onChange={(e) => setName(e.target.value)}
                   className="h-10"
+                  disabled={isLoading}
                 />
               </div>
             )}
@@ -97,16 +120,18 @@ const Login = () => {
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 className="h-10"
+                disabled={isLoading}
               />
             </div>
 
             <div className="space-y-2">
               <div className="flex items-center justify-between">
                 <Label htmlFor="password">Senha</Label>
-                {isLogin && (
+                {isLoginMode && (
                   <button
                     type="button"
                     className="text-xs text-primary hover:underline"
+                    disabled={isLoading}
                   >
                     Esqueceu a senha?
                   </button>
@@ -120,11 +145,13 @@ const Login = () => {
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                   className="h-10 pr-10"
+                  disabled={isLoading}
                 />
                 <button
                   type="button"
                   onClick={() => setShowPassword(!showPassword)}
                   className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
+                  disabled={isLoading}
                 >
                   {showPassword ? (
                     <EyeOff className="w-4 h-4" />
@@ -135,18 +162,20 @@ const Login = () => {
               </div>
             </div>
 
-            <Button type="submit" className="w-full h-10 mt-2">
-              {isLogin ? "Entrar" : "Criar conta"}
+            <Button type="submit" className="w-full h-10 mt-2" disabled={isLoading}>
+              {isLoading && <Loader2 className="w-4 h-4 mr-2 animate-spin" />}
+              {isLoginMode ? "Entrar" : "Criar conta"}
             </Button>
           </form>
 
           <p className="text-sm text-center text-muted-foreground mt-6">
-            {isLogin ? "Não tem uma conta?" : "Já tem uma conta?"}{" "}
+            {isLoginMode ? "Não tem uma conta?" : "Já tem uma conta?"}{" "}
             <button
-              onClick={() => setIsLogin(!isLogin)}
+              onClick={() => setIsLoginMode(!isLoginMode)}
               className="text-primary font-medium hover:underline"
+              disabled={isLoading}
             >
-              {isLogin ? "Cadastre-se" : "Fazer login"}
+              {isLoginMode ? "Cadastre-se" : "Fazer login"}
             </button>
           </p>
         </div>
@@ -156,3 +185,4 @@ const Login = () => {
 };
 
 export default Login;
+
