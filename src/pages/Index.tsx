@@ -13,7 +13,7 @@ const Index = () => {
   const { toast } = useToast();
   const [searchParams] = useSearchParams();
   const chatIdFromUrl = searchParams.get("chatId");
-  
+
   const [selectedChatId, setSelectedChatId] = useState<number | null>(
     chatIdFromUrl ? parseInt(chatIdFromUrl) : null
   );
@@ -32,12 +32,12 @@ const Index = () => {
         });
       }
     };
-
+    
     loadData();
   }, [fetchChats, chats]);
-
+  
   const selectedChat = chats.find((c) => c.id === selectedChatId) || null;
-
+  
   return (
     <div className="flex h-screen w-full overflow-hidden">
       <CrmSidebar />
@@ -47,14 +47,14 @@ const Index = () => {
 
         <div className="flex-1 flex overflow-hidden">
           <div className="w-full lg:w-[340px] xl:w-[380px] shrink-0 overflow-y-auto p-3 border-r border-border scrollbar-thin">
-            <ChatTable 
-              chats={chats} 
-              selectedChatId={selectedChatId} 
-              onSelectChat={setSelectedChatId} 
+            <ChatTable
+              chats={chats}
+              selectedChatId={selectedChatId}
+              onSelectChat={setSelectedChatId}
             />
           </div>
 
-          {/* <div className="hidden md:flex flex-1 min-w-0 p-3">
+          <div className="hidden md:flex flex-1 min-w-0 p-3">
             {selectedChat ? (
               <ChatInterface chat={selectedChat} />
             ) : (
@@ -64,7 +64,7 @@ const Index = () => {
             )}
           </div>
 
-          <div className="hidden xl:flex w-[300px] shrink-0 p-3 border-l border-border">
+          {/*  <div className="hidden xl:flex w-[300px] shrink-0 p-3 border-l border-border">
             <PropertyPanel 
               properties={properties} 
               lead={selectedChat?.lead} 
