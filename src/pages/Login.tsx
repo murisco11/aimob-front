@@ -52,9 +52,9 @@ const Login = () => {
         <div className="absolute inset-0 bg-gradient-to-br from-primary/10 via-transparent to-primary/5" />
         <div className="relative z-10 max-w-md">
           <div className="flex items-center gap-3 mb-8">
-            <span className="text-4xl text-center font-bold text-foreground">AIMOB CRM + IA + Meta Business</span>
+            <span className="text-5xl text-center font-bold text-foreground">AIMOB CRM + IA + Meta Business</span>
           </div>
-          <h1 className="text-2xl font-bold text-foreground leading-tight mb-4">
+          <h1 className="text-2xl text-primary text-center font-bold text-foreground leading-tight mb-4">
             Gerencie seus imóveis e leads com inteligência
           </h1>
           <p className="text-muted-foreground text-lg">
@@ -87,10 +87,10 @@ const Login = () => {
             <span className="text-xl font-bold text-foreground">AIMOB CRM</span>
           </div>
 
-          <h2 className="text-2xl font-bold text-foreground">
+          <h2 className="text-3xl font-bold text-foreground">
             {isLoginMode ? "Bem-vindo(a) de volta!" : "Criar conta"}
           </h2>
-          <p className="text-sm text-muted-foreground mt-1 mb-8">
+          <p className="text-md text-muted-foreground mt-1 mb-8">
             {isLoginMode
               ? "Entre com suas credenciais para acessar o seu CRM"
               : "Preencha os dados para começar a usar o CRM"}

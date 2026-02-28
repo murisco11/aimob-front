@@ -16,16 +16,23 @@ export interface AuthResponse {
   token: string;
 }
 
-export interface Lead {
-  id: string;
+export type Lead = {
+  id: number;
   name: string;
-  email: string;
-  phone: string;
-  status: "new" | "contacted" | "qualified" | "negotiating" | "closed";
-  source: string;
-  createdAt: string;
-  updatedAt: string;
-}
+  description?: string; 
+  phone?: string;
+  aiActive: boolean;
+  threadId?: string;
+  lid?: string;
+  temperatura?: string;
+  instanceName: string;
+  createdAt: Date | string; 
+  updatedAt: Date | string;
+  
+  user?: any; 
+  imoveis?: any[];
+  chats?: any[];
+};
 
 export interface CreateLeadInput {
   name: string;

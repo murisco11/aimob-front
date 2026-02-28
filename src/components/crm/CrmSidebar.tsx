@@ -1,6 +1,7 @@
 import { LayoutDashboard, Users, Home, Calendar, Settings, TrendingUp, LogOut } from "lucide-react";
 import { useNavigate, useLocation } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
+import { useToast } from "../ui/use-toast";
 
 const navItems = [
   { icon: LayoutDashboard, label: "Dashboard", path: "/" },
@@ -16,6 +17,7 @@ interface CrmSidebarProps {
 }
 
 const CrmSidebar = ({ activeItem }: CrmSidebarProps) => {
+  const { toast } = useToast();
   const navigate = useNavigate();
   const location = useLocation();
   const { user, logout } = useAuth();
@@ -30,6 +32,11 @@ const CrmSidebar = ({ activeItem }: CrmSidebarProps) => {
   const handleLogout = async () => {
     await logout();
     navigate("/login");
+
+    toast({
+      title: "Sucesso",
+      description: "Você saiu da sua conta!",
+    });
   };
 
   return (
@@ -40,8 +47,8 @@ const CrmSidebar = ({ activeItem }: CrmSidebarProps) => {
             <Home className="w-4 h-4 text-sidebar-primary-foreground" />
           </div>
           <div>
-            <h1 className="text-sm font-semibold text-sidebar-accent-foreground">LeadIQ</h1>
-            <p className="text-[11px] text-sidebar-foreground/60">Real Estate CRM</p>
+            <h1 className="text-sm font-semibold text-sidebar-accent-foreground">{user.name}</h1>
+            <p className="text-[11px] text-sidebar-foreground/60">AIMOB</p>
           </div>
         </div>
       </div>
@@ -53,11 +60,10 @@ const CrmSidebar = ({ activeItem }: CrmSidebarProps) => {
             <button
               key={item.label}
               onClick={() => navigate(item.path)}
-              className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm transition-colors ${
-                isActive
-                  ? "bg-sidebar-accent text-sidebar-accent-foreground font-medium"
-                  : "text-sidebar-foreground hover:bg-sidebar-accent/50 hover:text-sidebar-accent-foreground"
-              }`}
+              className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm transition-colors ${isActive
+                ? "bg-sidebar-accent text-sidebar-accent-foreground font-medium"
+                : "text-sidebar-foreground hover:bg-sidebar-accent/50 hover:text-sidebar-accent-foreground"
+                }`}
             >
               <item.icon className="w-4 h-4" />
               <span>{item.label}</span>

@@ -5,11 +5,6 @@ const TOKEN_KEY = "auth_token";
 
 class ApiClient {
   private client: AxiosInstance;
-  private refreshing = false;
-  private failedQueue: Array<{
-    onSuccess: (token: string) => void;
-    onFailed: (error: Error) => void;
-  }> = [];
 
   constructor() {
     this.client = axios.create({
@@ -23,7 +18,6 @@ class ApiClient {
   }
 
   private setupInterceptors() {
-    // Request interceptor - adiciona token
     this.client.interceptors.request.use(
       (config) => {
         const token = this.getToken();
@@ -35,57 +29,16 @@ class ApiClient {
       (error) => Promise.reject(error)
     );
 
-    // Response interceptor - trata erros e refresh token
     this.client.interceptors.response.use(
       (response) => response,
-      async (error: AxiosError) => {
-        const originalRequest = error.config as any;
-
-        // Se for erro 401 e não for a request de refresh
-        if (
-          error.response?.status === 401 &&
-          !originalRequest._retry &&
-          originalRequest.url !== "/auth/refresh"
-        ) {
-          originalRequest._retry = true;
-
-          if (this.refreshing) {
-            return new Promise((resolve, reject) => {
-              this.failedQueue.push({
-                onSuccess: (token: string) => {
-                  originalRequest.headers.Authorization = `Bearer ${token}`;
-                  resolve(this.client(originalRequest));
-                },
-                onFailed: (error: Error) => {
-                  reject(error);
-                },
-              });
-            });
-          }
-
-          this.refreshing = true;
-
-          try {
-            const response = await this.client.post("/auth/refresh");
-            const newToken = response.data.token;
-            this.setToken(newToken);
-            originalRequest.headers.Authorization = `Bearer ${newToken}`;
-
-            this.failedQueue.forEach((prom) => prom.onSuccess(newToken));
-            this.failedQueue = [];
-
-            return this.client(originalRequest);
-          } catch (err) {
-            this.clearToken();
-            this.failedQueue.forEach((prom) => prom.onFailed(err as Error));
-            this.failedQueue = [];
+      (error: AxiosError) => {
+        if (error.response?.status === 401) {
+          this.clearToken();
+          
+          if (window.location.pathname !== "/login") {
             window.location.href = "/login";
-            return Promise.reject(err);
-          } finally {
-            this.refreshing = false;
           }
         }
-
         return Promise.reject(error);
       }
     );

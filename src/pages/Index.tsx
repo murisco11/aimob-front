@@ -2,22 +2,41 @@ import { useState, useEffect } from "react";
 import { useSearchParams } from "react-router-dom";
 import CrmSidebar from "@/components/crm/CrmSidebar";
 import MobileHeader from "@/components/crm/MobileHeader";
-import LeadTable from "@/components/crm/LeadTable";
+import ChatTable from "@/components/crm/ChatTable";
 import ChatInterface from "@/components/crm/ChatInterface";
 import PropertyPanel from "@/components/crm/PropertyPanel";
-import { leads, properties } from "@/data/mockData";
+import { properties } from "@/data/mockData";
+import { useChat } from "@/hooks/useChat";
+import { useToast } from "@/components/ui/use-toast";
 
 const Index = () => {
+  const { toast } = useToast();
   const [searchParams] = useSearchParams();
-  const leadIdFromUrl = searchParams.get("leadId");
-  const [selectedLeadId, setSelectedLeadId] = useState(leadIdFromUrl || leads[0].id);
-  const selectedLead = leads.find((l) => l.id === selectedLeadId) ?? leads[0];
+  const chatIdFromUrl = searchParams.get("chatId");
+  
+  const [selectedChatId, setSelectedChatId] = useState<number | null>(
+    chatIdFromUrl ? parseInt(chatIdFromUrl) : null
+  );
+
+  const { chats, fetchChats } = useChat();
 
   useEffect(() => {
-    if (leadIdFromUrl && leads.some((l) => l.id === leadIdFromUrl)) {
-      setSelectedLeadId(leadIdFromUrl);
-    }
-  }, [leadIdFromUrl]);
+    const loadData = async () => {
+      try {
+        await fetchChats();
+      } catch (error) {
+        toast({
+          title: "Erro ao carregar chats",
+          description: error instanceof Error ? error.message : "Tente novamente mais tarde",
+          variant: "destructive",
+        });
+      }
+    };
+
+    loadData();
+  }, [fetchChats, chats]);
+
+  const selectedChat = chats.find((c) => c.id === selectedChatId) || null;
 
   return (
     <div className="flex h-screen w-full overflow-hidden">
@@ -27,20 +46,30 @@ const Index = () => {
         <MobileHeader />
 
         <div className="flex-1 flex overflow-hidden">
-          {/* Left: Lead Table */}
           <div className="w-full lg:w-[340px] xl:w-[380px] shrink-0 overflow-y-auto p-3 border-r border-border scrollbar-thin">
-            <LeadTable leads={leads} selectedLeadId={selectedLeadId} onSelectLead={setSelectedLeadId} />
+            <ChatTable 
+              chats={chats} 
+              selectedChatId={selectedChatId} 
+              onSelectChat={setSelectedChatId} 
+            />
           </div>
 
-          {/* Center: Chat */}
-          <div className="hidden md:flex flex-1 min-w-0 p-3">
-            <ChatInterface lead={selectedLead} />
+          {/* <div className="hidden md:flex flex-1 min-w-0 p-3">
+            {selectedChat ? (
+              <ChatInterface chat={selectedChat} />
+            ) : (
+              <div className="flex-1 flex items-center justify-center text-muted-foreground">
+                Selecione uma chat para iniciar
+              </div>
+            )}
           </div>
 
-          {/* Right: Property Sidebar */}
           <div className="hidden xl:flex w-[300px] shrink-0 p-3 border-l border-border">
-            <PropertyPanel properties={properties} />
-          </div>
+            <PropertyPanel 
+              properties={properties} 
+              lead={selectedChat?.lead} 
+            />
+          </div> */}
         </div>
       </div>
     </div>

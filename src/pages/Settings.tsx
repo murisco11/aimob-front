@@ -182,7 +182,7 @@ const Settings = () => {
                   <Card className="border-border">
                     <CardHeader className="pb-3">
                       <CardTitle className="text-sm">Prompt do Sistema / Contexto Base</CardTitle>
-                      <CardDescription>Instruções que a IA seguirá ao conversar com leads</CardDescription>
+                      <CardDescription>Instruções que a IA seguirá ao chatr com leads</CardDescription>
                     </CardHeader>
                     <CardContent>
                       <Textarea

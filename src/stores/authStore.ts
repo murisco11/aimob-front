@@ -1,7 +1,7 @@
 import { create } from "zustand";
 import { persist } from "zustand/middleware";
 import { AuthUser, LoginInput, AuthResponse } from "@/services/types";
-import { authService } from "@/services/auth";
+import { authService } from "@/services/authService";
 import { apiClient } from "@/services/api";
 
 export interface AuthStore {
