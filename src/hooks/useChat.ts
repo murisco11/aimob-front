@@ -3,6 +3,7 @@ import { useChatStore } from "@/stores/chatStore";
 export const useChat = () => {
     const {
         chats,
+        sendMessage,
         isLoading,
         fetchChatById,
         selectedChat,
@@ -13,6 +14,7 @@ export const useChat = () => {
     return {
         selectedChat,
         chats,
+        sendMessage,
         isLoading,
         fetchChatById,
         error,

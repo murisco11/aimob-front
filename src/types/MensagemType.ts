@@ -1,4 +1,4 @@
-import { Chat } from "./ChatType"; 
+import { Chat } from "./chatType"; 
 
 export type Mensagem = {
   id: number;

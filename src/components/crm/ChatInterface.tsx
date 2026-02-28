@@ -1,10 +1,11 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { Send, Sparkles, Bot, MessageCircle } from "lucide-react";
 import { Switch } from "@/components/ui/switch";
 import { useToast } from "@/components/ui/use-toast";
 import { Chat } from "@/types/chatType";
 import { Mensagem } from "@/types/MensagemType";
 import { useChat } from "@/hooks/useChat";
+import { useLead } from "@/hooks/useLead";
 
 interface ChatInterfaceProps {
   chat: Chat;
@@ -12,13 +13,20 @@ interface ChatInterfaceProps {
 
 const ChatInterface = ({ chat }: ChatInterfaceProps) => {
   const { toast } = useToast();
-  const { fetchChatById, selectedChat } = useChat();
-  const [autopilot, setAutopilot] = useState(false);
+  const { fetchChatById, selectedChat, sendMessage } = useChat();
+  const { updateLeadAiActive } = useLead()
   const [input, setInput] = useState("");
   const [mensagens, setMensagens] = useState<Mensagem[]>([]);
   const [isLoading, setIsLoading] = useState(false);
 
+  const messagesEndRef = useRef<HTMLDivElement>(null);
+
+  const scrollToBottom = () => {
+    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+  };
+
   useEffect(() => {
+    console.log(chat)
     const fetchMensagensDoChat = async () => {
       if (!chat?.id) return;
 
@@ -26,7 +34,6 @@ const ChatInterface = ({ chat }: ChatInterfaceProps) => {
       setIsLoading(true);
 
       try {
-        console.log(`Buscando mensagens para o chat ${chat.id}...`);
         await fetchChatById(chat.id);
       } catch (error) {
         toast({
@@ -48,8 +55,40 @@ const ChatInterface = ({ chat }: ChatInterfaceProps) => {
     }
   }, [selectedChat]);
 
+  useEffect(() => {
+    scrollToBottom();
+  }, [mensagens]);
+
   const leadName = chat.lead?.name || "Lead Desconhecido";
   const avatarLetter = leadName.charAt(0).toUpperCase();
+
+  const enviarMensagem = async () => {
+    if (!input.trim()) return;
+
+    try {
+      await sendMessage({ conversaId: chat.id, text: input });
+      setInput("");
+    } catch (error) {
+      toast({
+        title: "Erro ao enviar mensagens",
+        description: "Não foi possível enviar a mensagem.",
+        variant: "destructive",
+      });
+    }
+  };
+
+    const changeAiActive = async () => {
+    try {
+      await updateLeadAiActive(chat.lead.id, !chat.lead.aiActive);
+      setInput("");
+    } catch (error) {
+      toast({
+        title: "Erro ao atualizar inteligência artificial",
+        description: "Não foi possível atualizar inteligência artificial",
+        variant: "destructive",
+      });
+    }
+  };
 
   return (
     <div className="flex flex-col h-full bg-card rounded-xl border border-border overflow-hidden">
@@ -72,8 +111,8 @@ const ChatInterface = ({ chat }: ChatInterfaceProps) => {
         <div className="flex items-center gap-2">
           <div className="flex items-center gap-2 bg-muted rounded-lg px-3 py-1.5">
             <Bot className="w-3.5 h-3.5 text-primary" />
-            <span className="text-xs font-medium text-card-foreground">AI Autopilot</span>
-            <Switch checked={autopilot} onCheckedChange={setAutopilot} className="scale-75" />
+            <span className="text-xs font-medium text-card-foreground">Inteligência Artifical</span>
+            <Switch checked={chat.lead.aiActive} onCheckedChange={changeAiActive} className="scale-75" />
           </div>
         </div>
       </div>
@@ -103,29 +142,32 @@ const ChatInterface = ({ chat }: ChatInterfaceProps) => {
             Nenhuma mensagem encontrada.
           </div>
         ) : (
-          mensagens.map((msg) => (
-            <div key={msg.id} className={`flex ${!msg.fromMe ? "justify-start" : "justify-end"}`}>
-              <div
-                className={`max-w-[75%] px-3.5 py-2.5 rounded-2xl ${!msg.fromMe
+          <>
+            {mensagens.map((msg) => (
+              <div key={msg.id} className={`flex ${!msg.fromMe ? "justify-start" : "justify-end"}`}>
+                <div
+                  className={`max-w-[75%] px-3.5 py-2.5 rounded-2xl ${!msg.fromMe
                     ? "bg-chat-other text-chat-other-foreground rounded-bl-md"
                     : "bg-chat-self text-chat-self-foreground rounded-br-md"
-                  }`}
-              >
-                {msg.fromMe && msg.type === "ai" && (
-                  <div className="flex items-center gap-1 mb-1">
-                    <Bot className="w-3 h-3 text-primary" />
-                    <span className="text-[10px] font-medium text-primary">AI Auto-reply</span>
-                  </div>
-                )}
+                    }`}
+                >
+                  {msg.fromMe && msg.type === "ai" && (
+                    <div className="flex items-center gap-1 mb-1">
+                      <Bot className="w-3 h-3 text-primary" />
+                      <span className="text-[10px] font-medium text-primary">AI Auto-reply</span>
+                    </div>
+                  )}
 
-                <p className="text-sm leading-relaxed">{msg.body}</p>
-                <p className={`text-[10px] mt-1 text-right ${!msg.fromMe ? "text-muted-foreground" : "text-chat-self-foreground/70"
-                  }`}>
-                  {new Date(msg.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
-                </p>
+                  <p className="text-sm leading-relaxed">{msg.body}</p>
+                  <p className={`text-[10px] mt-1 text-right ${!msg.fromMe ? "text-muted-foreground" : "text-chat-self-foreground/70"
+                    }`}>
+                    {new Date(msg.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                  </p>
+                </div>
               </div>
-            </div>
-          ))
+            ))}
+            <div ref={messagesEndRef} />
+          </>
         )}
       </div>
 
@@ -135,12 +177,13 @@ const ChatInterface = ({ chat }: ChatInterfaceProps) => {
             type="text"
             value={input}
             onChange={(e) => setInput(e.target.value)}
-            onKeyDown={(e) => e.key === 'Enter' && /* Função de enviar aqui */ console.log("Enviar")}
+            onKeyDown={(e) => e.key === 'Enter' && enviarMensagem()}
             placeholder="Digite uma mensagem..."
             className="flex-1 bg-transparent text-sm text-card-foreground placeholder:text-muted-foreground outline-none"
             disabled={chat.status === "closed"}
           />
           <button
+            onClick={enviarMensagem}
             disabled={!input.trim() || chat.status === "closed"}
             className="w-8 h-8 rounded-lg bg-primary flex items-center justify-center text-primary-foreground hover:opacity-90 transition-opacity disabled:opacity-50"
           >

@@ -5,11 +5,13 @@ export const useLead = () => {
         leads,
         isLoading,
         error,
+        updateLeadAiActive,
         fetchLeads
     } = useLeadStore();
 
     return {
         leads,
+        updateLeadAiActive,
         isLoading,
         error,
         fetchLeads

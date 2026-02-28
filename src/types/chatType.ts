@@ -1,3 +1,5 @@
+import { Lead } from "./LeadType";
+
 export type ChatStatus = "open" | "closed" | "pending";
 
 export type Chat = {
@@ -9,10 +11,15 @@ export type Chat = {
   createdAt: Date | string;
   updatedAt: Date | string;
 
-  lead?: any;    
+  lead?: Lead;    
   user?: any | null;
   mensagens?: any[];
   
   leadId?: number;
   userId?: number | null;
 };
+
+export type SendMessage = {
+  text: string;
+  conversaId: number;
+}
