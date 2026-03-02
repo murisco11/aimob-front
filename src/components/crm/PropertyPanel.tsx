@@ -1,9 +1,13 @@
-import { Bed, Bath, Maximize, CalendarPlus, CheckCircle2, FileText, Home } from "lucide-react";
+import { Bed, Bath, Maximize, CalendarPlus, CheckCircle2, FileText, Home, Car } from "lucide-react";
 import { Property } from "@/data/mockData";
 import { Button } from "@/components/ui/button";
+import { Lead } from "@/services/types";
+import { useEffect, useState } from "react";
+import { Imovel } from "@/types/ImovelType";
+import { useLead } from "@/hooks/useLead";
 
 interface PropertyPanelProps {
-  properties: Property[];
+  leadId: number
 }
 
 const statusStyles = {
@@ -12,16 +16,24 @@ const statusStyles = {
   sold: "bg-muted text-muted-foreground",
 };
 
-const PropertyPanel = ({ properties }: PropertyPanelProps) => {
+const PropertyPanel = ({ leadId }: PropertyPanelProps) => {
+  const { lead, getLeadById, isLoading } = useLead()
+
+  useEffect(() => {
+    getLeadById(leadId);
+  }, [leadId, getLeadById]);
+
+  const imoveis: Imovel[] = (lead && lead.id === leadId && lead.imoveis) ? lead.imoveis : [];
+
   return (
     <div className="bg-card rounded-xl border border-border overflow-hidden flex flex-col h-full">
       <div className="px-5 py-4 border-b border-border">
-        <h2 className="text-sm font-semibold text-card-foreground">Active Properties</h2>
-        <p className="text-xs text-muted-foreground mt-0.5">{properties.length} listings</p>
+        <h2 className="text-sm font-semibold text-card-foreground">Imóveis ativos do Lead</h2>
+        <p className="text-xs text-muted-foreground mt-0.5">{imoveis.length} {imoveis.length === 1 ? "Imóvel" : "Imóveis  "}</p>
       </div>
 
       <div className="flex-1 overflow-y-auto p-3 space-y-3 scrollbar-thin">
-        {properties.map((property) => (
+        {imoveis.map((property) => (
           <div key={property.id} className="rounded-lg border border-border p-3 hover:border-primary/30 transition-colors">
             <div className="flex items-start justify-between mb-2">
               <div className="flex items-center gap-2">
@@ -29,37 +41,50 @@ const PropertyPanel = ({ properties }: PropertyPanelProps) => {
                   <Home className="w-4 h-4 text-secondary-foreground" />
                 </div>
                 <div>
-                  <p className="text-sm font-medium text-card-foreground leading-tight">{property.title}</p>
+                  <p className="text-sm font-medium text-card-foreground leading-tight">{property.name}</p>
                   <p className="text-[11px] text-muted-foreground">{property.address}</p>
                 </div>
               </div>
-              <span className={`text-[10px] font-medium px-1.5 py-0.5 rounded-full capitalize ${statusStyles[property.status]}`}>
-                {property.status}
-              </span>
             </div>
-            <p className="text-sm font-semibold text-primary mb-2">{property.price}</p>
-            <div className="flex items-center gap-3 text-[11px] text-muted-foreground">
-              <span className="flex items-center gap-1"><Bed className="w-3 h-3" />{property.beds} bed</span>
-              <span className="flex items-center gap-1"><Bath className="w-3 h-3" />{property.baths} bath</span>
-              <span className="flex items-center gap-1"><Maximize className="w-3 h-3" />{property.sqft} ft²</span>
+            <p className="text-sm font-semibold text-primary mb-2">{property.valor}</p>
+            <div className="grid grid-cols-2 gap-y-2 gap-x-1 text-[11px] text-muted-foreground">
+              <span className="flex items-center gap-2">
+                <Bed className="w-3.5 h-3.5" />
+                {property.quartos} Quartos
+              </span>
+              <span className="flex items-center gap-2">
+                <Car className="w-3.5 h-3.5" />
+                {property.vagas} Vagas
+              </span>
+              <span className="flex items-center gap-2">
+                <Bed className="w-3.5 h-3.5" />
+                {property.suites} Suítes
+              </span>
+              <span className="flex items-center gap-2">
+                <Bath className="w-3.5 h-3.5" />
+                {property.banheiros} Banheiros
+              </span>
+              <span className="flex items-center gap-2">
+                <Maximize className="w-3.5 h-3.5" />
+                {property.area} m² 
+              </span>
             </div>
           </div>
         ))}
       </div>
 
-      {/* Action Buttons */}
       <div className="p-4 border-t border-border space-y-2">
         <Button className="w-full justify-start gap-2 h-9 text-xs" variant="default">
           <CalendarPlus className="w-3.5 h-3.5" />
-          Schedule Visit
+          Marcar Visita
         </Button>
         <Button className="w-full justify-start gap-2 h-9 text-xs" variant="outline">
           <CheckCircle2 className="w-3.5 h-3.5" />
-          Mark as Sold
+          Marcar como vendido
         </Button>
         <Button className="w-full justify-start gap-2 h-9 text-xs" variant="outline">
           <FileText className="w-3.5 h-3.5" />
-          Generate Follow-up Script
+          Gerar Follow-Up
         </Button>
       </div>
     </div>

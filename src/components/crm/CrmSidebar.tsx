@@ -4,12 +4,12 @@ import { useAuth } from "@/hooks/useAuth";
 import { useToast } from "../ui/use-toast";
 
 const navItems = [
-  { icon: LayoutDashboard, label: "Dashboard", path: "/" },
+  { icon: LayoutDashboard, label: "Início", path: "/" },
   { icon: Users, label: "Leads", path: "/leads" },
-  { icon: Home, label: "Properties", path: "/properties" },
-  { icon: Calendar, label: "Visits", path: "/visits" },
-  { icon: TrendingUp, label: "Analytics", path: "/analytics" },
-  { icon: Settings, label: "Settings", path: "/settings" },
+  { icon: Home, label: "Imóveis", path: "/properties" },
+  { icon: Calendar, label: "Calendário", path: "/visits" },
+  { icon: TrendingUp, label: "Dashboard", path: "/analytics" },
+  { icon: Settings, label: "Configurações", path: "/settings" },
 ];
 
 interface CrmSidebarProps {

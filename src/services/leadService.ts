@@ -6,6 +6,10 @@ export const leadService = {
     const response = await apiClient.get<Lead[]>("/lead");
     return response.data;
   },
+  async getLeadById(id: number): Promise<Lead> {
+    const response = await apiClient.get<Lead>(`/lead/${id}`)
+    return response.data
+  },
   async updateAiActive(id: number, aiActive: boolean): Promise<Lead> {
     const response = await apiClient.put<Lead>(`/lead/${id}`, { aiActive });
     return response.data;

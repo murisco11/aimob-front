@@ -26,7 +26,6 @@ const ChatInterface = ({ chat }: ChatInterfaceProps) => {
   };
 
   useEffect(() => {
-    console.log(chat)
     const fetchMensagensDoChat = async () => {
       if (!chat?.id) return;
 

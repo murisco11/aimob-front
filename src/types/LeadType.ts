@@ -1,3 +1,6 @@
+import { Imovel } from "./ImovelType";
+import { User } from "./UserType";
+
 export type Lead = {
   id: number;
   name: string;
@@ -11,7 +14,7 @@ export type Lead = {
   createdAt: Date | string; 
   updatedAt: Date | string;
   
-  user?: any; 
-  imoveis?: any[];
+  user?: User; 
+  imoveis?: Imovel[];
   chats?: any[];
 };

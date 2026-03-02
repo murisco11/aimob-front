@@ -45,7 +45,7 @@ class ApiClient {
   }
 
   setToken(token: string) {
-    localStorage.setItem(TOKEN_KEY, token);
+    localStorage.setItem(TOKEN_KEY, token); 
   }
 
   getToken(): string | null {

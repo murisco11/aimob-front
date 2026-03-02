@@ -32,12 +32,12 @@ const Index = () => {
         });
       }
     };
-    
+
     loadData();
-  }, [fetchChats, chats]);
-  
+  }, [fetchChats]);
+
   const selectedChat = chats.find((c) => c.id === selectedChatId) || null;
-  
+
   return (
     <div className="flex h-screen w-full overflow-hidden">
       <CrmSidebar />
@@ -63,13 +63,13 @@ const Index = () => {
               </div>
             )}
           </div>
-
-          {/*  <div className="hidden xl:flex w-[300px] shrink-0 p-3 border-l border-border">
-            <PropertyPanel 
-              properties={properties} 
-              lead={selectedChat?.lead} 
-            />
-          </div> */}
+          {selectedChat &&
+            <div className="hidden xl:flex w-[300px] shrink-0 p-3 border-l border-border">
+              <PropertyPanel
+                leadId={Number(selectedChat.lead.id)}
+              />
+            </div>
+          }
         </div>
       </div>
     </div>
