@@ -9,9 +9,11 @@ export interface ChatStore {
     isLoading: boolean;
     error: string | null
 
+    updateLeadStatusInStore: (leadId: number, aiActive: boolean) => void;
     sendMessage: (data: SendMessage) => Promise<void>
     fetchChats: () => Promise<void>;
     fetchChatById: (id: number) => Promise<void>
+    addIncomingMessage: (conversaId: number, mensagem: Mensagem) => void;
 }
 
 export const useChatStore = create<ChatStore>()(
@@ -20,7 +22,35 @@ export const useChatStore = create<ChatStore>()(
         isLoading: false,
         selectedChat: null,
         error: null,
+        updateLeadStatusInStore: (leadId, aiActive) => {
+            set((state) => ({
+                chats: state.chats.map((chat) =>
+                    chat.lead.id === leadId
+                        ? { ...chat, lead: { ...chat.lead, aiActive } }
+                        : chat
+                )
+            }));
+        },
+        addIncomingMessage: (conversaId, novaMensagem) => {
+            const { selectedChat, chats } = get();
 
+            if (selectedChat) {
+                set({ selectedChat: [...selectedChat, novaMensagem] });
+            }
+
+            const updatedChats = chats.map(chat => {
+                if (chat.id === conversaId) {
+                    return {
+                        ...chat,
+                        lastMessage: novaMensagem.body ?? "Mídia Recebida",
+                        lastMessageAt: novaMensagem.createdAt
+                    };
+                }
+                return chat;
+            });
+
+            set({ chats: updatedChats });
+        },
         fetchChats: async () => {
             try {
                 set({ isLoading: true, error: null });

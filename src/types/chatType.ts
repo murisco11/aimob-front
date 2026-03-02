@@ -1,4 +1,6 @@
 import { Lead } from "./LeadType";
+import { Mensagem } from "./MensagemType";
+import { User } from "./UserType";
 
 export type ChatStatus = "open" | "closed" | "pending";
 
@@ -13,10 +15,10 @@ export type Chat = {
 
   lead?: Lead;    
   user?: any | null;
-  mensagens?: any[];
+  mensagens?: Mensagem[];
   
-  leadId?: number;
-  userId?: number | null;
+  leadId?: Lead
+  userId?: User | null;
 };
 
 export type SendMessage = {

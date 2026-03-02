@@ -13,7 +13,7 @@ interface ChatInterfaceProps {
 
 const ChatInterface = ({ chat }: ChatInterfaceProps) => {
   const { toast } = useToast();
-  const { fetchChatById, selectedChat, sendMessage } = useChat();
+  const { fetchChatById, selectedChat, sendMessage, updateLeadStatusInStore } = useChat();
   const { updateLeadAiActive } = useLead()
   const [input, setInput] = useState("");
   const [mensagens, setMensagens] = useState<Mensagem[]>([]);
@@ -65,8 +65,8 @@ const ChatInterface = ({ chat }: ChatInterfaceProps) => {
     if (!input.trim()) return;
 
     try {
-      await sendMessage({ conversaId: chat.id, text: input });
       setInput("");
+      await sendMessage({ conversaId: chat.id, text: input });
     } catch (error) {
       toast({
         title: "Erro ao enviar mensagens",
@@ -76,18 +76,26 @@ const ChatInterface = ({ chat }: ChatInterfaceProps) => {
     }
   };
 
-    const changeAiActive = async () => {
+const changeAiActive = async () => {
     try {
-      await updateLeadAiActive(chat.lead.id, !chat.lead.aiActive);
-      setInput("");
+        const novoStatus = !chat.lead.aiActive;
+        
+        await updateLeadAiActive(chat.lead.id, novoStatus);
+        
+        updateLeadStatusInStore(chat.lead.id, novoStatus);
+
+        toast({
+            title: "Sucesso",
+            description: "Status da IA atualizado!",
+        });
     } catch (error) {
-      toast({
-        title: "Erro ao atualizar inteligência artificial",
-        description: "Não foi possível atualizar inteligência artificial",
-        variant: "destructive",
-      });
+        toast({
+            title: "Erro",
+            description: "Não foi possível atualizar a IA.",
+            variant: "destructive",
+        });
     }
-  };
+};
 
   return (
     <div className="flex flex-col h-full bg-card rounded-xl border border-border overflow-hidden">

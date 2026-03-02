@@ -4,10 +4,13 @@ import CrmSidebar from "@/components/crm/CrmSidebar";
 import MobileHeader from "@/components/crm/MobileHeader";
 import ChatTable from "@/components/crm/ChatTable";
 import ChatInterface from "@/components/crm/ChatInterface";
-import PropertyPanel from "@/components/crm/PropertyPanel";
+import PropertyPanel from "@/components/crm/PropertyPanel"
+import { io } from "socket.io-client";;
 import { properties } from "@/data/mockData";
 import { useChat } from "@/hooks/useChat";
 import { useToast } from "@/components/ui/use-toast";
+import { Mensagem } from "@/types/MensagemType";
+import { useChatStore } from "@/stores/chatStore";
 
 const Index = () => {
   const { toast } = useToast();
@@ -18,7 +21,40 @@ const Index = () => {
     chatIdFromUrl ? parseInt(chatIdFromUrl) : null
   );
 
-  const { chats, fetchChats } = useChat();
+  const { chats, fetchChats, addIncomingMessage } = useChat();
+
+  useEffect(() => {
+    const socket = io(import.meta.env.VITE_API_URL || "http://localhost:3333");
+
+    socket.on("nova_mensagem_whatsapp", (data: { conversaId: number, mensagem: any }) => {
+      console.log("Chegou mensagem via Socket:", data);
+
+      const chatExistente = useChatStore.getState().chats.find(c => c.id === data.conversaId);
+
+      if (!chatExistente) {
+        fetchChats();
+        return;
+      }
+
+      const mensagemFormatada: Mensagem = {
+        id: data.mensagem.id,
+        waMessageId: data.mensagem.waMessageId,
+        fromMe: data.mensagem.fromMe,
+        body: data.mensagem.body,
+        type: data.mensagem.type,
+        mediaUrl: data.mensagem.mediaUrl,
+        status: data.mensagem.status,
+        createdAt: new Date(data.mensagem.createdAt),
+        conversa: chatExistente,
+      };
+
+      addIncomingMessage(data.conversaId, mensagemFormatada);
+    });
+
+    return () => {
+      socket.disconnect();
+    };
+  }, [addIncomingMessage]);
 
   useEffect(() => {
     const loadData = async () => {

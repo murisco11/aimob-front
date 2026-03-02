@@ -8,7 +8,9 @@ export const useChat = () => {
         fetchChatById,
         selectedChat,
         error,
-        fetchChats
+        fetchChats,
+        addIncomingMessage,
+        updateLeadStatusInStore
     } = useChatStore();
 
     return {
@@ -18,6 +20,8 @@ export const useChat = () => {
         isLoading,
         fetchChatById,
         error,
-        fetchChats
+        addIncomingMessage,
+        fetchChats,
+        updateLeadStatusInStore
     };
 }
