@@ -1,23 +1,20 @@
 import { useLeadStore } from "@/stores/leadStore";
 
 export const useLead = () => {
-    const {
-        leads,
-        lead,
-        isLoading,
-        error,
-        updateLeadAiActive,
-        fetchLeads,
-        getLeadById,
-    } = useLeadStore();
+  const store = useLeadStore();
 
-    return {
-        lead,
-        leads,
-        getLeadById,
-        updateLeadAiActive,
-        isLoading,
-        error,
-        fetchLeads
-    };
-}
+  return {
+    leads: store.items,
+    selectedLead: store.selectedItem,
+    isLoading: store.isLoading,
+    error: store.error,
+    
+    fetchAllLead: store.fetchAll,
+    fetchByIdLead: store.fetchById,
+    createLead: store.createItem,
+    updateLead: store.updateItem,
+    deleteLead: store.deleteItem,
+    
+    updateLeadAiActive: store.updateLeadAiActive
+  };
+};

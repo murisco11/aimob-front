@@ -1,20 +1,28 @@
-import { Imovel } from "./ImovelType";
+import { Chat } from "./ChatType"; 
 import { User } from "./UserType";
+import { Imovel } from "./ImovelType";
+import { Visita } from "./VisitaType";
 
-export type Lead = {
+export interface Lead {
   id: number;
   name: string;
-  description?: string; 
+  description?: string;
   phone?: string;
   aiActive: boolean;
   threadId?: string;
   lid?: string;
-  temperatura?: string;
+  temperatura?: "warm" | "cold" | "hot";
   instanceName: string;
-  createdAt: Date | string; 
-  updatedAt: Date | string;
-  
-  user?: User; 
+  createdAt: string | Date;
+  updatedAt: string | Date;
+  user?: User;
   imoveis?: Imovel[];
-  chats?: any[];
+  conversas?: Chat[];
+  visitas?: Visita[];
+}
+
+export type CreateLeadDto = Omit<Lead, "id" | "createdAt" | "updatedAt" | "user" | "imoveis" | "conversas" | "visitas"> & {
+  userId?: number; // Para associar ao User
 };
+
+export type UpdateLeadDto = Partial<CreateLeadDto>;

@@ -2,7 +2,7 @@ import { useState, useEffect, useRef } from "react";
 import { Send, Sparkles, Bot, MessageCircle } from "lucide-react";
 import { Switch } from "@/components/ui/switch";
 import { useToast } from "@/components/ui/use-toast";
-import { Chat } from "@/types/chatType";
+import { Chat } from "@/types/ChatType";
 import { Mensagem } from "@/types/MensagemType";
 import { useChat } from "@/hooks/useChat";
 import { useLead } from "@/hooks/useLead";

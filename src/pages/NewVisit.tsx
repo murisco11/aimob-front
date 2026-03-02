@@ -1,6 +1,6 @@
-import { useState } from "react";
-import { useNavigate } from "react-router-dom";
-import { ArrowLeft, CalendarIcon, Clock, User, MapPin, FileText } from "lucide-react";
+import { useState, useEffect } from "react";
+import { useNavigate, useParams } from "react-router-dom";
+import { ArrowLeft, CalendarIcon, Clock, User, MapPin, FileText, Activity } from "lucide-react";
 import CrmSidebar from "@/components/crm/CrmSidebar";
 import MobileHeader from "@/components/crm/MobileHeader";
 import { Button } from "@/components/ui/button";
@@ -12,24 +12,61 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Calendar } from "@/components/ui/calendar";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { toast } from "sonner";
-import { leads, properties } from "@/data/mockData";
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import { cn } from "@/lib/utils";
+
+// Importando os hooks da sua aplicação
+import { useVisita } from "@/hooks/useVisita";
+import { useLead } from "@/hooks/useLead";
+import { useImovel } from "@/hooks/useImovel";
+import { VisitaStatus, CreateVisitaDto, UpdateVisitaDto } from "@/types/VisitaType"; // Ajuste os caminhos
 
 type FieldErrors = Record<string, string>;
 
 const RequiredDot = () => <span className="text-destructive ml-0.5">*</span>;
 
-const NewVisit = () => {
+const VisitForm = () => {
   const navigate = useNavigate();
+  const { id } = useParams<{ id: string }>();
+  const isEditing = !!id;
+
+  const { visitas, createVisita, updateVisita, deleteVisita } = useVisita();
+  const { leads, fetchAllLead } = useLead();
+  const { imoveis, fetchImoveis } = useImovel();
+
   const [selectedDate, setSelectedDate] = useState<Date | undefined>();
   const [time, setTime] = useState("");
   const [leadId, setLeadId] = useState("");
   const [propertyId, setPropertyId] = useState("");
   const [notes, setNotes] = useState("");
+  const [status, setStatus] = useState<VisitaStatus>("agendada");
   const [errors, setErrors] = useState<FieldErrors>({});
   const [submitted, setSubmitted] = useState(false);
+
+  useEffect(() => {
+    fetchAllLead();
+    fetchImoveis();
+  }, [fetchAllLead, fetchImoveis]);
+
+  useEffect(() => {
+    if (isEditing && visitas) {
+      const visitToEdit = visitas.find((v) => v.id === Number(id));
+
+      if (visitToEdit) {
+        setLeadId(visitToEdit.lead?.id?.toString() || "");
+        setPropertyId(visitToEdit.imovel?.id?.toString() || "");
+        setNotes(visitToEdit.descricao || "");
+        setStatus(visitToEdit.status);
+
+        if (visitToEdit.data) {
+          const dateObj = new Date(visitToEdit.data);
+          setSelectedDate(dateObj);
+          setTime(format(dateObj, "HH:mm"));
+        }
+      }
+    }
+  }, [isEditing, id, visitas]);
 
   const validate = (): FieldErrors => {
     const errs: FieldErrors = {};
@@ -39,17 +76,63 @@ const NewVisit = () => {
     if (!time) errs.time = "Informe o horário";
     return errs;
   };
+  const handleDelete = async () => {
+    const confirmed = window.confirm("Tem certeza que deseja excluir esta visita?");
 
-  const handleSave = () => {
+    if (!confirmed) return;
+
+    try {
+      await deleteVisita(Number(id));
+
+      toast.success("Visita excluída com sucesso!");
+      navigate("/visits");
+    } catch (error) {
+      toast.error("Erro ao excluir a visita. Tente novamente.");
+      console.error("Delete error:", error);
+    }
+  };
+
+  const handleSave = async () => {
     setSubmitted(true);
     const errs = validate();
     setErrors(errs);
+
     if (Object.keys(errs).length > 0) {
       toast.error("Preencha todos os campos obrigatórios");
       return;
     }
-    toast.success("Visita agendada com sucesso!");
-    navigate("/visits");
+
+    try {
+      const [hours, minutes] = time.split(":");
+      const finalDate = new Date(selectedDate!);
+      finalDate.setHours(Number(hours), Number(minutes), 0, 0);
+
+      const leadSelecionado = leads?.find(l => l.id === Number(leadId));
+      const imovelSelecionado = imoveis?.find(i => i.id === Number(propertyId));
+
+      const payload: CreateVisitaDto | UpdateVisitaDto = {
+        name: `Visita: ${leadSelecionado?.name} - ${imovelSelecionado?.name}`,
+        data: finalDate.toISOString(),
+        descricao: notes,
+        status: status,
+        leadId: Number(leadId),
+        imovelId: Number(propertyId),
+        userId: 1,
+      };
+
+      if (isEditing) {
+        await updateVisita(Number(id), payload as UpdateVisitaDto);
+        toast.success("Visita atualizada com sucesso!");
+      } else {
+        await createVisita(payload as CreateVisitaDto);
+        toast.success("Visita agendada com sucesso!");
+      }
+
+      navigate("/visits");
+    } catch (error) {
+      toast.error("Erro ao salvar a visita. Tente novamente.");
+      console.error(error);
+    }
   };
 
   const fieldError = (field: string) =>
@@ -71,12 +154,40 @@ const NewVisit = () => {
               <ArrowLeft className="w-5 h-5" />
             </Button>
             <div>
-              <h1 className="text-xl font-bold text-foreground">Nova Visita</h1>
-              <p className="text-xs text-muted-foreground">Agende uma visita com um lead</p>
+              <h1 className="text-xl font-bold text-foreground">
+                {isEditing ? "Editar Visita" : "Nova Visita"}
+              </h1>
+              <p className="text-xs text-muted-foreground">
+                {isEditing ? "Atualize os dados do agendamento" : "Agende uma visita com um lead"}
+              </p>
             </div>
           </div>
 
           <div className="max-w-2xl mx-auto space-y-5">
+            {/* Status Selection - Mostra apenas se estiver editando */}
+            {isEditing && (
+              <Card className="border-border">
+                <CardHeader className="pb-3">
+                  <CardTitle className="text-sm font-medium flex items-center gap-2">
+                    <Activity className="w-4 h-4 text-primary" />
+                    Status da Visita
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <Select value={status} onValueChange={(value) => setStatus(value as VisitaStatus)}>
+                    <SelectTrigger className="mt-1">
+                      <SelectValue placeholder="Selecione o status" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="agendada">Agendada</SelectItem>
+                      <SelectItem value="realizada">Realizada</SelectItem>
+                      <SelectItem value="cancelada">Cancelada</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </CardContent>
+              </Card>
+            )}
+
             {/* Lead Selection */}
             <Card className="border-border">
               <CardHeader className="pb-3">
@@ -94,9 +205,9 @@ const NewVisit = () => {
                     <SelectValue placeholder="Escolha um lead" />
                   </SelectTrigger>
                   <SelectContent>
-                    {leads.map((lead) => (
-                      <SelectItem key={lead.id} value={lead.id}>
-                        {lead.name} — {lead.neighborhood}
+                    {leads?.map((lead) => (
+                      <SelectItem key={lead.id} value={lead.id.toString()}>
+                        {lead.name} {lead.phone ? `— ${lead.phone}` : ''}
                       </SelectItem>
                     ))}
                   </SelectContent>
@@ -122,9 +233,9 @@ const NewVisit = () => {
                     <SelectValue placeholder="Escolha um imóvel" />
                   </SelectTrigger>
                   <SelectContent>
-                    {properties.map((prop) => (
-                      <SelectItem key={prop.id} value={prop.id}>
-                        {prop.title} — {prop.address}
+                    {imoveis?.map((prop) => (
+                      <SelectItem key={prop.id} value={prop.id.toString()}>
+                        {prop.name} {prop.address ? `— ${prop.address}` : ''}
                       </SelectItem>
                     ))}
                   </SelectContent>
@@ -217,8 +328,19 @@ const NewVisit = () => {
                 Cancelar
               </Button>
               <Button onClick={handleSave}>
-                Agendar Visita
+                {isEditing ? "Salvar Alterações" : "Agendar Visita"}
               </Button>
+              {isEditing && (
+                <div className="mr-auto">
+                  <Button
+                    type="button"
+                    variant="destructive"
+                    onClick={handleDelete}
+                  >
+                    Excluir Visita
+                  </Button>
+                </div>
+              )}
             </div>
           </div>
         </div>
@@ -227,4 +349,4 @@ const NewVisit = () => {
   );
 };
 
-export default NewVisit;
+export default VisitForm;

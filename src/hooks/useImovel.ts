@@ -1,6 +1,6 @@
 import { useImovelStore } from "@/stores/imovelStore";
 
-export const useLead = () => {
+export const useImovel = () => {
     const {
         imoveis,
         isLoading,

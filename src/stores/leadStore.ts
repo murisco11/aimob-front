@@ -1,61 +1,99 @@
-import { leadService } from "@/services/leadService";
-import { Lead } from "@/services/types";
 import { create } from "zustand";
+import { leadService } from "@/services/leadService";
+import { Lead, CreateLeadDto, UpdateLeadDto } from "@/types/LeadType";
 
-export interface LeadStore {
-    leads: Lead[];
-    lead: Lead | null;
-    isLoading: boolean;
-    error: string | null
+interface LeadStore {
+  items: Lead[];
+  selectedItem: Lead | null;
+  isLoading: boolean;
+  error: string | null;
 
-    fetchLeads: () => Promise<void>;
-    getLeadById: (id: number) => Promise<void>;
-    updateLeadAiActive: (id: number, aiActive: boolean) => Promise<void>; // Nova tipagem
+  fetchAll: () => Promise<void>;
+  fetchById: (id: number) => Promise<void>;
+  createItem: (data: CreateLeadDto) => Promise<void>;
+  updateItem: (id: number, data: UpdateLeadDto) => Promise<void>;
+  deleteItem: (id: number) => Promise<void>;
+  updateLeadAiActive: (id: number, aiActive: boolean) => Promise<void>;
 }
 
-export const useLeadStore = create<LeadStore>()(
-    (set, get) => ({
-        leads: [],
-        isLoading: false,
-        error: null,
-        lead: null,
+export const useLeadStore = create<LeadStore>((set, get) => ({
+  items: [],
+  selectedItem: null,
+  isLoading: false,
+  error: null,
 
-        fetchLeads: async () => {
-            try {
-                set({ isLoading: true, error: null });
-                const leads = await leadService.getLeads();
+  fetchAll: async () => {
+    set({ isLoading: true, error: null });
+    try {
+      const data = await leadService.getAll();
+      set({ items: data, isLoading: false });
+    } catch (err) {
+      console.error("Erro ao buscar leads:", err);
+      set({ error: "Erro ao buscar dados", isLoading: false });
+    }
+  },
 
-                set({ leads: leads, isLoading: false });
-            } catch (error) {
-                console.error("Failed to fetch leads:", error);
-                set({ error: "Failed to fetch leads", isLoading: false });
-            }
-        },
-        updateLeadAiActive: async (id: number, aiActive: boolean) => {
-            try {
-                await leadService.updateAiActive(id, aiActive);
+  fetchById: async (id: number) => {
+    set({ isLoading: true, error: null });
+    try {
+      const item = await leadService.getById(id);
+      set({ selectedItem: item, isLoading: false });
+    } catch (err) {
+      console.error(`Erro ao buscar lead ${id}:`, err);
+      set({ error: "Erro ao buscar item", isLoading: false });
+    }
+  },
 
-                const currentLeads = get().leads;
-                set({
-                    leads: currentLeads.map((lead) =>
-                        lead.id === id ? { ...lead, aiActive: aiActive } : lead
-                    )
-                });
-            } catch (error) {
-                console.error(`Failed to update AI status for lead ${id}:`, error);
-                throw error;
-            }
-        },
-        getLeadById: async (id: number) => {
-            try {
-                set({ isLoading: true, error: null });
-                const lead = await leadService.getLeadById(id);
+  createItem: async (data: CreateLeadDto) => {
+    set({ isLoading: true });
+    try {
+      const newItem = await leadService.create(data);
+      set((state) => ({ items: [...state.items, newItem], isLoading: false }));
+    } catch (err) {
+      console.error("Erro ao criar lead:", err);
+      set({ isLoading: false });
+      throw err;
+    }
+  },
 
-                set({ lead: lead, isLoading: false });
-            } catch (error) {
-                console.error("Failed to fetch lead:", error);
-                set({ error: "Failed to fetch lead", isLoading: false });
-            }
-        }
-    })
-);
+  updateItem: async (id: number, data: UpdateLeadDto) => {
+    try {
+      const updated = await leadService.update(id, data);
+      set((state) => ({
+        items: state.items.map((i) => (i.id === id ? updated : i)),
+        selectedItem: state.selectedItem?.id === id ? updated : state.selectedItem
+      }));
+    } catch (err) {
+      console.error(`Erro ao atualizar lead ${id}:`, err);
+      throw err;
+    }
+  },
+
+  deleteItem: async (id: number) => {
+    try {
+      await leadService.delete(id);
+      set((state) => ({
+        items: state.items.filter((i) => i.id !== id),
+        selectedItem: state.selectedItem?.id === id ? null : state.selectedItem
+      }));
+    } catch (err) {
+      console.error(`Erro ao deletar lead ${id}:`, err);
+      throw err;
+    }
+  },
+
+  updateLeadAiActive: async (id: number, aiActive: boolean) => {
+    try {
+      const updated = await leadService.updateAiActive(id, aiActive);
+      set((state) => ({
+        items: state.items.map((lead) =>
+          lead.id === id ? { ...lead, aiActive: updated.aiActive } : lead
+        ),
+        selectedItem: state.selectedItem?.id === id ? { ...state.selectedItem, aiActive: updated.aiActive } : state.selectedItem
+      }));
+    } catch (err) {
+      console.error(`Erro ao atualizar status de IA do lead ${id}:`, err);
+      throw err;
+    }
+  }
+}));

@@ -65,6 +65,14 @@ const AppRoutes = () => {
           </ProtectedRoute>
         }
       />
+
+      <Route
+        path="/visits/:id"
+        element={
+          <ProtectedRoute>
+            <NewVisit />
+          </ProtectedRoute>
+        } />
       <Route
         path="/properties"
         element={

@@ -1,5 +1,5 @@
 import { Instagram, MessageCircle, User as UserIcon } from "lucide-react";
-import { Chat, ChatStatus } from "@/types/chatType"
+import { Chat, ChatStatus } from "@/types/ChatType"
 import { formatDistanceToNow } from "date-fns"; 
 import { ptBR } from "date-fns/locale";
 

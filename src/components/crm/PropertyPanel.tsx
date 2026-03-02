@@ -17,13 +17,15 @@ const statusStyles = {
 };
 
 const PropertyPanel = ({ leadId }: PropertyPanelProps) => {
-  const { lead, getLeadById, isLoading } = useLead()
+const { selectedLead, fetchByIdLead, isLoading } = useLead();
 
   useEffect(() => {
-    getLeadById(leadId);
-  }, [leadId, getLeadById]);
+    if (leadId) {
+      fetchByIdLead(leadId);
+    }
+  }, [leadId, fetchByIdLead]);
 
-  const imoveis: Imovel[] = (lead && lead.id === leadId && lead.imoveis) ? lead.imoveis : [];
+  const imoveis: Imovel[] = selectedLead?.id === leadId ? (selectedLead.imoveis || []) : [];
 
   return (
     <div className="bg-card rounded-xl border border-border overflow-hidden flex flex-col h-full">
