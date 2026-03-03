@@ -1,17 +1,22 @@
 import { useImovelStore } from "@/stores/imovelStore";
 
 export const useImovel = () => {
-    const {
-        imoveis,
-        isLoading,
-        error,
-        fetchImoveis
-    } = useImovelStore();
+    const store = useImovelStore();
 
     return {
-        imoveis,
-        isLoading,
-        error,
-        fetchImoveis
+        imoveis: store.imoveis,
+        selectedImovel: store.selectedImovel,
+        isLoading: store.isLoading,
+        error: store.error,
+
+        fetchAllImovel: store.fetchAll,
+        fetchByIdImovel: store.fetchById,
+        fetchByUser: store.fetchByUser,
+        fetchByLead: store.fetchByLead,
+        fetchByAiAssistantFile: store.fetchByAiAssistantFile,
+        createImovel: store.createImovel,
+        updateImovel: store.updateImovel,
+        deleteImovel: store.deleteImovel,
+        toggleLead: store.toggleLead
     };
-}
+};

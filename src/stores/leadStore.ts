@@ -59,6 +59,7 @@ export const useLeadStore = create<LeadStore>((set, get) => ({
   updateItem: async (id: number, data: UpdateLeadDto) => {
     try {
       const updated = await leadService.update(id, data);
+      console.log(data)
       set((state) => ({
         items: state.items.map((i) => (i.id === id ? updated : i)),
         selectedItem: state.selectedItem?.id === id ? updated : state.selectedItem

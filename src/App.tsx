@@ -15,9 +15,10 @@ import PropertyRegister from "./pages/PropertyRegister";
 import Leads from "./pages/Leads";
 import Analytics from "./pages/Analytics";
 import Settings from "./pages/Settings";
-import NewVisit from "./pages/NewVisit";
+import NewVisit from "./pages/VisitForm";
 import NotFound from "./pages/NotFound";
 import { GlobalConfirmDialog } from "./components/crm/Confirm";
+import LeadForm from "./pages/LeadForm";
 
 const queryClient = new QueryClient();
 
@@ -47,6 +48,22 @@ const AppRoutes = () => {
         element={
           <ProtectedRoute>
             <Leads />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/leads/new"
+        element={
+          <ProtectedRoute>
+            <LeadForm />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/leads/:id"
+        element={
+          <ProtectedRoute>
+            <LeadForm />
           </ProtectedRoute>
         }
       />
@@ -117,7 +134,7 @@ const AppRoutes = () => {
 
       {/* Rota 404 - deve ser última */}
       <Route path="*" element={<NotFound />} />
-      
+
     </Routes>
   );
 };

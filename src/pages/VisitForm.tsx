@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { useNavigate, useParams } from "react-router-dom";
+import { useNavigate, useParams, useSearchParams } from "react-router-dom";
 import { ArrowLeft, CalendarIcon, Clock, User, MapPin, FileText, Activity } from "lucide-react";
 import CrmSidebar from "@/components/crm/CrmSidebar";
 import MobileHeader from "@/components/crm/MobileHeader";
@@ -31,14 +31,15 @@ const VisitForm = () => {
   const navigate = useNavigate();
   const { id } = useParams<{ id: string }>();
   const isEditing = !!id;
-
+  const [searchParams] = useSearchParams();
+  const preSelectedLeadId = searchParams.get("leadId");
   const { visitas, createVisita, updateVisita, deleteVisita } = useVisita();
   const { leads, fetchAllLead } = useLead();
-  const { imoveis, fetchImoveis } = useImovel();
+  const { imoveis, fetchAllImovel } = useImovel();
 
   const [selectedDate, setSelectedDate] = useState<Date | undefined>();
   const [time, setTime] = useState("");
-  const [leadId, setLeadId] = useState("");
+  const [leadId, setLeadId] = useState(preSelectedLeadId || "");
   const [propertyId, setPropertyId] = useState("");
   const { openConfirm } = useConfirmStore();
   const [notes, setNotes] = useState("");
@@ -48,8 +49,8 @@ const VisitForm = () => {
 
   useEffect(() => {
     fetchAllLead();
-    fetchImoveis();
-  }, [fetchAllLead, fetchImoveis]);
+    fetchAllImovel();
+  }, [fetchAllLead, fetchAllImovel]);
 
   useEffect(() => {
     if (isEditing && visitas) {

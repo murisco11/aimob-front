@@ -4,6 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Lead } from "@/services/types";
 import { useEffect, useState } from "react";
 import { Imovel } from "@/types/ImovelType";
+import { useNavigate } from "react-router-dom";
 import { useLead } from "@/hooks/useLead";
 
 interface PropertyPanelProps {
@@ -17,7 +18,8 @@ const statusStyles = {
 };
 
 const PropertyPanel = ({ leadId }: PropertyPanelProps) => {
-const { selectedLead, fetchByIdLead, isLoading } = useLead();
+  const navigate = useNavigate()
+  const { selectedLead, fetchByIdLead, isLoading } = useLead();
 
   useEffect(() => {
     if (leadId) {
@@ -68,7 +70,7 @@ const { selectedLead, fetchByIdLead, isLoading } = useLead();
               </span>
               <span className="flex items-center gap-2">
                 <Maximize className="w-3.5 h-3.5" />
-                {property.area} m² 
+                {property.area} m²
               </span>
             </div>
           </div>
@@ -76,7 +78,7 @@ const { selectedLead, fetchByIdLead, isLoading } = useLead();
       </div>
 
       <div className="p-4 border-t border-border space-y-2">
-        <Button className="w-full justify-start gap-2 h-9 text-xs" variant="default">
+        <Button onClick={() => navigate(`/visits/new?leadId=${leadId}`)} className="w-full justify-start gap-2 h-9 text-xs" variant="default">
           <CalendarPlus className="w-3.5 h-3.5" />
           Marcar Visita
         </Button>
@@ -84,10 +86,11 @@ const { selectedLead, fetchByIdLead, isLoading } = useLead();
           <CheckCircle2 className="w-3.5 h-3.5" />
           Marcar como vendido
         </Button>
-        <Button className="w-full justify-start gap-2 h-9 text-xs" variant="outline">
+        
+        {/* <Button className="w-full justify-start gap-2 h-9 text-xs" variant="outline">
           <FileText className="w-3.5 h-3.5" />
           Gerar Follow-Up
-        </Button>
+        </Button> */}
       </div>
     </div>
   );

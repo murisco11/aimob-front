@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
-import { Search, Plus, Instagram, MessageCircle, Globe, MessageSquare, Clock, ChevronRight, Phone, Home, Sparkles, LayoutGrid, List, Calendar } from "lucide-react";
+import { useNavigate, useSearchParams } from "react-router-dom";
+import { Search, Plus, Instagram, MessageCircle, Globe, MessageSquare, Clock, ChevronRight, Phone, Home, Sparkles, LayoutGrid, List, Calendar, PenBox } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sheet";
@@ -12,11 +12,10 @@ import { Badge } from "@/components/ui/badge";
 import CrmSidebar from "@/components/crm/CrmSidebar";
 import MobileHeader from "@/components/crm/MobileHeader";
 import LeadStatusBadge from "@/components/crm/LeadStatusBadge";
-import { useLead } from "@/hooks/useLead"; 
-import { Lead } from "@/types/LeadType";   
+import { useLead } from "@/hooks/useLead";
+import { Lead } from "@/types/LeadType";
 import { VisitaStatus } from "@/types/VisitaType";
 
-// 1. Mapeamento exato dos status do seu banco de dados
 const pipelineColumns: { stage: Lead["status"]; label: string; color: string }[] = [
   { stage: "qualificacao_ia", label: "Qualificação IA", color: "bg-info" },
   { stage: "visita_agendada", label: "Visita Agendada", color: "bg-warning" },
@@ -28,7 +27,7 @@ const pipelineColumns: { stage: Lead["status"]; label: string; color: string }[]
 const originIcon = (instanceName?: string) => {
   if (instanceName?.toLowerCase().includes("insta")) return <Instagram className="w-3.5 h-3.5 text-pink-400" />;
   if (instanceName?.toLowerCase().includes("site")) return <Globe className="w-3.5 h-3.5 text-info" />;
-  return <MessageCircle className="w-3.5 h-3.5 text-leads-accent" />; 
+  return <MessageCircle className="w-3.5 h-3.5 text-leads-accent" />;
 };
 
 const getInitials = (name?: string) => {
@@ -39,7 +38,8 @@ const getInitials = (name?: string) => {
 const Leads = () => {
   const navigate = useNavigate();
   const { leads, fetchAllLead, updateLead, isLoading } = useLead();
-
+  const [searchParams] = useSearchParams();
+  const preSelectedLeadId = searchParams.get("leadId")
   const [search, setSearch] = useState("");
   const [filterTemp, setFilterTemp] = useState<string>("all");
   const [view, setView] = useState<"kanban" | "list">("kanban");
@@ -49,6 +49,16 @@ const Leads = () => {
   useEffect(() => {
     fetchAllLead();
   }, [fetchAllLead]);
+
+  useEffect(() => {
+    if (preSelectedLeadId && leads.length > 0) {
+      const leadEncontrado = leads.find((l) => l.id === Number(preSelectedLeadId));
+
+      if (leadEncontrado) {
+        setSelectedLeadData(leadEncontrado);
+      }
+    }
+  }, [preSelectedLeadId, leads]);
 
   const filtered = leads.filter((l) => {
     if (search && !l.name.toLowerCase().includes(search.toLowerCase())) return false;
@@ -77,7 +87,7 @@ const Leads = () => {
     e.preventDefault();
     setDragOverStage(null);
     const leadId = Number(e.dataTransfer.getData("text/plain"));
-    
+
     try {
       await updateLead(leadId, { status: stage });
     } catch (error) {
@@ -132,8 +142,8 @@ const Leads = () => {
                 </button>
               </div>
 
-              <Button className="bg-leads-accent hover:bg-leads-accent/90 text-leads-accent-foreground">
-                <Plus className="w-4 h-4 mr-1.5" /> Add Lead
+              <Button onClick={() => navigate("/leads/new")} className="bg-leads-accent  hover:bg-leads-accent/90 text-leads-accent-foreground">
+                <Plus className="w-4 h-4 mr-1.5" /> Criar Lead
               </Button>
             </div>
           </div>
@@ -179,18 +189,18 @@ const Leads = () => {
                               </div>
                               {originIcon(lead.instanceName)}
                             </div>
-                            
+
                             <div className="mb-2">
                               <LeadStatusBadge status={lead.temperatura || "cold"} />
                             </div>
-                            
+
                             {lead.description && (
                               <p className="text-xs text-muted-foreground italic mb-3 line-clamp-2">
                                 <span className="text-leads-accent font-medium not-italic">Resumo: </span>
                                 {lead.description}
                               </p>
                             )}
-                            
+
                             <div className="flex items-center justify-between text-[11px] text-muted-foreground mt-2">
                               <span className="flex items-center gap-1">
                                 <Clock className="w-3 h-3" /> {new Date(lead.updatedAt).toLocaleDateString()}
@@ -263,9 +273,9 @@ const Leads = () => {
       <Sheet open={!!selectedLeadData} onOpenChange={(open) => !open && setSelectedLeadData(null)}>
         <SheetContent className="dark bg-card border-border w-full sm:max-w-md p-0 overflow-y-auto">
           {selectedLeadData && (
-            <LeadDetailPanel 
-              lead={selectedLeadData} 
-              onOpenChat={(leadId) => navigate(`/?leadId=${leadId}`)} 
+            <LeadDetailPanel
+              lead={selectedLeadData}
+              onOpenChat={(leadId) => navigate(`/?leadId=${leadId}`)}
             />
           )}
         </SheetContent>
@@ -277,8 +287,8 @@ const Leads = () => {
 /* ────────── Lead Detail Panel ────────── */
 function LeadDetailPanel({ lead, onOpenChat }: { lead: Lead; onOpenChat: (leadId: number) => void }) {
   const currentStageLabel = pipelineColumns.find((c) => c.stage === lead.status)?.label;
-  
-  // Extraindo arrays do objeto
+
+  const navigate = useNavigate()
   const imoveis = lead.imoveis || [];
   const visitas = lead.visitas || [];
 
@@ -330,8 +340,8 @@ function LeadDetailPanel({ lead, onOpenChat }: { lead: Lead; onOpenChat: (leadId
             <Sparkles className="w-3.5 h-3.5 text-leads-accent" /> Perfil & Notas
           </h4>
           <div className="rounded-lg bg-secondary/80 border border-border p-3 space-y-1.5 text-sm">
-             <p><span className="text-muted-foreground">Inteligência Artificial:</span> <span className="font-medium">{lead.aiActive ? "Ativada" : "Desativada"}</span></p>
-             <p className="text-muted-foreground text-xs mt-2">{lead.description ? lead.description : "Nenhum resumo disponível."}</p>
+            <p><span className="text-muted-foreground">Inteligência Artificial:</span> <span className="font-medium">{lead.aiActive ? "Ativada" : "Desativada"}</span></p>
+            <p className="text-muted-foreground text-xs mt-2">{lead.description ? lead.description : "Nenhum resumo disponível."}</p>
           </div>
         </section>
 
@@ -405,8 +415,8 @@ function LeadDetailPanel({ lead, onOpenChat }: { lead: Lead; onOpenChat: (leadId
         <Button variant="outline" className="flex-1 border-border text-foreground hover:bg-secondary" onClick={() => onOpenChat(lead.id)}>
           <MessageSquare className="w-4 h-4 mr-1.5" /> Abrir Chat
         </Button>
-        <Button className="flex-1 bg-leads-accent hover:bg-leads-accent/90 text-leads-accent-foreground">
-          <Phone className="w-4 h-4 mr-1.5" /> Ligar
+        <Button onClick={() => navigate(`/leads/${lead.id}`)} className="flex-1 bg-leads-accent hover:bg-leads-accent/90 text-leads-accent-foreground">
+          <PenBox className="w-4 h-4 mr-1.5" /> Editar
         </Button>
       </div>
     </div>

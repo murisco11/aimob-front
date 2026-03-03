@@ -1,6 +1,13 @@
-import { User } from "./UserType";
+import { User } from "./UserType"; // Ajuste o path conforme sua estrutura
+import { Lead } from "./LeadType"; // Ajuste o path conforme sua estrutura
+import { Visit } from "@/services/types";
 
-export type Imovel = {
+// Se existirem as outras tipagens, você pode importá-las (Visita, Post, AiAssistantFile)
+// import { Visita } from "./VisitaType";
+// import { Post } from "./PostType";
+// import { AiAssistantFile } from "./AiAssistantFileType";
+
+export interface Imovel {
   id: number;
   name: string;
   address?: string;
@@ -14,13 +21,14 @@ export type Imovel = {
   condominio?: number;
   description?: string;
   isActive: boolean;
-
-  userId?: User;
-  user?: any; // Ou o tipo 'User'
   
-  leadId?: number | null;
-  leads?: any | null; // Note que na sua entidade o nome está no plural 'leads', mas é @ManyToOne (um único lead)
+  user?: User;
+  leads?: Lead[];
+  visitas?: Visit[]; 
+  posts?: any[];
+  aiAssistantFiles?: any[]; 
+}
 
-  posts?: any[]; // Ou 'Post[]'
-  aiAssistantFiles?: any[]; // Ou 'AiAssistantFile[]'
-};
+export type CreateImovelDto = Omit<Imovel, "id" | "isActive" | "user" | "leads" | "visitas" | "posts" | "aiAssistantFiles">;
+
+export type UpdateImovelDto = Partial<CreateImovelDto> & { id: number; isActive?: boolean; leads?: Lead[] };

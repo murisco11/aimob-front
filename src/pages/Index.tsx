@@ -1,21 +1,27 @@
 import { useState, useEffect } from "react";
-import { useSearchParams } from "react-router-dom";
+import { useNavigate, useSearchParams } from "react-router-dom";
 import CrmSidebar from "@/components/crm/CrmSidebar";
 import MobileHeader from "@/components/crm/MobileHeader";
 import ChatTable from "@/components/crm/ChatTable";
 import ChatInterface from "@/components/crm/ChatInterface";
 import PropertyPanel from "@/components/crm/PropertyPanel"
-import { io } from "socket.io-client";;
-import { properties } from "@/data/mockData";
+import { io } from "socket.io-client";
+
 import { useChat } from "@/hooks/useChat";
-import { useToast } from "@/components/ui/use-toast";
 import { Mensagem } from "@/types/MensagemType";
 import { useChatStore } from "@/stores/chatStore";
+import { useConfirmStore } from "@/stores/confirmStore";
+import { useLead } from "@/hooks/useLead";
+import { useToast } from "@/components/ui/use-toast";
 
 const Index = () => {
-  const { toast } = useToast();
   const [searchParams] = useSearchParams();
+  const navigate = useNavigate()
+  const { toast } = useToast();
+
+  const { openConfirm } = useConfirmStore();
   const chatIdFromUrl = searchParams.get("chatId");
+  const { deleteLead } = useLead()
 
   const [selectedChatId, setSelectedChatId] = useState<number | null>(
     chatIdFromUrl ? parseInt(chatIdFromUrl) : null
@@ -54,25 +60,62 @@ const Index = () => {
     return () => {
       socket.disconnect();
     };
-  }, [addIncomingMessage]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   useEffect(() => {
     const loadData = async () => {
       try {
         await fetchChats();
       } catch (error) {
-        toast({
-          title: "Erro ao carregar chats",
-          description: error instanceof Error ? error.message : "Tente novamente mais tarde",
-          variant: "destructive",
-        });
+        toast({ title: "Erro", description: "Erro ao carregar o chat" })
       }
     };
 
     loadData();
-  }, [fetchChats]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []); 
 
   const selectedChat = chats.find((c) => c.id === selectedChatId) || null;
+
+  const onEditChat = (id: number) => {
+    navigate(`/leads?leadId=${id}`)
+  }
+
+const onDeleteChat = (chatId: number) => {
+    setTimeout(async () => {
+      try {
+        const chatToDelete = chats.find(c => c.id === chatId);
+        const leadId = chatToDelete?.lead?.id;
+
+        if (!leadId) {
+          toast({ title: "Erro", description: "Lead não encontrado para este chat.", variant: "destructive" });
+          return;
+        }
+
+        await openConfirm({
+          title: "Excluir Lead",
+          description: `Tem certeza que deseja excluir permanentemente o lead? Esta ação não pode ser desfeita.`,
+          confirmText: "Sim, Excluir",
+          onConfirm: async () => {
+            await deleteLead(Number(leadId));
+            toast({
+              title: "Sucesso",
+              description: "Lead deletado com sucesso",
+            });
+            await fetchChats()
+          }
+        });
+      } catch (error) {
+        toast({
+          title: "Erro",
+          description: "Erro ao deletar lead",
+          variant: "destructive"
+        }); 
+        console.error("Delete error:", error);
+      }
+    }, 150);
+  }
 
   return (
     <div className="flex h-screen w-full overflow-hidden">
@@ -87,6 +130,8 @@ const Index = () => {
               chats={chats}
               selectedChatId={selectedChatId}
               onSelectChat={setSelectedChatId}
+              onEditChat={onEditChat}
+              onDeleteChat={onDeleteChat}
             />
           </div>
 
@@ -95,7 +140,7 @@ const Index = () => {
               <ChatInterface chat={selectedChat} />
             ) : (
               <div className="flex-1 flex items-center justify-center text-muted-foreground">
-                Selecione uma chat para iniciar
+                Selecione um chat para iniciar
               </div>
             )}
           </div>
