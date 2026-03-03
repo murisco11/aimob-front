@@ -17,6 +17,7 @@ import Analytics from "./pages/Analytics";
 import Settings from "./pages/Settings";
 import NewVisit from "./pages/NewVisit";
 import NotFound from "./pages/NotFound";
+import { GlobalConfirmDialog } from "./components/crm/Confirm";
 
 const queryClient = new QueryClient();
 
@@ -116,6 +117,7 @@ const AppRoutes = () => {
 
       {/* Rota 404 - deve ser última */}
       <Route path="*" element={<NotFound />} />
+      
     </Routes>
   );
 };
@@ -127,6 +129,7 @@ const App = () => (
       <Sonner />
       <BrowserRouter>
         <AppRoutes />
+        <GlobalConfirmDialog />
       </BrowserRouter>
     </TooltipProvider>
   </QueryClientProvider>

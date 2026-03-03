@@ -21,6 +21,7 @@ import { useVisita } from "@/hooks/useVisita";
 import { useLead } from "@/hooks/useLead";
 import { useImovel } from "@/hooks/useImovel";
 import { VisitaStatus, CreateVisitaDto, UpdateVisitaDto } from "@/types/VisitaType"; // Ajuste os caminhos
+import { useConfirmStore } from "@/stores/confirmStore";
 
 type FieldErrors = Record<string, string>;
 
@@ -39,6 +40,7 @@ const VisitForm = () => {
   const [time, setTime] = useState("");
   const [leadId, setLeadId] = useState("");
   const [propertyId, setPropertyId] = useState("");
+  const { openConfirm } = useConfirmStore();
   const [notes, setNotes] = useState("");
   const [status, setStatus] = useState<VisitaStatus>("agendada");
   const [errors, setErrors] = useState<FieldErrors>({});
@@ -77,15 +79,17 @@ const VisitForm = () => {
     return errs;
   };
   const handleDelete = async () => {
-    const confirmed = window.confirm("Tem certeza que deseja excluir esta visita?");
-
-    if (!confirmed) return;
-
     try {
-      await deleteVisita(Number(id));
-
-      toast.success("Visita excluída com sucesso!");
-      navigate("/visits");
+      await openConfirm({
+        title: "Excluir Lead",
+        description: `Tem certeza que deseja excluir permanentemente a visita? Esta ação não pode ser desfeita.`,
+        confirmText: "Sim, Excluir",
+        onConfirm: async () => {
+          await deleteVisita(Number(id));
+          toast.success("Visita excluída com sucesso!");
+          navigate("/visits");
+        }
+      });
     } catch (error) {
       toast.error("Erro ao excluir a visita. Tente novamente.");
       console.error("Delete error:", error);
@@ -115,9 +119,9 @@ const VisitForm = () => {
         data: finalDate.toISOString(),
         descricao: notes,
         status: status,
-        leadId: Number(leadId),
-        imovelId: Number(propertyId),
-        userId: 1,
+        lead: Number(leadId),
+        imovel: Number(propertyId),
+        user: 1,
       };
 
       if (isEditing) {

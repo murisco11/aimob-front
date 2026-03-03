@@ -12,6 +12,7 @@ export interface Lead {
   threadId?: string;
   lid?: string;
   temperatura?: "warm" | "cold" | "hot";
+  status: "qualificacao_ia" | "visita_agendada" | "em_negociacao" | "fechado" | "perdido";
   instanceName: string;
   createdAt: string | Date;
   updatedAt: string | Date;

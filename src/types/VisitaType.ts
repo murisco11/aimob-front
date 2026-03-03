@@ -19,9 +19,9 @@ export interface Visita {
 }
 
 export type CreateVisitaDto = Omit<Visita, "id" | "createdAt" | "updatedAt" | "user" | "imovel" | "lead"> & {
-  userId: number;
-  imovelId: number;
-  leadId: number;
+  user: number;
+  imovel: number;
+  lead: number;
 };
 
 export type UpdateVisitaDto = Partial<CreateVisitaDto>;
