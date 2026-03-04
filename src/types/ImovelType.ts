@@ -1,11 +1,7 @@
-import { User } from "./UserType"; // Ajuste o path conforme sua estrutura
-import { Lead } from "./LeadType"; // Ajuste o path conforme sua estrutura
+import { User } from "./UserType"; 
+import { Lead } from "./LeadType"; 
 import { Visit } from "@/services/types";
-
-// Se existirem as outras tipagens, você pode importá-las (Visita, Post, AiAssistantFile)
-// import { Visita } from "./VisitaType";
-// import { Post } from "./PostType";
-// import { AiAssistantFile } from "./AiAssistantFileType";
+import { Midia } from "./MidiaType";
 
 export interface Imovel {
   id: number;
@@ -20,13 +16,23 @@ export interface Imovel {
   iptu?: number;
   condominio?: number;
   description?: string;
+  
+  aceitaPets: boolean;
+  andar?: number;
+  mobiliado: boolean;
+  comissao?: number;
+  expectativaVenda?: string;
+  perfilComprador?: string;
+  infoProprietario?: string;
+  
   isActive: boolean;
   
   user?: User;
   leads?: Lead[];
   visitas?: Visit[]; 
-  posts?: any[];
-  aiAssistantFiles?: any[]; 
+  // posts?: Post[];
+  midias?: Midia[];
+  // aiAssistantFiles?: AiAssistantFile[]; 
 }
 
 export type CreateImovelDto = Omit<Imovel, "id" | "isActive" | "user" | "leads" | "visitas" | "posts" | "aiAssistantFiles">;
