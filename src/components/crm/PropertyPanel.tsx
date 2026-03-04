@@ -82,11 +82,11 @@ const PropertyPanel = ({ leadId }: PropertyPanelProps) => {
           <CalendarPlus className="w-3.5 h-3.5" />
           Marcar Visita
         </Button>
-        <Button className="w-full justify-start gap-2 h-9 text-xs" variant="outline">
+        {/* <Button className="w-full justify-start gap-2 h-9 text-xs" variant="outline">
           <CheckCircle2 className="w-3.5 h-3.5" />
           Marcar como vendido
-        </Button>
-        
+        </Button> */}
+
         {/* <Button className="w-full justify-start gap-2 h-9 text-xs" variant="outline">
           <FileText className="w-3.5 h-3.5" />
           Gerar Follow-Up

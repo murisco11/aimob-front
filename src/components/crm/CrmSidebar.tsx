@@ -1,4 +1,4 @@
-import { LayoutDashboard, Users, Home, Calendar, Settings, TrendingUp, LogOut } from "lucide-react";
+import { LayoutDashboard, Users, Home, Calendar, Settings, TrendingUp, LogOut, Bot } from "lucide-react";
 import { useNavigate, useLocation } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
 import { useToast } from "../ui/use-toast";
@@ -9,6 +9,7 @@ const navItems = [
   { icon: Home, label: "Imóveis", path: "/properties" },
   { icon: Calendar, label: "Calendário", path: "/visits" },
   { icon: TrendingUp, label: "Dashboard", path: "/analytics" },
+  { icon: Bot, label: "IA", path: "/ai" },
   { icon: Settings, label: "Configurações", path: "/settings" },
 ];
 

@@ -19,6 +19,7 @@ import NewVisit from "./pages/VisitForm";
 import NotFound from "./pages/NotFound";
 import { GlobalConfirmDialog } from "./components/crm/Confirm";
 import LeadForm from "./pages/LeadForm";
+import AIConfig from "./pages/AiConfig";
 
 const queryClient = new QueryClient();
 
@@ -64,6 +65,14 @@ const AppRoutes = () => {
         element={
           <ProtectedRoute>
             <LeadForm />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/ai"
+        element={
+          <ProtectedRoute>
+            <AIConfig />
           </ProtectedRoute>
         }
       />
