@@ -1,13 +1,15 @@
-import { 
-  Instagram, 
-  MessageCircle, 
-  User as UserIcon, 
-  MoreVertical, 
-  Trash2, 
-  Edit 
+import { useState } from "react";
+import {
+  Instagram,
+  MessageCircle,
+  User as UserIcon,
+  MoreVertical,
+  Trash2,
+  Edit,
+  Search
 } from "lucide-react";
-import { Chat, ChatStatus } from "@/types/ChatType"
-import { formatDistanceToNow } from "date-fns"; 
+import { Chat } from "@/types/ChatType"
+import { formatDistanceToNow } from "date-fns";
 import { ptBR } from "date-fns/locale";
 
 import {
@@ -21,18 +23,44 @@ interface ChatTableProps {
   chats: Chat[];
   selectedChatId: number | null;
   onSelectChat: (id: number) => void;
-  onEditChat?: (id: number) => void; 
+  onEditChat?: (id: number) => void;
   onDeleteChat?: (id: number) => void;
 }
 
 const ChatTable = ({ chats, selectedChatId, onSelectChat, onEditChat, onDeleteChat }: ChatTableProps) => {
-  
+  const [searchTerm, setSearchTerm] = useState("");
+  // <-- NOVO ESTADO: Controla se a ordenação está ligada ou desligada
+  const [isSorted, setIsSorted] = useState(false);
+
   const getInitials = (name: string) => {
     return name.split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2);
   };
 
+  // 1. Primeiro filtramos pela busca
+  let displayedChats = chats.filter(chat => {
+    const term = searchTerm.toLowerCase();
+    const leadName = chat.lead?.name?.toLowerCase() || "";
+    const lastMsg = chat.lastMessage?.toLowerCase() || "";
+    return leadName.includes(term) || lastMsg.includes(term);
+  });
+
+  // 2. Se o botão de ordenar estiver ativo, ordenamos a lista filtrada
+  if (isSorted) {
+    const pesos: Record<string, number> = {
+      "hot": 3,
+      "warm": 2,
+      "cold": 1,
+    };
+
+    displayedChats.sort((a, b) => {
+      const pesoA = pesos[a.lead?.temperatura || ""] || 0;
+      const pesoB = pesos[b.lead?.temperatura || ""] || 0;
+      return pesoB - pesoA; 
+    });
+  }
+
   return (
-    <div className="bg-card rounded-xl border border-border overflow-hidden">
+    <div className="bg-card rounded-xl border border-border overflow-hidden w-full h-full flex flex-col">
       <div className="px-5 py-4 border-b border-border flex items-center justify-between">
         <div>
           <h2 className="text-md font-semibold text-card-foreground">Chats</h2>
@@ -40,21 +68,39 @@ const ChatTable = ({ chats, selectedChatId, onSelectChat, onEditChat, onDeleteCh
             {chats.length} atendimentos ativos
           </p>
         </div>
-        <button className="text-xs text-muted-foreground bg-muted px-2 py-1 rounded-md hover:bg-muted/80 transition-colors">
-          Ordenar
+        {/* <-- EDITADO: O botão agora liga/desliga o estado isSorted */}
+        <button 
+          onClick={() => setIsSorted(!isSorted)} 
+          className={`text-xs px-2 py-1 rounded-md transition-colors ${
+            isSorted ? "bg-primary text-primary-foreground hover:bg-primary/90" : "text-muted-foreground bg-muted hover:bg-muted/80"
+          }`}
+        >
+          {isSorted ? "Remover Filtro" : "Mais Quentes"}
         </button>
       </div>
 
-      <div className="divide-y divide-border overflow-y-auto max-h-[calc(100vh-200px)]">
-        {chats.map((chat) => (
+      <div className="p-3 border-b border-border bg-background/50">
+        <div className="relative flex items-center">
+          <Search className="absolute left-3 w-4 h-4 text-muted-foreground" />
+          <input
+            type="text"
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+            placeholder="Buscar leads ou mensagens..."
+            className="w-full pl-9 pr-3 py-2 text-sm bg-muted rounded-md border-transparent focus:border-primary focus:ring-1 focus:ring-primary outline-none transition-all"
+          />
+        </div>
+      </div>
+
+      <div className="divide-y divide-border overflow-y-auto flex-1 scrollbar-thin">
+        {/* <-- EDITADO: Mapeando os chats finais processados */}
+        {displayedChats.map((chat) => (
           <div
             key={chat.id}
-            className={`w-full flex items-center gap-4 px-5 py-3.5 transition-colors hover:bg-muted/50 group ${
-              selectedChatId === chat.id ? "bg-primary/5 border-l-2 border-l-primary" : "border-l-2 border-l-transparent"
-            }`}
+            className={`w-full flex items-center gap-4 px-5 py-3.5 transition-colors hover:bg-muted/50 group ${selectedChatId === chat.id ? "bg-primary/5 border-l-2 border-l-primary" : "border-l-2 border-l-transparent"
+              }`}
           >
-            {/* Toda esta área clica para selecionar o chat */}
-            <button 
+            <button
               onClick={() => onSelectChat(chat.id)}
               className="flex-1 flex items-center gap-4 text-left min-w-0"
             >
@@ -62,13 +108,9 @@ const ChatTable = ({ chats, selectedChatId, onSelectChat, onEditChat, onDeleteCh
                 <div className="w-10 h-10 rounded-full bg-secondary flex items-center justify-center text-xs font-semibold text-secondary-foreground">
                   {chat.lead?.name ? getInitials(chat.lead.name) : <UserIcon className="w-5 h-5" />}
                 </div>
-                
+
                 <div className="absolute -bottom-0.5 -right-0.5 w-4 h-4 rounded-full bg-card shadow-sm flex items-center justify-center">
-                  {chat.instanceName?.toLowerCase().includes("insta") ? (
-                    <Instagram className="w-2.5 h-2.5 text-pink-500" />
-                  ) : (
-                    <MessageCircle className="w-2.5 h-2.5 text-green-500" />
-                  )}
+                  <MessageCircle className="w-2.5 h-2.5 text-green-500" />
                 </div>
               </div>
 
@@ -78,18 +120,17 @@ const ChatTable = ({ chats, selectedChatId, onSelectChat, onEditChat, onDeleteCh
                     {chat.lead?.name || "Lead Desconhecido"}
                   </span>
                   <span className="text-[10px] text-muted-foreground whitespace-nowrap">
-                    {chat.lastMessageAt && formatDistanceToNow(new Date(chat.lastMessageAt), { 
-                      addSuffix: false, 
-                      locale: ptBR 
+                    {chat.lastMessageAt && formatDistanceToNow(new Date(chat.lastMessageAt), {
+                      addSuffix: false,
+                      locale: ptBR
                     })}
                   </span>
                 </div>
-                
+
                 <div className="flex items-center gap-2 mt-0.5">
-                  <div className={`w-2 h-2 rounded-full ${
-                    chat.status === 'open' ? 'bg-green-500' : 
-                    chat.status === 'pending' ? 'bg-yellow-500' : 'bg-slate-400'
-                  }`} />
+                  <div className={`w-2 h-2 rounded-full ${chat.status === 'open' ? 'bg-green-500' :
+                      chat.status === 'pending' ? 'bg-yellow-500' : 'bg-slate-400'
+                    }`} />
                   <p className="text-xs text-muted-foreground truncate italic">
                     {chat.lastMessage}
                   </p>
@@ -98,9 +139,8 @@ const ChatTable = ({ chats, selectedChatId, onSelectChat, onEditChat, onDeleteCh
 
               {chat.lead?.temperatura && (
                 <div className="shrink-0 flex flex-col items-end">
-                  <span className={`text-[9px] px-1.5 py-0.5 rounded-full font-bold uppercase ${
-                    chat.lead.temperatura === 'hot' ? 'bg-red-100 text-orange-600' : 'bg-blue-100 text-blue-600'
-                  }`}>
+                  <span className={`text-[9px] px-1.5 py-0.5 rounded-full font-bold uppercase ${chat.lead.temperatura === 'hot' ? 'bg-red-100 text-orange-600' : 'bg-blue-100 text-blue-600'
+                    }`}>
                     {chat.lead.temperatura}
                   </span>
                 </div>
@@ -115,9 +155,9 @@ const ChatTable = ({ chats, selectedChatId, onSelectChat, onEditChat, onDeleteCh
                   </button>
                 </DropdownMenuTrigger>
                 <DropdownMenuContent align="end" className="w-40">
-                  <DropdownMenuItem 
+                  <DropdownMenuItem
                     onClick={(e) => {
-                      e.stopPropagation(); 
+                      e.stopPropagation();
                       if (onEditChat) onEditChat(chat.id);
                     }}
                     className="cursor-pointer flex items-center gap-2"
@@ -125,7 +165,7 @@ const ChatTable = ({ chats, selectedChatId, onSelectChat, onEditChat, onDeleteCh
                     <Edit className="w-4 h-4" />
                     <span>Editar</span>
                   </DropdownMenuItem>
-                  <DropdownMenuItem 
+                  <DropdownMenuItem
                     onClick={(e) => {
                       e.stopPropagation();
                       if (onDeleteChat) onDeleteChat(chat.id);
@@ -138,7 +178,6 @@ const ChatTable = ({ chats, selectedChatId, onSelectChat, onEditChat, onDeleteCh
                 </DropdownMenuContent>
               </DropdownMenu>
             </div>
-
           </div>
         ))}
       </div>

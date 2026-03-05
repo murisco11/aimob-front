@@ -1,4 +1,4 @@
-import { Chat } from "./chatType"; 
+import { Chat } from "./ChatType"; 
 
 export type Mensagem = {
   id: number;
@@ -9,5 +9,7 @@ export type Mensagem = {
   type: string;
   mediaUrl: string | null;    
   status: string;
+  quotedMessageBody?: string | null;
+  quotedMessageId?: string | null;
   createdAt: Date;
 };

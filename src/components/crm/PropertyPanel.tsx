@@ -30,7 +30,7 @@ const PropertyPanel = ({ leadId }: PropertyPanelProps) => {
   const imoveis: Imovel[] = selectedLead?.id === leadId ? (selectedLead.imoveis || []) : [];
 
   return (
-    <div className="bg-card rounded-xl border border-border overflow-hidden flex flex-col h-full">
+    <div className="bg-card rounded-xl border border-border overflow-hidden flex flex-col h-full w-full">
       <div className="px-5 py-4 border-b border-border">
         <h2 className="text-sm font-semibold text-card-foreground">Imóveis ativos do Lead</h2>
         <p className="text-xs text-muted-foreground mt-0.5">{imoveis.length} {imoveis.length === 1 ? "Imóvel" : "Imóveis  "}</p>

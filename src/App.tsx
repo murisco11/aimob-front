@@ -92,7 +92,6 @@ const AppRoutes = () => {
           </ProtectedRoute>
         }
       />
-
       <Route
         path="/visits/:id"
         element={
@@ -101,50 +100,58 @@ const AppRoutes = () => {
           </ProtectedRoute>
         } />
       <Route
-        path="/properties"
-        element={
-          <ProtectedRoute>
-            <Properties />
-          </ProtectedRoute>
-        }
-      />
-      <Route
-        path="/properties/new"
+        path="/properties/edit/:id"
         element={
           <ProtectedRoute>
             <PropertyRegister />
           </ProtectedRoute>
         }
       />
-      <Route
+      < Route
+        path="/properties"
+        element={
+          < ProtectedRoute >
+            <Properties />
+          </ProtectedRoute >
+        }
+      />
+      < Route
+        path="/properties/new"
+        element={
+          < ProtectedRoute >
+            <PropertyRegister />
+          </ProtectedRoute >
+        }
+      />
+      < Route
         path="/properties/:id"
         element={
-          <ProtectedRoute>
+          < ProtectedRoute >
             <PropertyDetail />
-          </ProtectedRoute>
+          </ProtectedRoute >
         }
       />
-      <Route
+      < Route
         path="/analytics"
         element={
-          <ProtectedRoute>
+          < ProtectedRoute >
             <Analytics />
-          </ProtectedRoute>
+          </ProtectedRoute >
         }
       />
-      <Route
+      < Route
         path="/settings"
         element={
-          <ProtectedRoute>
+          < ProtectedRoute >
             <Settings />
-          </ProtectedRoute>
+          </ProtectedRoute >
         }
       />
 
       {/* Rota 404 - deve ser última */}
       <Route path="*" element={<NotFound />} />
 
-    </Routes>
+    </Routes >
   );
 };
 

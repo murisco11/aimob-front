@@ -2,6 +2,30 @@ import { apiClient } from "./api";
 import { AiAssistant, UpdateAiAssistantDto, UploadFileResponse } from "@/types/AiAssistantType";
 
 export const aiAssistantService = {
+async uploadFile(id: number, file: File, imovelId: string): Promise<UploadFileResponse> {
+        console.log("Teste vital - É um arquivo Blob/File verdadeiro?", file instanceof File);
+        
+        const formData = new FormData();
+        formData.append("file", file);
+        
+        // Adicionamos o ID do imóvel no FormData para enviar ao backend
+        formData.append("imovelId", String(imovelId)); 
+
+        const response = await apiClient.post<UploadFileResponse>(
+            `/aiAssistant/${id}/upload`,
+            formData,
+            {
+                transformRequest: (data, headers) => {
+                    delete headers['Content-Type'];
+                    delete headers['content-type'];
+                    return data;
+                }
+            }
+        );
+
+        return response.data;
+    },
+
     async getById(id: number): Promise<AiAssistant> {
         const response = await apiClient.get<AiAssistant>(`/aiAssistant/${id}`);
         return response.data;
@@ -14,17 +38,5 @@ export const aiAssistantService = {
 
     async delete(id: number): Promise<void> {
         await apiClient.delete(`/aiAssistant/${id}`);
-    },
-
-    async uploadFile(id: number, file: File): Promise<UploadFileResponse> {
-        const formData = new FormData();
-        formData.append("file", file);
-
-        const response = await apiClient.post<UploadFileResponse>(
-            `/aiAssistant/${id}/upload`,
-            formData
-        );
-
-        return response.data;
     }
 };

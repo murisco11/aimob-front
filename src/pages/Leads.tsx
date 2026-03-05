@@ -101,7 +101,6 @@ const Leads = () => {
       <div className="flex-1 flex flex-col min-w-0">
         <MobileHeader />
 
-        {/* Header */}
         <header className="border-b border-border px-4 md:px-6 py-4 space-y-3">
           <div className="flex flex-col sm:flex-row items-start sm:items-center gap-3">
             <div className="relative flex-1 w-full">
@@ -126,7 +125,6 @@ const Leads = () => {
                 </SelectContent>
               </Select>
 
-              {/* View toggle */}
               <div className="flex items-center rounded-lg border border-border bg-secondary p-0.5">
                 <button
                   onClick={() => setView("kanban")}
@@ -149,7 +147,6 @@ const Leads = () => {
           </div>
         </header>
 
-        {/* Content */}
         {isLoading ? (
           <div className="flex-1 flex items-center justify-center text-muted-foreground">Carregando leads...</div>
         ) : (
@@ -219,7 +216,6 @@ const Leads = () => {
                 })}
               </div>
             ) : (
-              /* List View */
               <div className="p-4 md:p-6">
                 <div className="rounded-xl border border-border bg-card overflow-hidden">
                   <Table>
@@ -275,7 +271,7 @@ const Leads = () => {
           {selectedLeadData && (
             <LeadDetailPanel
               lead={selectedLeadData}
-              onOpenChat={(leadId) => navigate(`/?leadId=${leadId}`)}
+              onOpenChat={(leadId) => {navigate(`/?chatId=${selectedLeadData.conversas[0].id}`);} }
             />
           )}
         </SheetContent>
@@ -284,7 +280,6 @@ const Leads = () => {
   );
 };
 
-/* ────────── Lead Detail Panel ────────── */
 function LeadDetailPanel({ lead, onOpenChat }: { lead: Lead; onOpenChat: (leadId: number) => void }) {
   const currentStageLabel = pipelineColumns.find((c) => c.stage === lead.status)?.label;
 
@@ -322,7 +317,6 @@ function LeadDetailPanel({ lead, onOpenChat }: { lead: Lead; onOpenChat: (leadId
       </SheetHeader>
 
       <ScrollArea className="flex-1 px-5 mt-4">
-        {/* Contact info */}
         <section className="space-y-2 mb-5">
           <h4 className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">Contato</h4>
           {lead.phone && (
@@ -334,7 +328,6 @@ function LeadDetailPanel({ lead, onOpenChat }: { lead: Lead; onOpenChat: (leadId
 
         <Separator className="bg-border mb-5" />
 
-        {/* AI Profile */}
         <section className="mb-5">
           <h4 className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-2 flex items-center gap-1.5">
             <Sparkles className="w-3.5 h-3.5 text-leads-accent" /> Perfil & Notas
@@ -347,7 +340,6 @@ function LeadDetailPanel({ lead, onOpenChat }: { lead: Lead; onOpenChat: (leadId
 
         <Separator className="bg-border mb-5" />
 
-        {/* Properties (Imóveis) */}
         <section className="mb-5">
           <h4 className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-3 flex items-center gap-1.5">
             <Home className="w-3.5 h-3.5 text-leads-accent" /> Imóveis Vinculados ({imoveis.length})
@@ -373,7 +365,6 @@ function LeadDetailPanel({ lead, onOpenChat }: { lead: Lead; onOpenChat: (leadId
 
         <Separator className="bg-border mb-5" />
 
-        {/* Visits (Visitas) */}
         <section className="mb-8">
           <h4 className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-3 flex items-center gap-1.5">
             <Calendar className="w-3.5 h-3.5 text-leads-accent" /> Histórico de Visitas ({visitas.length})
@@ -410,7 +401,6 @@ function LeadDetailPanel({ lead, onOpenChat }: { lead: Lead; onOpenChat: (leadId
 
       </ScrollArea>
 
-      {/* Footer actions */}
       <div className="p-4 border-t border-border flex gap-2">
         <Button variant="outline" className="flex-1 border-border text-foreground hover:bg-secondary" onClick={() => onOpenChat(lead.id)}>
           <MessageSquare className="w-4 h-4 mr-1.5" /> Abrir Chat

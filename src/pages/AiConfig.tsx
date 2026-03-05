@@ -56,21 +56,19 @@ const AIConfig = () => {
         isLoading: isLeadsLoading
     } = useLead();
 
-    // Estados locais para os formulários
     const [prompt, setPrompt] = useState("");
     const [temperature, setTemperature] = useState([70]);
     const [isDragging, setIsDragging] = useState(false);
     const [uploadPropertyId, setUploadPropertyId] = useState<string>("");
 
-    // Busca inicial de todos os dados
     useEffect(() => {
         fetchByIdAiAssistant(ASSISTANT_ID);
         fetchFilesByAssistant(ASSISTANT_ID);
         fetchAllImovel();
         fetchAllLead();
+        console.log(files)
     }, [fetchByIdAiAssistant, fetchFilesByAssistant, fetchAllImovel, fetchAllLead]);
 
-    // Sincroniza o estado local quando a IA é carregada
     useEffect(() => {
         if (selectedAiAssistant) {
             setPrompt(selectedAiAssistant.prompt || "");
@@ -78,7 +76,8 @@ const AIConfig = () => {
         }
     }, [selectedAiAssistant]);
 
-    // ====== Ações de Arquivo ======
+    const filteredLeads = leads.filter(f => f.aiActive)
+
     const handleDeleteFile = async (idFile: number) => {
         try {
             await deleteFile(idFile);
@@ -95,10 +94,10 @@ const AIConfig = () => {
         }
 
         try {
-            await uploadFile(ASSISTANT_ID, file);
+            await uploadFile(ASSISTANT_ID, file, uploadPropertyId);
             toast({ title: "Sucesso", description: `Arquivo ${file.name} enviado.` });
             await fetchFilesByAssistant(ASSISTANT_ID);
-            setUploadPropertyId(""); // Limpa seleção
+            setUploadPropertyId("");
         } catch (error) {
             toast({ title: "Erro", description: "Falha ao enviar arquivo.", variant: "destructive" });
         }
@@ -118,7 +117,6 @@ const AIConfig = () => {
         }
     };
 
-    // ====== Salvar Configurações ======
     const handleSave = async () => {
         try {
             await updateAiAssistant(ASSISTANT_ID, {
@@ -131,7 +129,6 @@ const AIConfig = () => {
         }
     };
 
-    // Lógica visual da Temperatura
     const displayTemp = (temperature[0] / 100).toFixed(2);
     const tempLabel = temperature[0] <= 30
         ? "Mais Preciso / Focado"
@@ -160,7 +157,6 @@ const AIConfig = () => {
                     </div>
 
                     <div className="px-6 py-6 space-y-8 max-w-4xl">
-                        {/* ===== Section 1: Comportamento ===== */}
                         <section className="bg-card rounded-xl border border-border p-5 space-y-5">
                             <div className="flex items-center gap-2">
                                 <MessageCircle className="w-4 h-4 text-primary" />
@@ -206,7 +202,6 @@ const AIConfig = () => {
                             </div>
                         </section>
 
-                        {/* ===== Section 2: Base de Conhecimento ===== */}
                         <section className="bg-card rounded-xl border border-border p-5 space-y-5">
                             <div className="flex items-center gap-2">
                                 <Database className="w-4 h-4 text-primary" />
@@ -256,7 +251,6 @@ const AIConfig = () => {
                                 </div>
                             </div>
 
-                            {/* Lista de Arquivos */}
                             {isFilesLoading ? (
                                 <div className="flex justify-center p-4">
                                     <Loader2 className="w-6 h-6 animate-spin text-muted-foreground" />
@@ -293,12 +287,11 @@ const AIConfig = () => {
                             )}
                         </section>
 
-                        {/* ===== Section 3: Leads em Atendimento ===== */}
                         <section className="bg-card rounded-xl border border-border p-5 space-y-4">
                             <div className="flex items-center gap-2">
                                 <Users className="w-4 h-4 text-primary" />
                                 <h2 className="text-sm font-semibold text-card-foreground">
-                                    Leads ({leads.length})
+                                    Leads Ativos com IA ({filteredLeads.length})
                                 </h2>
                             </div>
 
@@ -308,13 +301,11 @@ const AIConfig = () => {
                                 </div>
                             ) : (
                                 <div className="space-y-1.5">
-                                    {leads.map((lead) => {
+                                    {filteredLeads.map((lead) => {
                                         const initials = lead.name ? lead.name.split(" ").map((n: string) => n[0]).join("").slice(0, 2).toUpperCase() : "L";
 
-                                        // Verifica se a IA está ativa para o Lead
                                         const isConversando = lead.aiActive;
 
-                                        // Pega o primeiro imóvel caso exista na array
                                         const linkedImovel = lead.imoveis && lead.imoveis.length > 0 ? lead.imoveis[0].name : null;
 
                                         return (
@@ -356,7 +347,6 @@ const AIConfig = () => {
                         </section>
                     </div>
 
-                    {/* Footer actions */}
                     <div className="flex justify-end gap-3 px-6 pb-8">
                         <Button variant="outline" size="sm" onClick={() => navigate(-1)}>
                             Cancelar

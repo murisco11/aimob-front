@@ -11,7 +11,7 @@ interface AiAssistantStore {
   fetchById: (id: number) => Promise<void>;
   updateItem: (id: number, data: UpdateAiAssistantDto) => Promise<void>;
   deleteItem: (id: number) => Promise<void>;
-  uploadFile: (id: number, file: File) => Promise<void>;
+  uploadFile: (id: number, file: File, imovelId: string) => Promise<void>;
 }
 
 export const useAiAssistantStore = create<AiAssistantStore>((set, get) => ({
@@ -58,12 +58,12 @@ export const useAiAssistantStore = create<AiAssistantStore>((set, get) => ({
     }
   },
 
-  uploadFile: async (id: number, file: File) => {
+uploadFile: async (id: number, file: File, imovelId: string) => {
     set({ isLoading: true, error: null });
     try {
-      const response = await aiAssistantService.uploadFile(id, file);
+      // Passando o imovelId para o service
+      const response = await aiAssistantService.uploadFile(id, file, imovelId);
       
-      // Atualiza o state local caso o endpoint retorne os dados do arquivo salvo
       const currentItem = get().selectedItem;
       if (currentItem && currentItem.id === id && response.file) {
         set({

@@ -3,7 +3,7 @@ import { AiAssistantFile } from "@/types/AiAssistantFileType";
 
 export const aiAssistantFileService = {
   async getAllByAssistant(idAssistant: number): Promise<AiAssistantFile[]> {
-    const response = await apiClient.get<AiAssistantFile[]>(`/aiAgentFile/assistants/${idAssistant}/files`);
+    const response = await apiClient.get<AiAssistantFile[]>(`/aiAssistantFile/assistants/${idAssistant}/files`);
     return response.data;
   },
 

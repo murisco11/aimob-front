@@ -8,9 +8,9 @@ const navItems = [
   { icon: Users, label: "Leads", path: "/leads" },
   { icon: Home, label: "Imóveis", path: "/properties" },
   { icon: Calendar, label: "Calendário", path: "/visits" },
-  { icon: TrendingUp, label: "Dashboard", path: "/analytics" },
   { icon: Bot, label: "IA", path: "/ai" },
-  { icon: Settings, label: "Configurações", path: "/settings" },
+  // { icon: TrendingUp, label: "Dashboard", path: "/analytics" },
+  // { icon: Settings, label: "Configurações", path: "/settings" },
 ];
 
 interface CrmSidebarProps {

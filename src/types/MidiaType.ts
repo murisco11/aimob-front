@@ -9,9 +9,10 @@ export interface Midia {
   user?: User;
 }
 
-export type CreateMidiaDto = Omit<Midia, "id" | "imovel" | "user"> & {
+export interface CreateMidiaDto {
+  base64Data: string;
+  extension: string;
   imovelId: number;
-  userId: number;
-};
+}
 
 export type UpdateMidiaDto = Partial<CreateMidiaDto>;

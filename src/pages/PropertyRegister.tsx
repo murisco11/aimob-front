@@ -1,5 +1,5 @@
-import { useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useState, useEffect } from "react";
+import { useNavigate, useParams } from "react-router-dom";
 import CrmSidebar from "@/components/crm/CrmSidebar";
 import MobileHeader from "@/components/crm/MobileHeader";
 import { Button } from "@/components/ui/button";
@@ -7,15 +7,9 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Switch } from "@/components/ui/switch";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
-import { ArrowLeft, Upload, Save, Home, DollarSign, User, FileText } from "lucide-react";
+import { ArrowLeft, Save, Home, DollarSign, User, FileText, Loader2 } from "lucide-react";
 import { toast } from "sonner";
+import { useImovel } from "@/hooks/useImovel";
 
 type TabKey = "info" | "financial" | "context" | "owner";
 
@@ -27,41 +21,89 @@ const tabs: { key: TabKey; label: string; icon: React.ReactNode }[] = [
 ];
 
 interface FieldErrors {
-  title?: string;
+  name?: string;
   address?: string;
-  propertyType?: string;
-  price?: string;
+  valor?: string;
 }
 
 const PropertyRegister = () => {
   const navigate = useNavigate();
+  const { id } = useParams(); // Pega o ID da URL se for edição
+  
+  // Pegamos também as funções de update e fetch do hook
+  const { createImovel, updateImovel, fetchByIdImovel, selectedImovel, isLoading } = useImovel();
+
   const [activeTab, setActiveTab] = useState<TabKey>("info");
   const [errors, setErrors] = useState<FieldErrors>({});
   const [submitted, setSubmitted] = useState(false);
+  const [isFetching, setIsFetching] = useState(false);
 
-  // Info fields
-  const [title, setTitle] = useState("");
+  const [name, setName] = useState("");
   const [address, setAddress] = useState("");
-  const [propertyType, setPropertyType] = useState("");
   const [description, setDescription] = useState("");
-  const [bedrooms, setBedrooms] = useState("");
-  const [bathrooms, setBathrooms] = useState("");
+  
+  const [quartos, setQuartos] = useState("");
+  const [suites, setSuites] = useState("");
+  const [banheiros, setBanheiros] = useState("");
+  const [vagas, setVagas] = useState("");
   const [area, setArea] = useState("");
-  const [floor, setFloor] = useState("");
-  const [parkingSpots, setParkingSpots] = useState("");
-  const [acceptsPets, setAcceptsPets] = useState(false);
-  const [furnished, setFurnished] = useState(false);
-
-  // Financial
-  const [price, setPrice] = useState("");
-  const [condoFee, setCondoFee] = useState("");
+  const [andar, setAndar] = useState("");
+  
+  const [aceitaPets, setAceitaPets] = useState(false);
+  const [mobiliado, setMobiliado] = useState(false);
+  
+  const [valor, setValor] = useState("");
+  const [condominio, setCondominio] = useState("");
   const [iptu, setIptu] = useState("");
+  const [comissao, setComissao] = useState("");
+  
+  const [expectativaVenda, setExpectativaVenda] = useState("");
+  const [perfilComprador, setPerfilComprador] = useState("");
+  const [infoProprietario, setInfoProprietario] = useState("");
+
+  const isEditing = !!id;
+
+  // Busca os dados do imóvel se estivermos no modo de edição
+  useEffect(() => {
+    if (isEditing) {
+      setIsFetching(true);
+      fetchByIdImovel(Number(id)).finally(() => setIsFetching(false));
+    }
+  }, [id, fetchByIdImovel, isEditing]);
+
+  // Preenche o formulário quando o selectedImovel for carregado
+  useEffect(() => {
+    if (isEditing && selectedImovel && String(selectedImovel.id) === id) {
+      setName(selectedImovel.name || "");
+      setAddress(selectedImovel.address || "");
+      setDescription(selectedImovel.description || "");
+      
+      setQuartos(selectedImovel.quartos ? String(selectedImovel.quartos) : "");
+      setSuites(selectedImovel.suites ? String(selectedImovel.suites) : "");
+      setBanheiros(selectedImovel.banheiros ? String(selectedImovel.banheiros) : "");
+      setVagas(selectedImovel.vagas ? String(selectedImovel.vagas) : "");
+      setArea(selectedImovel.area ? String(selectedImovel.area) : "");
+      setAndar(selectedImovel.andar ? String(selectedImovel.andar) : "");
+      
+      setAceitaPets(!!selectedImovel.aceitaPets);
+      setMobiliado(!!selectedImovel.mobiliado);
+      
+      setValor(selectedImovel.valor ? selectedImovel.valor.toLocaleString("pt-BR") : "");
+      setCondominio(selectedImovel.condominio ? selectedImovel.condominio.toLocaleString("pt-BR") : "");
+      setIptu(selectedImovel.iptu ? selectedImovel.iptu.toLocaleString("pt-BR") : "");
+      setComissao(selectedImovel.comissao ? String(selectedImovel.comissao) : "");
+      
+      setExpectativaVenda(selectedImovel.expectativaVenda || "");
+      setPerfilComprador(selectedImovel.perfilComprador || "");
+      setInfoProprietario(selectedImovel.infoProprietario || "");
+    }
+  }, [isEditing, selectedImovel, id]);
 
   const formatCurrency = (raw: string): string => {
     const digits = raw.replace(/\D/g, "");
     if (!digits) return "";
-    const number = parseInt(digits, 10);
-    return number.toLocaleString("pt-BR");
+    const num = parseInt(digits, 10);
+    return num.toLocaleString("pt-BR");
   };
 
   const handleCurrencyChange = (
@@ -79,70 +121,78 @@ const PropertyRegister = () => {
       });
     }
   };
-  const [commission, setCommission] = useState("");
-
-  // Context
-  const [publicationStatus, setPublicationStatus] = useState("");
-  const [expectedProfile, setExpectedProfile] = useState("");
-  const [saleExpectation, setSaleExpectation] = useState("");
-
-  // Owner
-  const [ownerContact, setOwnerContact] = useState("");
 
   const validate = (): FieldErrors => {
     const errs: FieldErrors = {};
-    if (!title.trim()) errs.title = "Título é obrigatório";
-    else if (title.trim().length > 150) errs.title = "Máximo 150 caracteres";
+    if (!name.trim()) errs.name = "Título é obrigatório";
+    else if (name.trim().length > 255) errs.name = "Máximo 255 caracteres";
+    
     if (!address.trim()) errs.address = "Endereço é obrigatório";
-    else if (address.trim().length > 250) errs.address = "Máximo 250 caracteres";
-    if (!propertyType) errs.propertyType = "Selecione o tipo";
-    if (!price.replace(/\D/g, "")) errs.price = "Preço é obrigatório";
+    else if (address.trim().length > 255) errs.address = "Máximo 255 caracteres";
+    
+    if (!valor.replace(/\D/g, "")) errs.valor = "Preço é obrigatório";
     return errs;
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setSubmitted(true);
     const errs = validate();
     setErrors(errs);
 
     if (Object.keys(errs).length > 0) {
-      // Navigate to the tab with the first error
-      if (errs.title || errs.address || errs.propertyType) {
-        setActiveTab("info");
-      } else if (errs.price) {
-        setActiveTab("financial");
-      }
+      if (errs.name || errs.address) setActiveTab("info");
+      else if (errs.valor) setActiveTab("financial");
       toast.error("Preencha os campos obrigatórios");
       return;
     }
 
-    toast.success("Imóvel cadastrado com sucesso!");
-    navigate("/properties");
-  };
+    try {
+      const payload = {
+        name,
+        address,
+        description,
+        quartos: Number(quartos) || 0,
+        suites: Number(suites) || 0,
+        banheiros: Number(banheiros) || 0,
+        vagas: Number(vagas) || 0,
+        area: area ? Number(area) : undefined,
+        andar: andar ? Number(andar) : undefined,
+        aceitaPets,
+        mobiliado,
+        valor: Number(valor.replace(/\D/g, "")) || 0,
+        condominio: condominio ? Number(condominio.replace(/\D/g, "")) : undefined,
+        iptu: iptu ? Number(iptu.replace(/\D/g, "")) : undefined,
+        comissao: comissao ? Number(comissao) : undefined,
+        expectativaVenda,
+        perfilComprador,
+        infoProprietario
+      };
 
-  // Re-validate on change when already submitted
-  const onChangeField = (field: keyof FieldErrors, value: string) => {
-    if (field === "title") setTitle(value);
-    if (field === "address") setAddress(value);
-    if (field === "price") setPrice(value);
-    if (submitted) {
-      setErrors((prev) => {
-        const next = { ...prev };
-        if (value.trim()) delete next[field];
-        else next[field] = `${field === "title" ? "Título" : field === "address" ? "Endereço" : "Preço"} é obrigatório`;
-        return next;
-      });
+      if (isEditing) {
+        await updateImovel({...payload, id: Number(id)});
+        toast.success("Imóvel atualizado com sucesso!");
+        navigate(`/properties/${id}`); // Volta pro detalhe do imóvel editado
+      } else {
+        await createImovel(payload);
+        toast.success("Imóvel cadastrado com sucesso!");
+        navigate("/properties");
+      }
+    } catch (error) {
+      toast.error(isEditing ? "Erro ao atualizar imóvel." : "Erro ao cadastrar imóvel.");
     }
   };
 
-  const onChangePropertyType = (value: string) => {
-    setPropertyType(value);
+  const onChangeField = (field: keyof FieldErrors, val: string) => {
+    if (field === "name") setName(val);
+    if (field === "address") setAddress(val);
+    if (field === "valor") setValor(val);
+    
     if (submitted) {
       setErrors((prev) => {
         const next = { ...prev };
-        if (value) delete next.propertyType;
-        else next.propertyType = "Selecione o tipo";
+        if (val.trim()) delete next[field];
+        else next[field] = `${field === "name" ? "Título" : field === "address" ? "Endereço" : "Preço"} é obrigatório`;
         return next;
       });
     }
@@ -154,6 +204,14 @@ const PropertyRegister = () => {
   const RequiredDot = () => (
     <span className="text-destructive ml-0.5">*</span>
   );
+
+  if (isFetching) {
+    return (
+      <div className="flex h-screen w-full items-center justify-center">
+        <Loader2 className="w-8 h-8 animate-spin text-primary" />
+      </div>
+    );
+  }
 
   return (
     <div className="flex h-screen w-full overflow-hidden">
@@ -169,20 +227,21 @@ const PropertyRegister = () => {
                 variant="ghost"
                 size="icon"
                 className="h-8 w-8"
-                onClick={() => navigate("/properties")}
+                onClick={() => navigate(-1)} // Volta pra tela anterior
               >
                 <ArrowLeft className="w-4 h-4" />
               </Button>
               <div>
-                <h1 className="text-xl font-semibold text-foreground">Cadastrar Imóvel</h1>
+                <h1 className="text-xl font-semibold text-foreground">
+                  {isEditing ? "Editar Imóvel" : "Cadastrar Imóvel"}
+                </h1>
                 <p className="text-sm text-muted-foreground mt-0.5">
-                  Preencha as informações do novo imóvel
+                  {isEditing ? "Altere as informações do imóvel" : "Preencha as informações do novo imóvel"}
                 </p>
               </div>
             </div>
           </div>
 
-          {/* Tabs */}
           <div className="px-6 pt-4">
             <div className="flex gap-1 bg-muted rounded-lg p-1 w-fit">
               {tabs.map((tab) => (
@@ -203,21 +262,21 @@ const PropertyRegister = () => {
             </div>
           </div>
 
-          {/* Form */}
-          <form onSubmit={handleSubmit} className="p-6">
+          <form onSubmit={handleSubmit} className="p-6 pb-20">
             {activeTab === "info" && (
               <div className="grid grid-cols-1 md:grid-cols-2 gap-5 max-w-3xl">
                 <div className={`${fieldClass} md:col-span-2`}>
                   <Label>Título<RequiredDot /></Label>
                   <Input
                     placeholder="Ex: Apartamento 3 quartos em Ponta Negra"
-                    value={title}
-                    onChange={(e) => onChangeField("title", e.target.value)}
-                    className={errors.title ? errorClass : ""}
-                    maxLength={150}
+                    value={name}
+                    onChange={(e) => onChangeField("name", e.target.value)}
+                    className={errors.name ? errorClass : ""}
+                    maxLength={255}
                   />
-                  {errors.title && <p className="text-xs text-destructive">{errors.title}</p>}
+                  {errors.name && <p className="text-xs text-destructive">{errors.name}</p>}
                 </div>
+                
                 <div className={`${fieldClass} md:col-span-2`}>
                   <Label>Endereço<RequiredDot /></Label>
                   <Input
@@ -225,66 +284,54 @@ const PropertyRegister = () => {
                     value={address}
                     onChange={(e) => onChangeField("address", e.target.value)}
                     className={errors.address ? errorClass : ""}
-                    maxLength={250}
+                    maxLength={255}
                   />
                   {errors.address && <p className="text-xs text-destructive">{errors.address}</p>}
                 </div>
-                <div className={fieldClass}>
-                  <Label>Tipo do imóvel<RequiredDot /></Label>
-                  <Select value={propertyType} onValueChange={onChangePropertyType}>
-                    <SelectTrigger className={errors.propertyType ? errorClass : ""}>
-                      <SelectValue placeholder="Selecione" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="apartment">Apartamento</SelectItem>
-                      <SelectItem value="house">Casa</SelectItem>
-                      <SelectItem value="commercial">Comercial</SelectItem>
-                      <SelectItem value="land">Terreno</SelectItem>
-                      <SelectItem value="studio">Studio/Kitnet</SelectItem>
-                      <SelectItem value="penthouse">Cobertura</SelectItem>
-                    </SelectContent>
-                  </Select>
-                  {errors.propertyType && <p className="text-xs text-destructive">{errors.propertyType}</p>}
-                </div>
+
                 <div className={fieldClass}>
                   <Label>Área (m²)</Label>
                   <Input type="number" placeholder="120" value={area} onChange={(e) => setArea(e.target.value)} />
                 </div>
-                <div className={fieldClass}>
-                  <Label>Quartos</Label>
-                  <Input type="number" placeholder="3" value={bedrooms} onChange={(e) => setBedrooms(e.target.value)} />
-                </div>
-                <div className={fieldClass}>
-                  <Label>Banheiros</Label>
-                  <Input type="number" placeholder="2" value={bathrooms} onChange={(e) => setBathrooms(e.target.value)} />
-                </div>
+                
                 <div className={fieldClass}>
                   <Label>Andar</Label>
-                  <Input type="number" placeholder="8" value={floor} onChange={(e) => setFloor(e.target.value)} />
+                  <Input type="number" placeholder="8" value={andar} onChange={(e) => setAndar(e.target.value)} />
                 </div>
+
+                <div className={fieldClass}>
+                  <Label>Quartos</Label>
+                  <Input type="number" placeholder="3" value={quartos} onChange={(e) => setQuartos(e.target.value)} />
+                </div>
+
+                <div className={fieldClass}>
+                  <Label>Suítes</Label>
+                  <Input type="number" placeholder="1" value={suites} onChange={(e) => setSuites(e.target.value)} />
+                </div>
+
+                <div className={fieldClass}>
+                  <Label>Banheiros</Label>
+                  <Input type="number" placeholder="2" value={banheiros} onChange={(e) => setBanheiros(e.target.value)} />
+                </div>
+                
                 <div className={fieldClass}>
                   <Label>Vagas de garagem</Label>
-                  <Input type="number" placeholder="2" value={parkingSpots} onChange={(e) => setParkingSpots(e.target.value)} />
+                  <Input type="number" placeholder="2" value={vagas} onChange={(e) => setVagas(e.target.value)} />
                 </div>
+
                 <div className="flex items-center justify-between rounded-lg border border-border p-3">
                   <Label className="cursor-pointer">Aceita pets</Label>
-                  <Switch checked={acceptsPets} onCheckedChange={setAcceptsPets} />
+                  <Switch checked={aceitaPets} onCheckedChange={setAceitaPets} />
                 </div>
+                
                 <div className="flex items-center justify-between rounded-lg border border-border p-3">
                   <Label className="cursor-pointer">Mobiliado</Label>
-                  <Switch checked={furnished} onCheckedChange={setFurnished} />
+                  <Switch checked={mobiliado} onCheckedChange={setMobiliado} />
                 </div>
+
                 <div className={`${fieldClass} md:col-span-2`}>
                   <Label>Descrição</Label>
                   <Textarea placeholder="Descreva o imóvel com detalhes..." rows={4} value={description} onChange={(e) => setDescription(e.target.value)} maxLength={2000} />
-                </div>
-                <div className={`${fieldClass} md:col-span-2`}>
-                  <Label>Fotos</Label>
-                  <div className="border-2 border-dashed border-border rounded-lg p-8 flex flex-col items-center justify-center text-center hover:border-primary/40 transition-colors cursor-pointer">
-                    <Upload className="w-8 h-8 text-muted-foreground mb-2" />
-                    <p className="text-sm text-muted-foreground">Arraste fotos ou clique para enviar</p>
-                    <p className="text-xs text-muted-foreground/60 mt-1">JPG, PNG até 10MB cada</p>
-                  </div>
                 </div>
               </div>
             )}
@@ -292,32 +339,34 @@ const PropertyRegister = () => {
             {activeTab === "financial" && (
               <div className="grid grid-cols-1 md:grid-cols-2 gap-5 max-w-3xl">
                 <div className={fieldClass}>
-                  <Label>Preço<RequiredDot /></Label>
+                  <Label>Valor<RequiredDot /></Label>
                   <div className="relative">
                     <span className="absolute left-3 top-1/2 -translate-y-1/2 text-sm text-muted-foreground pointer-events-none">R$</span>
                     <Input
                       placeholder="1.450.000"
-                      value={price}
-                      onChange={handleCurrencyChange(setPrice, "price")}
-                      className={`pl-9 ${errors.price ? errorClass : ""}`}
+                      value={valor}
+                      onChange={handleCurrencyChange(setValor, "valor")}
+                      className={`pl-9 ${errors.valor ? errorClass : ""}`}
                       inputMode="numeric"
                     />
                   </div>
-                  {errors.price && <p className="text-xs text-destructive">{errors.price}</p>}
+                  {errors.valor && <p className="text-xs text-destructive">{errors.valor}</p>}
                 </div>
+                
                 <div className={fieldClass}>
                   <Label>Condomínio <span className="text-muted-foreground font-normal text-xs">(R$/mês)</span></Label>
                   <div className="relative">
                     <span className="absolute left-3 top-1/2 -translate-y-1/2 text-sm text-muted-foreground pointer-events-none">R$</span>
                     <Input
                       placeholder="1.800"
-                      value={condoFee}
-                      onChange={handleCurrencyChange(setCondoFee)}
+                      value={condominio}
+                      onChange={handleCurrencyChange(setCondominio)}
                       className="pl-9"
                       inputMode="numeric"
                     />
                   </div>
                 </div>
+                
                 <div className={fieldClass}>
                   <Label>IPTU <span className="text-muted-foreground font-normal text-xs">(R$/ano)</span></Label>
                   <div className="relative">
@@ -331,9 +380,10 @@ const PropertyRegister = () => {
                     />
                   </div>
                 </div>
+                
                 <div className={fieldClass}>
                   <Label>Comissão (%)</Label>
-                  <Input type="number" step="0.5" placeholder="6" value={commission} onChange={(e) => setCommission(e.target.value)} />
+                  <Input type="number" step="0.1" placeholder="6" value={comissao} onChange={(e) => setComissao(e.target.value)} />
                 </div>
               </div>
             )}
@@ -341,24 +391,13 @@ const PropertyRegister = () => {
             {activeTab === "context" && (
               <div className="grid grid-cols-1 md:grid-cols-2 gap-5 max-w-3xl">
                 <div className={fieldClass}>
-                  <Label>Status de publicação</Label>
-                  <Select value={publicationStatus} onValueChange={setPublicationStatus}>
-                    <SelectTrigger><SelectValue placeholder="Selecione" /></SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="draft">Rascunho</SelectItem>
-                      <SelectItem value="active">Ativo</SelectItem>
-                      <SelectItem value="pending">Pendente</SelectItem>
-                      <SelectItem value="sold">Vendido</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
-                <div className={fieldClass}>
                   <Label>Expectativa de venda</Label>
-                  <Input placeholder="Ex: 30 a 60 dias" value={saleExpectation} onChange={(e) => setSaleExpectation(e.target.value)} />
+                  <Input placeholder="Ex: 30 a 60 dias" value={expectativaVenda} onChange={(e) => setExpectativaVenda(e.target.value)} />
                 </div>
+                
                 <div className={`${fieldClass} md:col-span-2`}>
                   <Label>Perfil esperado do comprador</Label>
-                  <Textarea placeholder="Descreva o perfil ideal: faixa etária, renda, estilo de vida..." rows={3} value={expectedProfile} onChange={(e) => setExpectedProfile(e.target.value)} />
+                  <Textarea placeholder="Descreva o perfil ideal: faixa etária, renda, estilo de vida..." rows={3} value={perfilComprador} onChange={(e) => setPerfilComprador(e.target.value)} />
                 </div>
               </div>
             )}
@@ -366,19 +405,18 @@ const PropertyRegister = () => {
             {activeTab === "owner" && (
               <div className="grid grid-cols-1 gap-5 max-w-3xl">
                 <div className={fieldClass}>
-                  <Label>Contato do proprietário</Label>
-                  <Textarea placeholder="Nome, telefone, e-mail, observações..." rows={4} value={ownerContact} onChange={(e) => setOwnerContact(e.target.value)} />
+                  <Label>Contato e Info do proprietário</Label>
+                  <Textarea placeholder="Nome, telefone, e-mail, observações..." rows={4} value={infoProprietario} onChange={(e) => setInfoProprietario(e.target.value)} />
                 </div>
               </div>
             )}
 
-            {/* Footer actions */}
             <div className="flex items-center gap-3 mt-8 max-w-3xl">
-              <Button type="submit" className="gap-2">
-                <Save className="w-4 h-4" />
-                Salvar Imóvel
+              <Button type="submit" className="gap-2" disabled={isLoading}>
+                {isLoading ? <Loader2 className="w-4 h-4 animate-spin" /> : <Save className="w-4 h-4" />}
+                {isLoading ? "Salvando..." : (isEditing ? "Salvar Alterações" : "Salvar Imóvel")}
               </Button>
-              <Button type="button" variant="outline" onClick={() => navigate("/properties")}>
+              <Button type="button" variant="outline" onClick={() => navigate(-1)} disabled={isLoading}>
                 Cancelar
               </Button>
             </div>

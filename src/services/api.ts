@@ -1,4 +1,4 @@
-import axios, { AxiosInstance, AxiosError } from "axios";
+import axios, { AxiosInstance, AxiosError, AxiosRequestConfig } from "axios";
 
 const API_URL = import.meta.env.VITE_API_URL || "http://localhost:3000/api";
 const TOKEN_KEY = "auth_token";
@@ -60,24 +60,24 @@ class ApiClient {
     return this.client;
   }
 
-  get<T = any>(url: string) {
-    return this.client.get<T>(url);
+ get<T = any>(url: string, config?: AxiosRequestConfig) {
+    return this.client.get<T>(url, config);
   }
 
-  post<T = any>(url: string, data?: any) {
-    return this.client.post<T>(url, data);
+  post<T = any>(url: string, data?: any, config?: AxiosRequestConfig) {
+    return this.client.post<T>(url, data, config); 
   }
 
-  patch<T = any>(url: string, data?: any) {
-    return this.client.patch<T>(url, data);
+  patch<T = any>(url: string, data?: any, config?: AxiosRequestConfig) {
+    return this.client.patch<T>(url, data, config);
   }
 
-  put<T = any>(url: string, data?: any) {
-    return this.client.put<T>(url, data);
+  put<T = any>(url: string, data?: any, config?: AxiosRequestConfig) {
+    return this.client.put<T>(url, data, config);
   }
 
-  delete<T = any>(url: string) {
-    return this.client.delete<T>(url);
+  delete<T = any>(url: string, config?: AxiosRequestConfig) {
+    return this.client.delete<T>(url, config);
   }
 }
 

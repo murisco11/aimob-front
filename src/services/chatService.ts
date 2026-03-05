@@ -1,6 +1,6 @@
 import { Mensagem } from "@/types/MensagemType";
 import { apiClient } from "./api";
-import { Chat, SendMessage } from "@/types/chatType";
+import { Chat, SendMessage } from "@/types/ChatType";
 
 export const chatService = {
   async getChats(): Promise<Chat[]> {

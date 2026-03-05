@@ -27,7 +27,11 @@ const Index = () => {
     chatIdFromUrl ? parseInt(chatIdFromUrl) : null
   );
 
-  const { chats, fetchChats, addIncomingMessage } = useChat();
+  const { chats, fetchChats, addIncomingMessage, setActiveChatId } = useChat();
+
+  useEffect(() => {
+    setActiveChatId(selectedChatId);
+  }, [selectedChatId, setActiveChatId]);
 
   useEffect(() => {
     const socket = io(import.meta.env.VITE_API_URL || "http://localhost:3333");
@@ -74,7 +78,7 @@ const Index = () => {
 
     loadData();
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []); 
+  }, []);
 
   const selectedChat = chats.find((c) => c.id === selectedChatId) || null;
 
@@ -82,7 +86,7 @@ const Index = () => {
     navigate(`/leads?leadId=${id}`)
   }
 
-const onDeleteChat = (chatId: number) => {
+  const onDeleteChat = (chatId: number) => {
     setTimeout(async () => {
       try {
         const chatToDelete = chats.find(c => c.id === chatId);
@@ -111,7 +115,7 @@ const onDeleteChat = (chatId: number) => {
           title: "Erro",
           description: "Erro ao deletar lead",
           variant: "destructive"
-        }); 
+        });
         console.error("Delete error:", error);
       }
     }, 150);
@@ -125,7 +129,7 @@ const onDeleteChat = (chatId: number) => {
         <MobileHeader />
 
         <div className="flex-1 flex overflow-hidden">
-          <div className="w-full lg:w-[340px] xl:w-[380px] shrink-0 overflow-y-auto p-3 border-r border-border scrollbar-thin">
+          <div className="w-full lg:w-[340px] xl:w-[380px] shrink-0 p-3 border-r border-border flex flex-col">
             <ChatTable
               chats={chats}
               selectedChatId={selectedChatId}
@@ -145,7 +149,7 @@ const onDeleteChat = (chatId: number) => {
             )}
           </div>
           {selectedChat &&
-            <div className="hidden xl:flex w-[300px] shrink-0 p-3 border-l border-border">
+            <div className="hidden xl:flex w-[380px] flex-col shrink-0 p-3 border-l border-border">
               <PropertyPanel
                 leadId={Number(selectedChat.lead.id)}
               />

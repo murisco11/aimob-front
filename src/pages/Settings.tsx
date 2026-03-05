@@ -48,7 +48,6 @@ const Settings = () => {
         <MobileHeader />
 
         <div className="flex-1 flex overflow-hidden">
-          {/* Left: Tab Navigation */}
           <div className="w-[220px] shrink-0 border-r border-border p-4 hidden md:block">
             <h2 className="text-lg font-semibold text-foreground mb-1">Configurações</h2>
             <p className="text-xs text-muted-foreground mb-6">Gerencie seu CRM</p>
@@ -72,9 +71,7 @@ const Settings = () => {
             </nav>
           </div>
 
-          {/* Main Content */}
           <div className="flex-1 overflow-y-auto p-6 scrollbar-thin">
-            {/* Mobile tab selector */}
             <div className="flex gap-2 mb-6 md:hidden">
               {tabs.map((tab) => (
                 <button
@@ -94,7 +91,6 @@ const Settings = () => {
             </div>
 
             <div className="max-w-2xl">
-              {/* TAB 1: Profile */}
               {activeTab === "profile" && (
                 <div className="space-y-6">
                   <div>
@@ -102,7 +98,6 @@ const Settings = () => {
                     <p className="text-sm text-muted-foreground">Informações do corretor e da empresa</p>
                   </div>
 
-                  {/* Avatar */}
                   <Card className="border-border">
                     <CardContent className="p-6">
                       <div className="flex items-center gap-5">
@@ -152,7 +147,6 @@ const Settings = () => {
                 </div>
               )}
 
-              {/* TAB 2: AI & Automation */}
               {activeTab === "ai" && (
                 <div className="space-y-6">
                   <div>
@@ -160,7 +154,6 @@ const Settings = () => {
                     <p className="text-sm text-muted-foreground">Configure o comportamento do agente de IA</p>
                   </div>
 
-                  {/* Global Toggle */}
                   <Card className="border-border">
                     <CardContent className="p-6">
                       <div className="flex items-center justify-between">
@@ -178,7 +171,6 @@ const Settings = () => {
                     </CardContent>
                   </Card>
 
-                  {/* System Prompt */}
                   <Card className="border-border">
                     <CardHeader className="pb-3">
                       <CardTitle className="text-sm">Prompt do Sistema / Contexto Base</CardTitle>
@@ -196,7 +188,6 @@ const Settings = () => {
                     </CardContent>
                   </Card>
 
-                  {/* Autonomy Level */}
                   <Card className="border-border">
                     <CardHeader className="pb-3">
                       <CardTitle className="text-sm">Nível de Autonomia</CardTitle>
@@ -233,7 +224,6 @@ const Settings = () => {
                 </div>
               )}
 
-              {/* TAB 3: Integrations */}
               {activeTab === "integrations" && (
                 <div className="space-y-6">
                   <div>
@@ -241,7 +231,6 @@ const Settings = () => {
                     <p className="text-sm text-muted-foreground">Conecte seus canais de comunicação e automação</p>
                   </div>
 
-                  {/* WhatsApp */}
                   <Card className="border-border">
                     <CardHeader>
                       <div className="flex items-center justify-between">
@@ -268,7 +257,6 @@ const Settings = () => {
                     </CardContent>
                   </Card>
 
-                  {/* Instagram */}
                   <Card className="border-border">
                     <CardHeader>
                       <div className="flex items-center justify-between">
@@ -295,7 +283,6 @@ const Settings = () => {
                     </CardContent>
                   </Card>
 
-                  {/* Webhooks */}
                   <Card className="border-border">
                     <CardHeader>
                       <div className="flex items-center gap-3">

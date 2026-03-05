@@ -1,5 +1,5 @@
 import { chatService } from "@/services/chatService";
-import { Chat, SendMessage } from "@/types/chatType";
+import { Chat, SendMessage } from "@/types/ChatType";
 import { Mensagem } from "@/types/MensagemType";
 import { create } from "zustand";
 
@@ -7,11 +7,13 @@ export interface ChatStore {
     chats: Chat[]
     selectedChat: Mensagem[] | null
     isLoading: boolean;
+    activeChatId: number | null;
     error: string | null
 
     updateLeadStatusInStore: (leadId: number, aiActive: boolean) => void;
     sendMessage: (data: SendMessage) => Promise<void>
     fetchChats: () => Promise<void>;
+    setActiveChatId: (id: number | null) => void;
     fetchChatById: (id: number) => Promise<void>
     addIncomingMessage: (conversaId: number, mensagem: Mensagem) => void;
 }
@@ -21,7 +23,11 @@ export const useChatStore = create<ChatStore>()(
         chats: [],
         isLoading: false,
         selectedChat: null,
+        activeChatId: null,
         error: null,
+
+        setActiveChatId: (id) => set({ activeChatId: id }),
+
         updateLeadStatusInStore: (leadId, aiActive) => {
             set((state) => ({
                 chats: state.chats.map((chat) =>
@@ -32,9 +38,9 @@ export const useChatStore = create<ChatStore>()(
             }));
         },
         addIncomingMessage: (conversaId, novaMensagem) => {
-            const { selectedChat, chats } = get();
+            const { selectedChat, chats, activeChatId } = get();
 
-            if (selectedChat) {
+            if (selectedChat && activeChatId === conversaId) {
                 set({ selectedChat: [...selectedChat, novaMensagem] });
             }
 
@@ -42,13 +48,12 @@ export const useChatStore = create<ChatStore>()(
                 if (chat.id === conversaId) {
                     return {
                         ...chat,
-                        lastMessage: novaMensagem.body ?? "Mídia Recebida",
+                        lastMessage: novaMensagem.type === "image" ? "📷 Imagem" : novaMensagem.type === "audio" ? "🎵 Áudio" : novaMensagem.body,
                         lastMessageAt: novaMensagem.createdAt
                     };
                 }
                 return chat;
             });
-
             set({ chats: updatedChats });
         },
         fetchChats: async () => {

@@ -24,4 +24,10 @@ export type Chat = {
 export type SendMessage = {
   text: string;
   conversaId: number;
+  quotedMessageId?: string | null; 
+  media?: {                      
+    type: string;
+    base64: string;
+    fileName?: string;
+  };
 }

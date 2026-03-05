@@ -19,17 +19,15 @@ import { ArrowLeft, Save, UserPlus, Building2, CalendarCheck, Image as ImageIcon
 import { toast } from "sonner";
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
-
-// Importando os hooks e os tipos
 import { useLead } from "@/hooks/useLead";
 import { useImovel } from "@/hooks/useImovel";
 import { useVisita } from "@/hooks/useVisita";
 import { Lead, CreateLeadDto, UpdateLeadDto } from "@/types/LeadType";
+import { Visit } from "@/services/types";
 
 interface FieldErrors {
   name?: string;
   status?: string;
-  instanceName?: string;
 }
 
 const statusOptions: { value: Lead["status"]; label: string }[] = [
@@ -52,8 +50,8 @@ const LeadForm = () => {
   const isEditing = Boolean(id);
 
   const { leads, fetchAllLead, createLead, updateLead } = useLead();
-  const { imoveis, fetchAllImovel, toggleLead } = useImovel(); // <-- Adicionado toggleLead
-  const { visitas, fetchAllVisita } = useVisita()
+  const { imoveis, fetchAllImovel, toggleLead } = useImovel();
+  const { visitas, fetchAllVisita } = useVisita();
 
   const [errors, setErrors] = useState<FieldErrors>({});
   const [submitted, setSubmitted] = useState(false);
@@ -67,7 +65,6 @@ const LeadForm = () => {
   const [lid, setLid] = useState("");
   const [temperatura, setTemperatura] = useState<Lead["temperatura"] | "">("");
   const [status, setStatus] = useState<Lead["status"] | "">("");
-  const [instanceName, setInstanceName] = useState("");
 
   const [selectedPropertyIds, setSelectedPropertyIds] = useState<number[]>([]);
   const [selectedVisitIds, setSelectedVisitIds] = useState<number[]>([]);
@@ -91,7 +88,6 @@ const LeadForm = () => {
         setLid(existingLead.lid || "");
         setTemperatura(existingLead.temperatura || "");
         setStatus(existingLead.status || "");
-        setInstanceName(existingLead.instanceName || "");
 
         if (existingLead.imoveis) {
           setSelectedPropertyIds(existingLead.imoveis.map(i => i.id));
@@ -119,7 +115,6 @@ const LeadForm = () => {
     const errs: FieldErrors = {};
     if (!name.trim()) errs.name = "Nome é obrigatório";
     if (!status) errs.status = "Selecione o status";
-    if (!instanceName.trim() && !isEditing) errs.instanceName = "Instância é obrigatória";
     return errs;
   };
 
@@ -146,7 +141,6 @@ const LeadForm = () => {
         lid,
         temperatura: temperatura ? (temperatura as Lead["temperatura"]) : undefined,
         status: status as Lead["status"],
-        instanceName,
       };
 
       if (isEditing) {
@@ -168,7 +162,6 @@ const LeadForm = () => {
 
   const onChangeField = (field: keyof FieldErrors, value: string) => {
     if (field === "name") setName(value);
-    if (field === "instanceName") setInstanceName(value);
     if (submitted) {
       setErrors((prev) => {
         const next = { ...prev };
@@ -202,6 +195,8 @@ const LeadForm = () => {
     );
   };
 
+  const visitasDoLead = visitas?.filter((v) => v.lead?.id === Number(id)) || [];
+
   const errorClass = "border-destructive focus-visible:ring-destructive";
   const fieldClass = "space-y-2";
 
@@ -214,7 +209,6 @@ const LeadForm = () => {
         <MobileHeader />
 
         <div className="flex-1 overflow-y-auto scrollbar-thin">
-          {/* Header */}
           <div className="px-6 py-5 border-b border-border bg-card/50 sticky top-0 z-10 backdrop-blur-sm">
             <div className="flex items-center gap-3">
               <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => navigate("/leads")}>
@@ -261,7 +255,6 @@ const LeadForm = () => {
                       onChange={(e) => setDescription(e.target.value)}
                     />
                   </div>
-
 
                   <div className={fieldClass}>
                     <Label>Status<RequiredDot /></Label>
@@ -310,17 +303,6 @@ const LeadForm = () => {
                       disabled={isEditing}
                       onChange={(e) => setPhone(e.target.value)}
                     />
-                  </div>
-                  <div className={fieldClass}>
-                    <Label>Nome da Instância</Label>
-                    <Input
-                      placeholder="ex: whatsapp-principal"
-                      value={instanceName}
-                      onChange={(e) => onChangeField("instanceName", e.target.value)}
-                      className={errors.instanceName ? errorClass : ""}
-                      disabled={true}
-                    />
-                    {errors.instanceName && <p className="text-xs text-destructive">{errors.instanceName}</p>}
                   </div>
 
                   <div className={fieldClass}>
@@ -401,16 +383,16 @@ const LeadForm = () => {
                     <CalendarCheck className="w-4 h-4 text-primary" />
                     <h2 className="text-sm font-semibold text-foreground uppercase tracking-wider">Visitas Associadas</h2>
 
-                  <Button onClick={() => navigate(`/visits/new?leadId=${id}`)} className="bg-leads-accent ml-auto  hover:bg-leads-accent/90 text-leads-accent-foreground">
-                    <Plus className="w-4 h-4 mr-1.5" /> Criar Visita
-                  </Button>
+                    <Button onClick={() => navigate(`/visits/new?leadId=${id}`)} className="bg-leads-accent ml-auto  hover:bg-leads-accent/90 text-leads-accent-foreground">
+                      <Plus className="w-4 h-4 mr-1.5" /> Criar Visita
+                    </Button>
                   </div>
-                  
+
                   <div className="space-y-3 max-h-[300px] overflow-y-auto pr-2 scrollbar-thin">
-                    {(!visitas || visitas.length === 0) && (
+                    {(!visitasDoLead || visitasDoLead.length === 0) && (
                       <p className="text-sm text-muted-foreground text-center py-6 bg-muted/30 rounded-lg">Nenhuma visita cadastrada</p>
                     )}
-                    {visitas?.map((visit) => {
+                    {visitasDoLead?.map((visit) => {
                       const statusLabel =
                         visit.status === "agendada" ? "Agendada"
                           : visit.status === "realizada" ? "Realizada"
@@ -429,10 +411,10 @@ const LeadForm = () => {
                             : "border-border hover:border-muted-foreground/30 bg-card"
                             }`}
                         >
-                          <Checkbox
+                          {/* <Checkbox
                             checked={selectedVisitIds.includes(visit.id)}
                             onCheckedChange={() => toggleVisit(visit.id)}
-                          />
+                          /> */}
                           <div className="min-w-0 flex-1">
                             <div className="flex items-center justify-between gap-2 mb-0.5">
                               <p className="text-sm font-medium text-foreground truncate">

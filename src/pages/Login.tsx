@@ -48,7 +48,6 @@ const Login = () => {
 
   return (
     <div className="h-screen bg-background flex overflow-hidden">
-      {/* Lado Esquerdo - Banner (Desktop) */}
       <div className="hidden lg:flex lg:w-1/2 relative bg-card items-center justify-center p-12">
         <div className="absolute inset-0 bg-gradient-to-br from-primary/10 via-transparent to-primary/5" />
         <div className="relative z-10 max-w-md">

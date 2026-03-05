@@ -120,7 +120,6 @@ const Analytics = () => {
       <main className="flex-1 overflow-auto">
         <MobileHeader />
         <div className="p-6 space-y-6">
-          {/* Header */}
           <div className="flex items-center justify-between">
             <div>
               <h1 className="text-2xl font-bold text-slate-50">Analytics & ROI</h1>
@@ -132,7 +131,6 @@ const Analytics = () => {
             </Badge>
           </div>
 
-          {/* KPI Row */}
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
             <KpiCard
               title="Valor do Pipeline"
@@ -168,11 +166,8 @@ const Analytics = () => {
             />
           </div>
 
-          {/* Charts + AI Insights */}
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-            {/* Charts Column */}
             <div className="lg:col-span-2 space-y-6">
-              {/* Lead Source */}
               <Card className="bg-slate-900/80 border-slate-800/60">
                 <CardHeader className="pb-2">
                   <CardTitle className="text-sm font-semibold text-slate-200 flex items-center gap-2">
@@ -217,7 +212,6 @@ const Analytics = () => {
                 </CardContent>
               </Card>
 
-              {/* Funnel */}
               <Card className="bg-slate-900/80 border-slate-800/60">
                 <CardHeader className="pb-2">
                   <CardTitle className="text-sm font-semibold text-slate-200 flex items-center gap-2">
@@ -255,7 +249,6 @@ const Analytics = () => {
                 </CardContent>
               </Card>
 
-              {/* Visits Over Time */}
               <Card className="bg-slate-900/80 border-slate-800/60">
                 <CardHeader className="pb-2">
                   <CardTitle className="text-sm font-semibold text-slate-200 flex items-center gap-2">
@@ -285,7 +278,6 @@ const Analytics = () => {
               </Card>
             </div>
 
-            {/* AI Insights Column */}
             <div className="space-y-6">
               <Card className="bg-slate-900/80 border-slate-800/60 hover:border-emerald-500/30 transition-colors">
                 <CardHeader className="pb-3">
@@ -321,7 +313,6 @@ const Analytics = () => {
                 </CardContent>
               </Card>
 
-              {/* AI Suggestion */}
               <Card className="bg-gradient-to-br from-emerald-500/10 to-slate-900/80 border-emerald-500/20">
                 <CardContent className="p-5">
                   <div className="flex items-start gap-3">
@@ -340,7 +331,6 @@ const Analytics = () => {
                 </CardContent>
               </Card>
 
-              {/* Top Properties */}
               <Card className="bg-slate-900/80 border-slate-800/60">
                 <CardHeader className="pb-3">
                   <CardTitle className="text-sm font-semibold text-slate-200 flex items-center gap-2">

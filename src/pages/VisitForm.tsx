@@ -15,12 +15,10 @@ import { toast } from "sonner";
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import { cn } from "@/lib/utils";
-
-// Importando os hooks da sua aplicação
 import { useVisita } from "@/hooks/useVisita";
 import { useLead } from "@/hooks/useLead";
 import { useImovel } from "@/hooks/useImovel";
-import { VisitaStatus, CreateVisitaDto, UpdateVisitaDto } from "@/types/VisitaType"; // Ajuste os caminhos
+import { VisitaStatus, CreateVisitaDto, UpdateVisitaDto } from "@/types/VisitaType";
 import { useConfirmStore } from "@/stores/confirmStore";
 
 type FieldErrors = Record<string, string>;
@@ -33,6 +31,7 @@ const VisitForm = () => {
   const isEditing = !!id;
   const [searchParams] = useSearchParams();
   const preSelectedLeadId = searchParams.get("leadId");
+  const preSelectedImovelId = searchParams.get("imovelId");
   const { visitas, createVisita, updateVisita, deleteVisita } = useVisita();
   const { leads, fetchAllLead } = useLead();
   const { imoveis, fetchAllImovel } = useImovel();
@@ -40,7 +39,7 @@ const VisitForm = () => {
   const [selectedDate, setSelectedDate] = useState<Date | undefined>();
   const [time, setTime] = useState("");
   const [leadId, setLeadId] = useState(preSelectedLeadId || "");
-  const [propertyId, setPropertyId] = useState("");
+  const [propertyId, setPropertyId] = useState(preSelectedImovelId || "");
   const { openConfirm } = useConfirmStore();
   const [notes, setNotes] = useState("");
   const [status, setStatus] = useState<VisitaStatus>("agendada");
@@ -153,7 +152,6 @@ const VisitForm = () => {
         <MobileHeader />
 
         <div className="flex-1 overflow-y-auto p-4 md:p-6">
-          {/* Header */}
           <div className="flex items-center gap-3 mb-6">
             <Button variant="ghost" size="icon" onClick={() => navigate("/visits")}>
               <ArrowLeft className="w-5 h-5" />
@@ -169,7 +167,6 @@ const VisitForm = () => {
           </div>
 
           <div className="max-w-2xl mx-auto space-y-5">
-            {/* Status Selection - Mostra apenas se estiver editando */}
             {isEditing && (
               <Card className="border-border">
                 <CardHeader className="pb-3">
@@ -193,7 +190,6 @@ const VisitForm = () => {
               </Card>
             )}
 
-            {/* Lead Selection */}
             <Card className="border-border">
               <CardHeader className="pb-3">
                 <CardTitle className="text-sm font-medium flex items-center gap-2">
@@ -221,7 +217,6 @@ const VisitForm = () => {
               </CardContent>
             </Card>
 
-            {/* Property Selection */}
             <Card className="border-border">
               <CardHeader className="pb-3">
                 <CardTitle className="text-sm font-medium flex items-center gap-2">
@@ -249,7 +244,6 @@ const VisitForm = () => {
               </CardContent>
             </Card>
 
-            {/* Date & Time */}
             <Card className="border-border">
               <CardHeader className="pb-3">
                 <CardTitle className="text-sm font-medium flex items-center gap-2">
@@ -309,7 +303,6 @@ const VisitForm = () => {
               </CardContent>
             </Card>
 
-            {/* Notes */}
             <Card className="border-border">
               <CardHeader className="pb-3">
                 <CardTitle className="text-sm font-medium flex items-center gap-2">
@@ -327,7 +320,6 @@ const VisitForm = () => {
               </CardContent>
             </Card>
 
-            {/* Actions */}
             <div className="flex gap-3 justify-end pb-6">
               <Button variant="outline" onClick={() => navigate("/visits")}>
                 Cancelar

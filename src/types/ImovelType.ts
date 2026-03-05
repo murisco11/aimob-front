@@ -30,11 +30,9 @@ export interface Imovel {
   user?: User;
   leads?: Lead[];
   visitas?: Visit[]; 
-  // posts?: Post[];
   midias?: Midia[];
-  // aiAssistantFiles?: AiAssistantFile[]; 
 }
 
-export type CreateImovelDto = Omit<Imovel, "id" | "isActive" | "user" | "leads" | "visitas" | "posts" | "aiAssistantFiles">;
+export type CreateImovelDto = Omit<Imovel, "id" | "isActive" | "user" | "leads" | "visitas" | "posts" | "aiAssistantFiles" | "midias">;
 
 export type UpdateImovelDto = Partial<CreateImovelDto> & { id: number; isActive?: boolean; leads?: Lead[] };
