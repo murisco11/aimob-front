@@ -56,6 +56,8 @@ const Index = () => {
         status: data.mensagem.status,
         createdAt: new Date(data.mensagem.createdAt),
         conversa: chatExistente,
+        quotedMessageId: data.mensagem.quotedMessageId,
+        quotedMessageBody: data.mensagem.quotedMessageBody
       };
 
       addIncomingMessage(data.conversaId, mensagemFormatada);
@@ -83,7 +85,8 @@ const Index = () => {
   const selectedChat = chats.find((c) => c.id === selectedChatId) || null;
 
   const onEditChat = (id: number) => {
-    navigate(`/leads?leadId=${id}`)
+    const chatSelected = chats.find(c => c.id == id)
+    navigate(`/leads?leadId=${chatSelected.lead.id}`)
   }
 
   const onDeleteChat = (chatId: number) => {

@@ -9,6 +9,7 @@ interface AiAssistantStore {
   error: string | null;
 
   fetchById: (id: number) => Promise<void>;
+  fetchAiAssistantByUser: (id: number) => Promise<void>;
   updateItem: (id: number, data: UpdateAiAssistantDto) => Promise<void>;
   deleteItem: (id: number) => Promise<void>;
   uploadFile: (id: number, file: File, imovelId: string) => Promise<void>;
@@ -24,6 +25,16 @@ export const useAiAssistantStore = create<AiAssistantStore>((set, get) => ({
     set({ isLoading: true, error: null });
     try {
       const item = await aiAssistantService.getById(id);
+      set({ selectedItem: item, isLoading: false });
+    } catch (err) {
+      console.error("Erro ao buscar Assistente:", err);
+      set({ error: "Erro ao buscar dados do assistente", isLoading: false });
+    }
+  },
+  fetchAiAssistantByUser: async (id: number) => {
+    set({ isLoading: true, error: null });
+    try {
+      const item = await aiAssistantService.getByUser(id);
       set({ selectedItem: item, isLoading: false });
     } catch (err) {
       console.error("Erro ao buscar Assistente:", err);
@@ -58,12 +69,12 @@ export const useAiAssistantStore = create<AiAssistantStore>((set, get) => ({
     }
   },
 
-uploadFile: async (id: number, file: File, imovelId: string) => {
+  uploadFile: async (id: number, file: File, imovelId: string) => {
     set({ isLoading: true, error: null });
     try {
       // Passando o imovelId para o service
       const response = await aiAssistantService.uploadFile(id, file, imovelId);
-      
+
       const currentItem = get().selectedItem;
       if (currentItem && currentItem.id === id && response.file) {
         set({

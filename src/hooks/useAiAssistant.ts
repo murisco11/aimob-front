@@ -9,6 +9,7 @@ export const useAiAssistant = () => {
     error: store.error,
     
     fetchByIdAiAssistant: store.fetchById,
+    fetchAiAssistantByUser: store.fetchAiAssistantByUser,
     updateAiAssistant: store.updateItem,
     deleteAiAssistant: store.deleteItem,
     uploadFile: store.uploadFile

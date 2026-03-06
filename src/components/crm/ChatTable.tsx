@@ -29,14 +29,12 @@ interface ChatTableProps {
 
 const ChatTable = ({ chats, selectedChatId, onSelectChat, onEditChat, onDeleteChat }: ChatTableProps) => {
   const [searchTerm, setSearchTerm] = useState("");
-  // <-- NOVO ESTADO: Controla se a ordenação está ligada ou desligada
   const [isSorted, setIsSorted] = useState(false);
 
   const getInitials = (name: string) => {
     return name.split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2);
   };
 
-  // 1. Primeiro filtramos pela busca
   let displayedChats = chats.filter(chat => {
     const term = searchTerm.toLowerCase();
     const leadName = chat.lead?.name?.toLowerCase() || "";
@@ -44,7 +42,6 @@ const ChatTable = ({ chats, selectedChatId, onSelectChat, onEditChat, onDeleteCh
     return leadName.includes(term) || lastMsg.includes(term);
   });
 
-  // 2. Se o botão de ordenar estiver ativo, ordenamos a lista filtrada
   if (isSorted) {
     const pesos: Record<string, number> = {
       "hot": 3,
@@ -68,7 +65,6 @@ const ChatTable = ({ chats, selectedChatId, onSelectChat, onEditChat, onDeleteCh
             {chats.length} atendimentos ativos
           </p>
         </div>
-        {/* <-- EDITADO: O botão agora liga/desliga o estado isSorted */}
         <button 
           onClick={() => setIsSorted(!isSorted)} 
           className={`text-xs px-2 py-1 rounded-md transition-colors ${
@@ -93,7 +89,6 @@ const ChatTable = ({ chats, selectedChatId, onSelectChat, onEditChat, onDeleteCh
       </div>
 
       <div className="divide-y divide-border overflow-y-auto flex-1 scrollbar-thin">
-        {/* <-- EDITADO: Mapeando os chats finais processados */}
         {displayedChats.map((chat) => (
           <div
             key={chat.id}

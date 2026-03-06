@@ -20,6 +20,7 @@ import NotFound from "./pages/NotFound";
 import { GlobalConfirmDialog } from "./components/crm/Confirm";
 import LeadForm from "./pages/LeadForm";
 import AIConfig from "./pages/AiConfig";
+import Transactions from "./pages/Transactions";
 
 const queryClient = new QueryClient();
 
@@ -49,6 +50,14 @@ const AppRoutes = () => {
         element={
           <ProtectedRoute>
             <Leads />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/transactions"
+        element={
+          <ProtectedRoute>
+            <Transactions />
           </ProtectedRoute>
         }
       />

@@ -12,26 +12,29 @@ import {
 } from "@/components/ui/select";
 import {
     Brain, Upload, Trash2, FileText, MessageCircle, Save,
-    Bot, Thermometer, Database, Users, Loader2
+    Bot, Thermometer, Database, Users, Loader2, Send, Plus, Pencil
 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 
-// Importando todos os nossos Hooks reais
 import { useAiAssistant } from "@/hooks/useAiAssistant";
 import { useAiAssistantFile } from "@/hooks/useAiAssistantFile";
 import { useImovel } from "@/hooks/useImovel";
 import { useLead } from "@/hooks/useLead";
+import { useFirstMessage } from "@/hooks/useFirstMessage";
+import { FirstMessage } from "@/types/FirstMessageType";
+import { useAuth } from "@/hooks/useAuth";
+import { Switch } from "@/components/ui/switch";
 
 const AIConfig = () => {
     const navigate = useNavigate();
     const { toast } = useToast();
     const fileInputRef = useRef<HTMLInputElement>(null);
-
-    const ASSISTANT_ID = 1;
+    const { user } = useAuth()
+    const userId = Number(user.id)
 
     const {
         selectedAiAssistant,
-        fetchByIdAiAssistant,
+        fetchAiAssistantByUser,
         updateAiAssistant,
         uploadFile,
         isLoading: isSaving
@@ -56,18 +59,40 @@ const AIConfig = () => {
         isLoading: isLeadsLoading
     } = useLead();
 
+    const {
+        selectedFirstMessage: selectedFirstMessage,
+        fetchAlFirstMessagel: fetchFirstMessages,
+        createFirstMessage: createFirstMessage,
+        updateFirstMessage: updateFirstMessage,
+        deleteFirstMessage: deleteFirstMessage,
+        isLoading: isFirstMessageLoading
+    } = useFirstMessage();
+
     const [prompt, setPrompt] = useState("");
     const [temperature, setTemperature] = useState([70]);
     const [isDragging, setIsDragging] = useState(false);
     const [uploadPropertyId, setUploadPropertyId] = useState<string>("");
 
+    const [showMsgForm, setShowMsgForm] = useState(false);
+    const [newMsgContent, setNewMsgContent] = useState("");
+    const [newMsgActive, setNewMsgActive] = useState<boolean>(false);
+    const [editingMessageId, setEditingMessageId] = useState<number | null>(null);
+
+    let hasFirstMessage = selectedFirstMessage ? true : false
+
     useEffect(() => {
-        fetchByIdAiAssistant(ASSISTANT_ID);
-        fetchFilesByAssistant(ASSISTANT_ID);
+        fetchAiAssistantByUser(userId);
         fetchAllImovel();
         fetchAllLead();
-        console.log(files)
-    }, [fetchByIdAiAssistant, fetchFilesByAssistant, fetchAllImovel, fetchAllLead]);
+        fetchFirstMessages();
+        console.log(selectedFirstMessage)
+    }, [userId]);
+
+    useEffect(() => {
+        if (selectedAiAssistant?.id) {
+            fetchFilesByAssistant(selectedAiAssistant.id);
+        }
+    }, [selectedAiAssistant?.id, fetchFilesByAssistant]);
 
     useEffect(() => {
         if (selectedAiAssistant) {
@@ -76,7 +101,59 @@ const AIConfig = () => {
         }
     }, [selectedAiAssistant]);
 
-    const filteredLeads = leads.filter(f => f.aiActive)
+    const filteredLeads = leads.filter(f => f.aiActive);
+
+    const handleCancelMsgForm = () => {
+        setShowMsgForm(false);
+        setNewMsgContent("");
+        setNewMsgActive(false);
+        setEditingMessageId(null);
+    };
+
+    const handleSaveMessage = async () => {
+        if (!newMsgContent.trim()) {
+            toast({ title: "Atenção", description: "O conteúdo não pode estar vazio.", variant: "destructive" });
+            return;
+        }
+
+        try {
+            if (editingMessageId) {
+                await updateFirstMessage(editingMessageId, { content: newMsgContent, isActive: newMsgActive });
+                toast({ title: "Sucesso", description: "Mensagem atualizada." });
+            } else {
+                if (hasFirstMessage) {
+                    toast({ title: "Atenção", description: "Já existe uma mensagem configurada.", variant: "destructive" });
+                    return;
+                }
+                await createFirstMessage({
+                    content: newMsgContent,
+                    isActive: newMsgActive,
+                    userId: userId
+                });
+                toast({ title: "Sucesso", description: "Mensagem criada." });
+            }
+            fetchFirstMessages()
+            handleCancelMsgForm();
+        } catch (error) {
+            toast({ title: "Erro", description: "Falha ao salvar a mensagem.", variant: "destructive" });
+        }
+    };
+
+    const handleEditMessage = (msg: FirstMessage) => {
+        setNewMsgContent(msg.content);
+        setNewMsgActive(msg.isActive)
+        setEditingMessageId(msg.id);
+        setShowMsgForm(true);
+    };
+
+    const handleDeleteMessage = async (id: number) => {
+        try {
+            await deleteFirstMessage(id);
+            toast({ title: "Sucesso", description: "Mensagem removida." });
+        } catch (error) {
+            toast({ title: "Erro", description: "Falha ao remover a mensagem.", variant: "destructive" });
+        }
+    };
 
     const handleDeleteFile = async (idFile: number) => {
         try {
@@ -94,9 +171,9 @@ const AIConfig = () => {
         }
 
         try {
-            await uploadFile(ASSISTANT_ID, file, uploadPropertyId);
+            await uploadFile(selectedAiAssistant.id, file, uploadPropertyId);
             toast({ title: "Sucesso", description: `Arquivo ${file.name} enviado.` });
-            await fetchFilesByAssistant(ASSISTANT_ID);
+            await fetchFilesByAssistant(selectedAiAssistant.id);
             setUploadPropertyId("");
         } catch (error) {
             toast({ title: "Erro", description: "Falha ao enviar arquivo.", variant: "destructive" });
@@ -119,7 +196,7 @@ const AIConfig = () => {
 
     const handleSave = async () => {
         try {
-            await updateAiAssistant(ASSISTANT_ID, {
+            await updateAiAssistant(selectedAiAssistant.id, {
                 prompt,
                 temperature: temperature[0]
             });
@@ -200,6 +277,116 @@ const AIConfig = () => {
                                     <span>🎨 Criativo</span>
                                 </div>
                             </div>
+                        </section>
+
+                        <section className="bg-card rounded-xl border border-border p-5 space-y-4">
+                            <div className="flex items-center justify-between">
+                                <div className="flex items-center gap-2">
+                                    <Send className="w-4 h-4 text-primary" />
+                                    <h2 className="text-sm font-semibold text-card-foreground">Primeira Mensagem</h2>
+                                </div>
+                                {!showMsgForm && !hasFirstMessage && (
+                                    <Button
+                                        variant="outline"
+                                        size="sm"
+                                        className="gap-1.5 text-xs"
+                                        onClick={() => setShowMsgForm(true)}
+                                    >
+                                        <Plus className="w-3.5 h-3.5" /> Nova Mensagem
+                                    </Button>
+                                )}
+                            </div>
+                            <p className="text-[11px] text-muted-foreground">
+                                Mensagens enviadas automaticamente para o cliente em paralelo à IA. (Apenas 1 permitida).
+                            </p>
+
+                            {showMsgForm && (
+                                <div className="border border-border rounded-lg p-4 space-y-3 bg-background">
+                                    <div className="space-y-1.5">
+                                        <Label className="text-xs text-muted-foreground">Conteúdo da mensagem</Label>
+                                        <Textarea
+                                            value={newMsgContent}
+                                            onChange={(e) => setNewMsgContent(e.target.value)}
+                                            placeholder="Digite a mensagem que será enviada automaticamente..."
+                                            className="min-h-[100px] resize-y text-sm"
+                                            disabled={isFirstMessageLoading}
+                                        />
+                                    </div>
+
+                                    {/* Substituição do Switch pelo Select */}
+                                    <div className="space-y-1.5">
+                                        <Label className="text-xs text-muted-foreground">Status da Mensagem</Label>
+                                        <Select
+                                            value={newMsgActive ? "true" : "false"}
+                                            onValueChange={(value) => setNewMsgActive(value === "true")}
+                                            disabled={isFirstMessageLoading}
+                                        >
+                                            <SelectTrigger className="w-[180px] h-9 text-sm">
+                                                <SelectValue placeholder="Selecione o status" />
+                                            </SelectTrigger>
+                                            <SelectContent>
+                                                <SelectItem value="true" className="text-success">Ativo</SelectItem>
+                                                <SelectItem value="false" className="text-muted-foreground">Desativado</SelectItem>
+                                            </SelectContent>
+                                        </Select>
+                                    </div>
+
+                                    <div className="flex justify-end gap-2">
+                                        <Button variant="outline" size="sm" onClick={handleCancelMsgForm} disabled={isFirstMessageLoading}>
+                                            Cancelar
+                                        </Button>
+                                        <Button size="sm" className="gap-1.5" onClick={handleSaveMessage} disabled={isFirstMessageLoading}>
+                                            {isFirstMessageLoading ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Save className="w-3.5 h-3.5" />}
+                                            {editingMessageId ? "Atualizar" : "Adicionar"}
+                                        </Button>
+                                    </div>
+                                </div>
+                            )}
+
+                            {!showMsgForm && (
+                                isFirstMessageLoading && !hasFirstMessage ? (
+                                    <div className="flex justify-center py-4">
+                                        <Loader2 className="w-5 h-5 animate-spin text-muted-foreground" />
+                                    </div>
+                                ) : hasFirstMessage ? (
+                                    <div className="space-y-1.5">
+                                        <div
+                                            key={selectedFirstMessage.id}
+                                            className="flex items-start gap-3 p-3 rounded-lg border border-border bg-background group"
+                                        >
+                                            <div className="w-8 h-8 rounded-md bg-primary/10 flex items-center justify-center shrink-0 mt-0.5">
+                                                <Send className="w-4 h-4 text-primary" />
+                                            </div>
+                                            <div className="flex-1 min-w-0">
+                                                <p className="text-sm font-medium text-card-foreground">Mensagem Automática - {selectedFirstMessage.isActive ? "Ativa" : "Desativada"}</p>
+                                                <p className="text-xs text-muted-foreground mt-0.5">{selectedFirstMessage.content}</p>
+                                            </div>
+                                            <div className="flex gap-1 shrink-0">
+                                                <Button
+                                                    variant="ghost"
+                                                    size="icon"
+                                                    className="h-8 w-8 text-muted-foreground hover:text-primary"
+                                                    onClick={() => handleEditMessage(selectedFirstMessage)}
+                                                >
+                                                    <Pencil className="w-3.5 h-3.5" />
+                                                </Button>
+                                                <Button
+                                                    variant="ghost"
+                                                    size="icon"
+                                                    className="h-8 w-8 text-muted-foreground hover:text-destructive"
+                                                    onClick={() => handleDeleteMessage(selectedFirstMessage.id)}
+                                                >
+                                                    <Trash2 className="w-3.5 h-3.5" />
+                                                </Button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                ) : (
+                                    <div className="text-center py-6 text-muted-foreground text-sm">
+                                        Nenhuma primeira mensagem configurada.
+                                    </div>
+                                )
+                            )}
                         </section>
 
                         <section className="bg-card rounded-xl border border-border p-5 space-y-5">
@@ -303,9 +490,7 @@ const AIConfig = () => {
                                 <div className="space-y-1.5">
                                     {filteredLeads.map((lead) => {
                                         const initials = lead.name ? lead.name.split(" ").map((n: string) => n[0]).join("").slice(0, 2).toUpperCase() : "L";
-
                                         const isConversando = lead.aiActive;
-
                                         const linkedImovel = lead.imoveis && lead.imoveis.length > 0 ? lead.imoveis[0].name : null;
 
                                         return (
@@ -347,7 +532,7 @@ const AIConfig = () => {
                         </section>
                     </div>
 
-                    <div className="flex justify-end gap-3 px-6 pb-8">
+                    <div className="flex justify-start gap-3 px-6 pb-8">
                         <Button variant="outline" size="sm" onClick={() => navigate(-1)}>
                             Cancelar
                         </Button>

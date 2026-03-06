@@ -29,6 +29,7 @@ export const useAuthStore = create<AuthStore>()(
           set({ isLoading: true, error: null });
           const response: AuthResponse = await authService.login(credentials);
           apiClient.setToken(response.token);
+          console.log(response.user)
           set({
             user: response.user,
             isAuthenticated: true,
