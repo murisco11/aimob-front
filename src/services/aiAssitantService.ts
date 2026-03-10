@@ -8,7 +8,6 @@ export const aiAssistantService = {
         const formData = new FormData();
         formData.append("file", file);
 
-        // Adicionamos o ID do imóvel no FormData para enviar ao backend
         formData.append("imovelId", String(imovelId));
 
         const response = await apiClient.post<UploadFileResponse>(

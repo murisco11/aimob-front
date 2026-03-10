@@ -21,6 +21,7 @@ import { GlobalConfirmDialog } from "./components/crm/Confirm";
 import LeadForm from "./pages/LeadForm";
 import AIConfig from "./pages/AiConfig";
 import Transactions from "./pages/Transactions";
+import Documents from "./pages/Documents";
 
 const queryClient = new QueryClient();
 
@@ -58,6 +59,14 @@ const AppRoutes = () => {
         element={
           <ProtectedRoute>
             <Transactions />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/documents"
+        element={
+          <ProtectedRoute>
+            <Documents />
           </ProtectedRoute>
         }
       />

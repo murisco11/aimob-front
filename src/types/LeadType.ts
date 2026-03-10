@@ -23,7 +23,7 @@ export interface Lead {
 }
 
 export type CreateLeadDto = Omit<Lead, "id" | "createdAt" | "updatedAt" | "user" | "imoveis" | "conversas" | "visitas"> & {
-  userId?: number; // Para associar ao User
+  userId?: number; 
 };
 
 export type UpdateLeadDto = Partial<CreateLeadDto>;

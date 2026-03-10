@@ -47,7 +47,6 @@ export const useVisitaStore = create<VisitaStore>((set, get) => ({
     set({ isLoading: true, error: null });
     try {
       const createdVisita = await visitaService.create(data);
-      // Atualiza a lista localmente sem precisar fazer novo fetchAll()
       set((state) => ({ visitas: [...state.visitas, createdVisita], isLoading: false }));
       return createdVisita;
     } catch (error) {
@@ -62,7 +61,6 @@ export const useVisitaStore = create<VisitaStore>((set, get) => ({
     try {
       const updatedVisita = await visitaService.update(id, data);
       set((state) => ({
-        // Substitui a visita editada na lista
         visitas: state.visitas.map((v) => (v.id === id ? updatedVisita : v)),
         selectedVisita: state.selectedVisita?.id === id ? updatedVisita : state.selectedVisita,
         isLoading: false
@@ -80,7 +78,6 @@ export const useVisitaStore = create<VisitaStore>((set, get) => ({
     try {
       await visitaService.delete(id);
       set((state) => ({
-        // Remove a visita deletada da lista
         visitas: state.visitas.filter((v) => v.id !== id),
         selectedVisita: state.selectedVisita?.id === id ? null : state.selectedVisita,
         isLoading: false

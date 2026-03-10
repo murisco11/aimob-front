@@ -16,7 +16,7 @@ interface AiAssistantStore {
 }
 
 export const useAiAssistantStore = create<AiAssistantStore>((set, get) => ({
-  data: [], // Mantido por padrão AIMOB
+  data: [],
   selectedItem: null,
   isLoading: false,
   error: null,
@@ -72,7 +72,6 @@ export const useAiAssistantStore = create<AiAssistantStore>((set, get) => ({
   uploadFile: async (id: number, file: File, imovelId: string) => {
     set({ isLoading: true, error: null });
     try {
-      // Passando o imovelId para o service
       const response = await aiAssistantService.uploadFile(id, file, imovelId);
 
       const currentItem = get().selectedItem;

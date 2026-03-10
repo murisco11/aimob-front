@@ -411,10 +411,6 @@ const LeadForm = () => {
                             : "border-border hover:border-muted-foreground/30 bg-card"
                             }`}
                         >
-                          {/* <Checkbox
-                            checked={selectedVisitIds.includes(visit.id)}
-                            onCheckedChange={() => toggleVisit(visit.id)}
-                          /> */}
                           <div className="min-w-0 flex-1">
                             <div className="flex items-center justify-between gap-2 mb-0.5">
                               <p className="text-sm font-medium text-foreground truncate">

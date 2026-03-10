@@ -313,7 +313,6 @@ const AIConfig = () => {
                                         />
                                     </div>
 
-                                    {/* Substituição do Switch pelo Select */}
                                     <div className="space-y-1.5">
                                         <Label className="text-xs text-muted-foreground">Status da Mensagem</Label>
                                         <Select

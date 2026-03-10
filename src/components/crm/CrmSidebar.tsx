@@ -1,4 +1,4 @@
-import { LayoutDashboard, Users, Home, Calendar, Settings, TrendingUp, LogOut, Bot, DollarSign } from "lucide-react";
+import { LayoutDashboard, Users, Home, Calendar, Settings, TrendingUp, LogOut, Bot, DollarSign, File } from "lucide-react";
 import { useNavigate, useLocation } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
 import { useToast } from "../ui/use-toast";
@@ -10,6 +10,7 @@ const navItems = [
   { icon: Calendar, label: "Calendário", path: "/visits" },
   { icon: Bot, label: "IA", path: "/ai" },
   { icon: DollarSign, label: "Transações", path: "/transactions" },
+  { icon: File, label: "Documentos", path: "/documents" },
   { icon: Settings, label: "Configurações", path: "/settings" },
 ];
 

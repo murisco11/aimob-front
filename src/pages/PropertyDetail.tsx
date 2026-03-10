@@ -23,7 +23,7 @@ import { useToast } from "@/hooks/use-toast";
 import { useImovel } from "@/hooks/useImovel";
 import { useMidia } from "@/hooks/useMidia";
 import { useLead } from "@/hooks/useLead";
-import { useChat } from "@/hooks/useChat"; // Importando o useChat para disparar a msg
+import { useChat } from "@/hooks/useChat"; 
 
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { useConfirmStore } from "@/stores/confirmStore";
@@ -52,7 +52,6 @@ const PropertyDetail = () => {
   const { openConfirm } = useConfirmStore()
   const { sendMessage } = useChat();
 
-  // Estados para o Modal de Envio de Leads
   const [isLeadModalOpen, setIsLeadModalOpen] = useState(false);
   const [selectedMediaToShare, setSelectedMediaToShare] = useState<any>(null);
   const [selectedLeads, setSelectedLeads] = useState<number[]>([]);
@@ -68,12 +67,10 @@ const PropertyDetail = () => {
     fetchAllLead();
   }, [id, fetchByIdImovel, fetchAllLead]);
 
-  // 1. SOLUÇÃO DO CONFLITO: Atrasar abertura do modal para o Dropdown fechar primeiro
   const handleSendMediaClick = (midia: any) => {
     setSelectedMediaToShare(midia);
     setSelectedLeads([]);
 
-    // Dá 150ms para o radix-ui destruir o portal do Menu antes de criar o portal do Dialog
     setTimeout(() => {
       setIsLeadModalOpen(true);
     }, 150);
@@ -87,7 +84,6 @@ const PropertyDetail = () => {
     );
   };
 
-  // 2. SOLUÇÃO DO CONGELAMENTO: Promise.all para enviar sem travar a thread
   const confirmSendMediaToLeads = async () => {
     if (!selectedMediaToShare || selectedLeads.length === 0) return;
 
@@ -126,7 +122,6 @@ const PropertyDetail = () => {
         }
       });
 
-      // Aguarda todos os envios terminarem em paralelo
       await Promise.all(promessasDeEnvio);
 
       if (sucessoCount > 0) {
@@ -395,7 +390,6 @@ const PropertyDetail = () => {
                                   </Button>
                                 </DropdownMenuTrigger>
                                 <DropdownMenuContent align="end" className="w-40">
-                                  {/* USANDO onSelect SEM preventDefault() */}
                                   <DropdownMenuItem
                                     className="text-destructive focus:text-destructive focus:bg-destructive/10 cursor-pointer"
                                     onSelect={() => handleDeleteMedia(m.id)}
@@ -462,7 +456,6 @@ const PropertyDetail = () => {
         </div>
       </div>
 
-      {/* MODAL DE SELEÇÃO DE LEADS */}
       <Dialog open={isLeadModalOpen} onOpenChange={setIsLeadModalOpen}>
         <DialogContent className="sm:max-w-md">
           <DialogHeader>

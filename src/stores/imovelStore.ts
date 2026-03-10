@@ -119,11 +119,9 @@ toggleLead: async (imovelId: number, leadId: number) => {
     try {
       const data = await imovelService.toggleLead(imovelId, leadId);
       
-      // Opcional: Atualiza o Imóvel Selecionado automaticamente na store se for o mesmo
       set((state) => ({
         selectedImovel: state.selectedImovel?.id === imovelId ? data.imovel : state.selectedImovel,
-        // Atualiza a lista principal para refletir a nova contagem/lista de leads
-        imoveis: state.imoveis.map(i => i.id === imovelId ? data.imovel : i)
+         imoveis: state.imoveis.map(i => i.id === imovelId ? data.imovel : i)
       }));
 
     } catch (err: any) {

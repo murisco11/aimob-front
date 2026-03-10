@@ -28,9 +28,8 @@ interface FieldErrors {
 
 const PropertyRegister = () => {
   const navigate = useNavigate();
-  const { id } = useParams(); // Pega o ID da URL se for edição
-  
-  // Pegamos também as funções de update e fetch do hook
+  const { id } = useParams(); 
+
   const { createImovel, updateImovel, fetchByIdImovel, selectedImovel, isLoading } = useImovel();
 
   const [activeTab, setActiveTab] = useState<TabKey>("info");
@@ -63,7 +62,6 @@ const PropertyRegister = () => {
 
   const isEditing = !!id;
 
-  // Busca os dados do imóvel se estivermos no modo de edição
   useEffect(() => {
     if (isEditing) {
       setIsFetching(true);
@@ -71,7 +69,6 @@ const PropertyRegister = () => {
     }
   }, [id, fetchByIdImovel, isEditing]);
 
-  // Preenche o formulário quando o selectedImovel for carregado
   useEffect(() => {
     if (isEditing && selectedImovel && String(selectedImovel.id) === id) {
       setName(selectedImovel.name || "");
@@ -172,7 +169,7 @@ const PropertyRegister = () => {
       if (isEditing) {
         await updateImovel({...payload, id: Number(id)});
         toast.success("Imóvel atualizado com sucesso!");
-        navigate(`/properties/${id}`); // Volta pro detalhe do imóvel editado
+        navigate(`/properties/${id}`);
       } else {
         await createImovel(payload);
         toast.success("Imóvel cadastrado com sucesso!");
@@ -220,14 +217,13 @@ const PropertyRegister = () => {
         <MobileHeader />
 
         <div className="flex-1 overflow-y-auto scrollbar-thin">
-          {/* Header */}
           <div className="px-6 py-5 border-b border-border">
             <div className="flex items-center gap-3">
               <Button
                 variant="ghost"
                 size="icon"
                 className="h-8 w-8"
-                onClick={() => navigate(-1)} // Volta pra tela anterior
+                onClick={() => navigate(-1)}
               >
                 <ArrowLeft className="w-4 h-4" />
               </Button>
