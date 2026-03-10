@@ -8,7 +8,7 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Switch } from "@/components/ui/switch";
 import { ArrowLeft, Save, Home, DollarSign, User, FileText, Loader2 } from "lucide-react";
-import { toast } from "sonner";
+import { useToast } from "@/hooks/use-toast";
 import { useImovel } from "@/hooks/useImovel";
 
 type TabKey = "info" | "financial" | "context" | "owner";
@@ -28,7 +28,8 @@ interface FieldErrors {
 
 const PropertyRegister = () => {
   const navigate = useNavigate();
-  const { id } = useParams(); 
+  const { id } = useParams();
+  const { toast } = useToast();
 
   const { createImovel, updateImovel, fetchByIdImovel, selectedImovel, isLoading } = useImovel();
 
@@ -40,22 +41,22 @@ const PropertyRegister = () => {
   const [name, setName] = useState("");
   const [address, setAddress] = useState("");
   const [description, setDescription] = useState("");
-  
+
   const [quartos, setQuartos] = useState("");
   const [suites, setSuites] = useState("");
   const [banheiros, setBanheiros] = useState("");
   const [vagas, setVagas] = useState("");
   const [area, setArea] = useState("");
   const [andar, setAndar] = useState("");
-  
+
   const [aceitaPets, setAceitaPets] = useState(false);
   const [mobiliado, setMobiliado] = useState(false);
-  
+
   const [valor, setValor] = useState("");
   const [condominio, setCondominio] = useState("");
   const [iptu, setIptu] = useState("");
   const [comissao, setComissao] = useState("");
-  
+
   const [expectativaVenda, setExpectativaVenda] = useState("");
   const [perfilComprador, setPerfilComprador] = useState("");
   const [infoProprietario, setInfoProprietario] = useState("");
@@ -74,22 +75,22 @@ const PropertyRegister = () => {
       setName(selectedImovel.name || "");
       setAddress(selectedImovel.address || "");
       setDescription(selectedImovel.description || "");
-      
+
       setQuartos(selectedImovel.quartos ? String(selectedImovel.quartos) : "");
       setSuites(selectedImovel.suites ? String(selectedImovel.suites) : "");
       setBanheiros(selectedImovel.banheiros ? String(selectedImovel.banheiros) : "");
       setVagas(selectedImovel.vagas ? String(selectedImovel.vagas) : "");
       setArea(selectedImovel.area ? String(selectedImovel.area) : "");
       setAndar(selectedImovel.andar ? String(selectedImovel.andar) : "");
-      
+
       setAceitaPets(!!selectedImovel.aceitaPets);
       setMobiliado(!!selectedImovel.mobiliado);
-      
+
       setValor(selectedImovel.valor ? selectedImovel.valor.toLocaleString("pt-BR") : "");
       setCondominio(selectedImovel.condominio ? selectedImovel.condominio.toLocaleString("pt-BR") : "");
       setIptu(selectedImovel.iptu ? selectedImovel.iptu.toLocaleString("pt-BR") : "");
       setComissao(selectedImovel.comissao ? String(selectedImovel.comissao) : "");
-      
+
       setExpectativaVenda(selectedImovel.expectativaVenda || "");
       setPerfilComprador(selectedImovel.perfilComprador || "");
       setInfoProprietario(selectedImovel.infoProprietario || "");
@@ -123,10 +124,10 @@ const PropertyRegister = () => {
     const errs: FieldErrors = {};
     if (!name.trim()) errs.name = "Título é obrigatório";
     else if (name.trim().length > 255) errs.name = "Máximo 255 caracteres";
-    
+
     if (!address.trim()) errs.address = "Endereço é obrigatório";
     else if (address.trim().length > 255) errs.address = "Máximo 255 caracteres";
-    
+
     if (!valor.replace(/\D/g, "")) errs.valor = "Preço é obrigatório";
     return errs;
   };
@@ -140,7 +141,7 @@ const PropertyRegister = () => {
     if (Object.keys(errs).length > 0) {
       if (errs.name || errs.address) setActiveTab("info");
       else if (errs.valor) setActiveTab("financial");
-      toast.error("Preencha os campos obrigatórios");
+      toast({ title: "Atenção", description: "Preencha os campos obrigatórios", variant: "destructive" });
       return;
     }
 
@@ -167,16 +168,16 @@ const PropertyRegister = () => {
       };
 
       if (isEditing) {
-        await updateImovel({...payload, id: Number(id)});
-        toast.success("Imóvel atualizado com sucesso!");
+        await updateImovel({ ...payload, id: Number(id) });
+        toast({ title: "Sucesso", description: "Imóvel atualizado com sucesso", variant: "success" });
         navigate(`/properties/${id}`);
       } else {
         await createImovel(payload);
-        toast.success("Imóvel cadastrado com sucesso!");
+        toast({ title: "Sucesso", description: "Imóvel criado com sucesso", variant: "success" });
         navigate("/properties");
       }
     } catch (error) {
-      toast.error(isEditing ? "Erro ao atualizar imóvel." : "Erro ao cadastrar imóvel.");
+      toast({ title: "Atenção", description: "Erro ao cadastrar imóvel", variant: "destructive" });
     }
   };
 
@@ -184,7 +185,7 @@ const PropertyRegister = () => {
     if (field === "name") setName(val);
     if (field === "address") setAddress(val);
     if (field === "valor") setValor(val);
-    
+
     if (submitted) {
       setErrors((prev) => {
         const next = { ...prev };
@@ -245,11 +246,10 @@ const PropertyRegister = () => {
                   key={tab.key}
                   type="button"
                   onClick={() => setActiveTab(tab.key)}
-                  className={`flex items-center gap-2 px-4 py-2 rounded-md text-xs font-medium transition-colors ${
-                    activeTab === tab.key
-                      ? "bg-card text-foreground shadow-sm"
-                      : "text-muted-foreground hover:text-foreground"
-                  }`}
+                  className={`flex items-center gap-2 px-4 py-2 rounded-md text-xs font-medium transition-colors ${activeTab === tab.key
+                    ? "bg-card text-foreground shadow-sm"
+                    : "text-muted-foreground hover:text-foreground"
+                    }`}
                 >
                   {tab.icon}
                   {tab.label}
@@ -272,7 +272,7 @@ const PropertyRegister = () => {
                   />
                   {errors.name && <p className="text-xs text-destructive">{errors.name}</p>}
                 </div>
-                
+
                 <div className={`${fieldClass} md:col-span-2`}>
                   <Label>Endereço<RequiredDot /></Label>
                   <Input
@@ -289,7 +289,7 @@ const PropertyRegister = () => {
                   <Label>Área (m²)</Label>
                   <Input type="number" placeholder="120" value={area} onChange={(e) => setArea(e.target.value)} />
                 </div>
-                
+
                 <div className={fieldClass}>
                   <Label>Andar</Label>
                   <Input type="number" placeholder="8" value={andar} onChange={(e) => setAndar(e.target.value)} />
@@ -309,7 +309,7 @@ const PropertyRegister = () => {
                   <Label>Banheiros</Label>
                   <Input type="number" placeholder="2" value={banheiros} onChange={(e) => setBanheiros(e.target.value)} />
                 </div>
-                
+
                 <div className={fieldClass}>
                   <Label>Vagas de garagem</Label>
                   <Input type="number" placeholder="2" value={vagas} onChange={(e) => setVagas(e.target.value)} />
@@ -319,7 +319,7 @@ const PropertyRegister = () => {
                   <Label className="cursor-pointer">Aceita pets</Label>
                   <Switch checked={aceitaPets} onCheckedChange={setAceitaPets} />
                 </div>
-                
+
                 <div className="flex items-center justify-between rounded-lg border border-border p-3">
                   <Label className="cursor-pointer">Mobiliado</Label>
                   <Switch checked={mobiliado} onCheckedChange={setMobiliado} />
@@ -348,7 +348,7 @@ const PropertyRegister = () => {
                   </div>
                   {errors.valor && <p className="text-xs text-destructive">{errors.valor}</p>}
                 </div>
-                
+
                 <div className={fieldClass}>
                   <Label>Condomínio <span className="text-muted-foreground font-normal text-xs">(R$/mês)</span></Label>
                   <div className="relative">
@@ -362,7 +362,7 @@ const PropertyRegister = () => {
                     />
                   </div>
                 </div>
-                
+
                 <div className={fieldClass}>
                   <Label>IPTU <span className="text-muted-foreground font-normal text-xs">(R$/ano)</span></Label>
                   <div className="relative">
@@ -376,7 +376,7 @@ const PropertyRegister = () => {
                     />
                   </div>
                 </div>
-                
+
                 <div className={fieldClass}>
                   <Label>Comissão (%)</Label>
                   <Input type="number" step="0.1" placeholder="6" value={comissao} onChange={(e) => setComissao(e.target.value)} />
@@ -390,7 +390,7 @@ const PropertyRegister = () => {
                   <Label>Expectativa de venda</Label>
                   <Input placeholder="Ex: 30 a 60 dias" value={expectativaVenda} onChange={(e) => setExpectativaVenda(e.target.value)} />
                 </div>
-                
+
                 <div className={`${fieldClass} md:col-span-2`}>
                   <Label>Perfil esperado do comprador</Label>
                   <Textarea placeholder="Descreva o perfil ideal: faixa etária, renda, estilo de vida..." rows={3} value={perfilComprador} onChange={(e) => setPerfilComprador(e.target.value)} />

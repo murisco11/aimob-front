@@ -6,7 +6,6 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-import { toast } from "sonner";
 import {
   FileText,
   UploadCloud,
@@ -22,6 +21,7 @@ import {
 } from "lucide-react";
 
 import { useDocumento } from "@/hooks/useDocumento";
+import { useToast } from "@/hooks/use-toast";
 
 const getFileName = (url: string) => {
   if (!url) return "Documento Desconhecido";
@@ -66,7 +66,7 @@ const Documents = () => {
   } = useDocumento();
 
   const [searchDoc, setSearchDoc] = useState("");
-  
+  const { toast } = useToast();
   const [showNewDoc, setShowNewDoc] = useState(false);
   const [docName, setDocName] = useState("");
   const [dragOver, setDragOver] = useState(false);
@@ -78,15 +78,18 @@ const Documents = () => {
   const handleDeleteDoc = async (id: number) => {
     try {
       await deleteDoc(id);
-      toast.success("Documento excluído com sucesso");
+      toast({ title: "Sucesso", description: "Documento excluído com sucesso", variant: "success" });
+
+      fetchDocs()
     } catch (error) {
-      toast.error("Erro ao excluir documento");
+      toast({ title: "Erro", description: "Erro ao excluir documento", variant: "destructive" });
+
     }
   };
 
   const handleDownloadDoc = (url: string, name: string) => {
     window.open(url, '_blank');
-    toast.info(`Download de "${name}" iniciado`);
+    toast({ title: "Download", description: "Iniciando download do documento" });
   };
 
   const handleUploadFileDrop = async (e: DragEvent<HTMLDivElement>) => {
@@ -105,10 +108,11 @@ const Documents = () => {
     try {
       const finalName = docName.trim() ? docName : file.name;
       await uploadDocumento(file, currentUserId, finalName);
-      toast.success("Arquivo enviado com sucesso!");
+      toast({ title: "Sucesso", description: "Arquivo enviado com sucesso", variant: "success" });
       resetModal();
+      console.log(documents)
     } catch (error) {
-      toast.error("Erro ao enviar arquivo.");
+      toast({ title: "Erro", description: "Erro ao enviar arquivo", variant: "destructive" });
     }
   };
 

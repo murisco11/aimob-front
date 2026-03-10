@@ -16,7 +16,6 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { ArrowLeft, Save, UserPlus, Building2, CalendarCheck, Image as ImageIcon, Plus } from "lucide-react";
-import { toast } from "sonner";
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import { useLead } from "@/hooks/useLead";
@@ -24,6 +23,7 @@ import { useImovel } from "@/hooks/useImovel";
 import { useVisita } from "@/hooks/useVisita";
 import { Lead, CreateLeadDto, UpdateLeadDto } from "@/types/LeadType";
 import { Visit } from "@/services/types";
+import { useToast } from "@/hooks/use-toast";
 
 interface FieldErrors {
   name?: string;
@@ -48,6 +48,7 @@ const LeadForm = () => {
   const navigate = useNavigate();
   const { id } = useParams<{ id: string }>();
   const isEditing = Boolean(id);
+  const { toast } = useToast();
 
   const { leads, fetchAllLead, createLead, updateLead } = useLead();
   const { imoveis, fetchAllImovel, toggleLead } = useImovel();
@@ -125,7 +126,7 @@ const LeadForm = () => {
     setErrors(errs);
 
     if (Object.keys(errs).length > 0) {
-      toast.error("Preencha os campos obrigatórios");
+      toast({ title: "Atenção", description: "Preencha os campos obrigatórios" });
       return;
     }
 
@@ -145,15 +146,15 @@ const LeadForm = () => {
 
       if (isEditing) {
         await updateLead(Number(id), payload as UpdateLeadDto);
-        toast.success("Lead atualizado com sucesso!");
+        toast({ title: "Sucesso", description: "Lead atualizado com sucesso", variant: "success" });
       } else {
         await createLead(payload as CreateLeadDto);
-        toast.success("Lead criado com sucesso!");
+        toast({ title: "Sucesso", description: "Lead criado com sucesso", variant: "success" });
       }
 
       navigate("/leads");
     } catch (error) {
-      toast.error("Erro ao salvar o lead. Tente novamente.");
+      toast({ title: "Erro", description: "Erro ao salvar lead, tente novamente", variant: "destructive" });
       console.error(error);
     } finally {
       setIsSaving(false);
@@ -179,9 +180,9 @@ const LeadForm = () => {
     if (isEditing && id) {
       try {
         await toggleLead(propId, Number(id));
-        toast.success("Vínculo atualizado!");
+        toast({ title: "Sucesso", description: "O vínculo foi atualizado", variant: "success" });
       } catch (error) {
-        toast.error("Erro ao vincular/desvincular o imóvel.");
+        toast({ title: "Erro", description: "Erro ao vincular/desvincular lead", variant: "destructive" });
         setSelectedPropertyIds((prev) =>
           prev.includes(propId) ? prev.filter((p) => p !== propId) : [...prev, propId]
         );

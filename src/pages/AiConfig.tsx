@@ -1,3 +1,8 @@
+//            toast({ title: "Atenção", description: "O conteúdo não pode estar vazio.", variant: "destructive" });
+
+//                toast({ title: "Sucesso", description: "Mensagem atualizada.", variant: "success" });
+
+
 import { useState, useEffect, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import CrmSidebar from "@/components/crm/CrmSidebar";
@@ -119,7 +124,7 @@ const AIConfig = () => {
         try {
             if (editingMessageId) {
                 await updateFirstMessage(editingMessageId, { content: newMsgContent, isActive: newMsgActive });
-                toast({ title: "Sucesso", description: "Mensagem atualizada." });
+                toast({ title: "Sucesso", description: "Mensagem atualizada.", variant: "success" });
             } else {
                 if (hasFirstMessage) {
                     toast({ title: "Atenção", description: "Já existe uma mensagem configurada.", variant: "destructive" });
@@ -130,7 +135,7 @@ const AIConfig = () => {
                     isActive: newMsgActive,
                     userId: userId
                 });
-                toast({ title: "Sucesso", description: "Mensagem criada." });
+                toast({ title: "Sucesso", description: "Mensagem criada.", variant: "success" });
             }
             fetchFirstMessages()
             handleCancelMsgForm();
@@ -149,7 +154,7 @@ const AIConfig = () => {
     const handleDeleteMessage = async (id: number) => {
         try {
             await deleteFirstMessage(id);
-            toast({ title: "Sucesso", description: "Mensagem removida." });
+            toast({ title: "Sucesso", description: "Mensagem removida.", variant: "success" });
         } catch (error) {
             toast({ title: "Erro", description: "Falha ao remover a mensagem.", variant: "destructive" });
         }
@@ -158,7 +163,7 @@ const AIConfig = () => {
     const handleDeleteFile = async (idFile: number) => {
         try {
             await deleteFile(idFile);
-            toast({ title: "Arquivo removido", description: "O arquivo foi deletado com sucesso." });
+            toast({ title: "Arquivo removido", description: "O arquivo foi deletado com sucesso.", variant: "success"});
         } catch (error) {
             toast({ title: "Erro", description: "Não foi possível remover o arquivo.", variant: "destructive" });
         }
@@ -172,7 +177,7 @@ const AIConfig = () => {
 
         try {
             await uploadFile(selectedAiAssistant.id, file, uploadPropertyId);
-            toast({ title: "Sucesso", description: `Arquivo ${file.name} enviado.` });
+            toast({ title: "Sucesso", description: `Arquivo ${file.name} enviado.`, variant: "success" });
             await fetchFilesByAssistant(selectedAiAssistant.id);
             setUploadPropertyId("");
         } catch (error) {
@@ -200,7 +205,7 @@ const AIConfig = () => {
                 prompt,
                 temperature: temperature[0]
             });
-            toast({ title: "Configurações salvas!", description: "IA atualizada com sucesso." });
+            toast({ title: "Configurações salvas!", description: "IA atualizada com sucesso.", variant: "success" });
         } catch (error) {
             toast({ title: "Erro", description: "Não foi possível salvar as configurações.", variant: "destructive" });
         }

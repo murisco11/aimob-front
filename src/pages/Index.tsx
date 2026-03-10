@@ -12,7 +12,7 @@ import { Mensagem } from "@/types/MensagemType";
 import { useChatStore } from "@/stores/chatStore";
 import { useConfirmStore } from "@/stores/confirmStore";
 import { useLead } from "@/hooks/useLead";
-import { useToast } from "@/components/ui/use-toast";
+import { useToast } from "@/hooks/use-toast";
 
 const Index = () => {
   const [searchParams] = useSearchParams();
@@ -74,7 +74,7 @@ const Index = () => {
       try {
         await fetchChats();
       } catch (error) {
-        toast({ title: "Erro", description: "Erro ao carregar o chat" })
+        toast({ title: "Erro", description: "Erro ao carregar o chat", variant: "destructive" })
       }
     };
 
@@ -109,6 +109,7 @@ const Index = () => {
             toast({
               title: "Sucesso",
               description: "Lead deletado com sucesso",
+              variant: "success"
             });
             await fetchChats()
           }

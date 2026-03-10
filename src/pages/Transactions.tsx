@@ -10,7 +10,6 @@ import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
 import CrmSidebar from "@/components/crm/CrmSidebar";
 import MobileHeader from "@/components/crm/MobileHeader";
-import { toast } from "@/components/ui/sonner";
 
 import { useTransaction } from "@/hooks/useTransaction";
 import { useTransactionType } from "@/hooks/useTransactionType";
@@ -18,6 +17,7 @@ import { useTransactionType } from "@/hooks/useTransactionType";
 import { Transaction } from "@/types/TransactionType"
 import { TransactionType } from "@/types/TransactionTypeType"
 import { useConfirmStore } from "@/stores/confirmStore";
+import { useToast } from "@/hooks/use-toast";
 
 const Transactions = () => {
   const {
@@ -42,6 +42,7 @@ const Transactions = () => {
   }, [fetchAllTransactions, fetchAllTransactionTypeS]);
 
   const [search, setSearch] = useState("");
+  const { toast } = useToast()
   const { openConfirm } = useConfirmStore();
   const [filterType, setFilterType] = useState<string>("all");
   const [filterProfit, setFilterProfit] = useState<string>("all");
@@ -81,12 +82,12 @@ const Transactions = () => {
 
   const handleSaveTransaction = async () => {
     if (!formName.trim() || !formValor.trim()) {
-      toast.error("Preencha o nome e o valor.");
+      toast({ title: "Atenção", description: "Preencha o nome e o valor", variant: "destructive" });
       return;
     }
     const valor = parseFloat(formValor);
     if (isNaN(valor) || valor <= 0) {
-      toast.error("Informe um valor válido.");
+      toast({ title: "Atenção", description: "Informe um valor válido", variant: "destructive" });
       return;
     }
 
@@ -100,15 +101,15 @@ const Transactions = () => {
     try {
       if (editingTransaction) {
         await updateTransaction(editingTransaction.id, payload);
-        toast.success("Transação atualizada!");
+        toast({ title: "Sucesso", description: "Transação atualizada", variant: "success" });
       } else {
         await createTransaction(payload);
-        toast.success("Transação criada!");
+        toast({ title: "Sucesso", description: "Transação criada", variant: "success" });
       }
       setDialogOpen(false);
       resetTransactionForm();
     } catch (error) {
-      toast.error("Erro ao salvar a transação.");
+      toast({ title: "Erro", description: "Erro ao salvar transação", variant: "destructive" });
     }
   };
 
@@ -120,11 +121,11 @@ const Transactions = () => {
         confirmText: "Sim, Excluir",
         onConfirm: async () => {
           await deleteTransaction(id);
-          toast.success("Transação excluída com sucesso!");
+          toast({ title: "Sucesso", description: "Transação excluída com sucesso", variant: "success" });
         }
       });
     } catch (error) {
-      toast.error("Erro ao excluir a transação.");
+      toast({ title: "Erro", description: "Erro ao excluir transação", variant: "destructive" });
     }
   };
 
@@ -142,7 +143,7 @@ const Transactions = () => {
 
   const handleSaveType = async () => {
     if (!formTypeName.trim()) {
-      toast.error("Informe o nome do tipo.");
+      toast({ title: "Atenção", description: "Informe o nome do tipo", variant: "destructive" });
       return;
     }
 
@@ -153,14 +154,14 @@ const Transactions = () => {
     try {
       if (editingType) {
         await updateTransactionType(editingType.id, { name: payload.name, id: editingType.id });
-        toast.success("Categoria atualizada!");
+        toast({ title: "Sucesso", description: "Categoria atualizada", variant: "success" });
       } else {
         await createTransactionType(payload);
-        toast.success("Categoria criada!");
+        toast({ title: "Sucesso", description: "Categoria criada", variant: "success" });
       }
       setTypeDialogOpen(false);
     } catch (error) {
-      toast.error("Erro ao salvar a categoria.");
+      toast({ title: "Erro", description: "Erro ao salvar cateogira", variant: "destructive" });
     }
   };
 
@@ -172,11 +173,13 @@ const Transactions = () => {
         confirmText: "Sim, Excluir",
         onConfirm: async () => {
           await deleteTransactionType(id);
-          toast.success("Categoria excluída com sucesso!");
+          toast({
+            title: "Sucesso", description: "Categoria excluída com sucesso", variant: "success"
+          });
         }
       });
     } catch (error) {
-      toast.error("Erro ao excluir a categoria.");
+      toast({ title: "Erro", description: "Erro ao excluir cateogira", variant: "destructive" });
     }
   };
 

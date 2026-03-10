@@ -34,6 +34,7 @@ const Login = () => {
       toast({
         title: "Sucesso",
         description: "Login realizado com sucesso!",
+        variant: "success"
       });
       navigate("/");
     } catch (error) {

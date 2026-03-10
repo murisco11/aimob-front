@@ -23,7 +23,7 @@ import { useToast } from "@/hooks/use-toast";
 import { useImovel } from "@/hooks/useImovel";
 import { useMidia } from "@/hooks/useMidia";
 import { useLead } from "@/hooks/useLead";
-import { useChat } from "@/hooks/useChat"; 
+import { useChat } from "@/hooks/useChat";
 
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { useConfirmStore } from "@/stores/confirmStore";
@@ -125,7 +125,7 @@ const PropertyDetail = () => {
       await Promise.all(promessasDeEnvio);
 
       if (sucessoCount > 0) {
-        toast({ title: "Mídia Enviada", description: `Enviada com sucesso para ${sucessoCount} lead(s)!` });
+        toast({ title: "Mídia Enviada", description: `Enviada com sucesso para ${sucessoCount} lead(s)!`, variant: "success" });
       }
 
       setIsLeadModalOpen(false);
@@ -154,7 +154,7 @@ const PropertyDetail = () => {
 
         await createMidia({ base64Data, extension, imovelId: imovel.id });
 
-        toast({ title: "Mídia adicionada", description: "Imagem enviada com sucesso!" });
+        toast({ title: "Mídia adicionada", description: "Imagem enviada com sucesso!", variant: "success" });
         if (id) fetchByIdImovel(Number(id));
       };
     } catch (error) {
@@ -167,7 +167,7 @@ const PropertyDetail = () => {
   const handleDeleteMedia = async (idMidia: number) => {
     try {
       await deleteMidia(idMidia);
-      toast({ title: "Mídia removida", description: "Imagem removida com sucesso!" });
+      toast({ title: "Mídia removida", description: "Imagem removida com sucesso!", variant: "success" });
       if (id) fetchByIdImovel(Number(id));
     } catch (error) {
       toast({ title: "Erro", description: "Ocorreu um erro ao remover a imagem.", variant: "destructive" });
@@ -186,6 +186,7 @@ const PropertyDetail = () => {
             toast({
               title: "Sucesso",
               description: "Imóvel deletado com sucesso",
+              variant: "success"
             });
             navigate("/properties")
           }
