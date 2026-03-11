@@ -178,11 +178,11 @@ const Login = () => {
           <p className="text-sm text-center text-muted-foreground mt-6">
             {isLoginMode ? "Não tem uma conta?" : "Já tem uma conta?"}{" "}
             <button
-              onClick={() => setIsLoginMode(!isLoginMode)}
+              onClick={() => navigate("/pricing")}
               className="text-primary font-medium hover:underline"
               disabled={isLoading}
             >
-              {isLoginMode ? "Cadastre-se" : "Fazer login"}
+              Cadastre-se
             </button>
           </p>
         </div>

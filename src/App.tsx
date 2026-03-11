@@ -22,6 +22,9 @@ import LeadForm from "./pages/LeadForm";
 import AIConfig from "./pages/AiConfig";
 import Transactions from "./pages/Transactions";
 import Documents from "./pages/Documents";
+import Pricing from "./pages/Pricing";
+import SignUp from "./pages/SignUp";
+import Success from "./pages/Success";
 
 const queryClient = new QueryClient();
 
@@ -68,6 +71,24 @@ const AppRoutes = () => {
           <ProtectedRoute>
             <Documents />
           </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/pricing"
+        element={
+          <Pricing />
+        }
+      />
+      <Route
+        path="/signup"
+        element={
+          <SignUp />
+        }
+      />
+      <Route
+        path="/sucesso"
+        element={
+          <Success />
         }
       />
       <Route

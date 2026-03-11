@@ -301,8 +301,11 @@ const AIConfig = () => {
                                     </Button>
                                 )}
                             </div>
-                            <p className="text-[11px] text-muted-foreground">
-                                Mensagens enviadas automaticamente para o cliente em paralelo à IA. (Apenas 1 permitida).
+                            <p className="text-xs text-muted-foreground">
+                                Mensagens enviadas automaticamente para o cliente em paralelo à IA.
+                            </p>
+                            <p className="text-xs text-muted-foreground">
+                                Apenas uma mensagem é permitida.
                             </p>
 
                             {showMsgForm && (
@@ -430,7 +433,7 @@ const AIConfig = () => {
                                     <p className="text-sm text-muted-foreground">
                                         Arraste PDFs aqui ou <span className="text-primary font-medium">clique para enviar</span>
                                     </p>
-                                    <p className="text-[11px] text-muted-foreground/60 mt-1">PDF, até 10MB por arquivo</p>
+                                    <p className="text-xs1 text-muted-foreground/60 mt-1">PDF, até 10MB por arquivo</p>
 
                                     <input
                                         type="file"
@@ -459,7 +462,7 @@ const AIConfig = () => {
                                                 </div>
                                                 <div className="flex-1 min-w-0">
                                                     <p className="text-sm font-medium text-card-foreground truncate">{file.fileName}</p>
-                                                    <p className="text-[11px] text-muted-foreground">
+                                                    <p className="text-xs1 text-muted-foreground">
                                                         {file.imovel ? <span className="text-primary">{file.imovel.name}</span> : "Sem imóvel vinculado"}
                                                     </p>
                                                 </div>
@@ -508,7 +511,7 @@ const AIConfig = () => {
                                                 </div>
                                                 <div className="flex-1 min-w-0">
                                                     <p className="text-sm font-medium text-card-foreground">{lead.name}</p>
-                                                    <p className="text-[11px] text-muted-foreground">
+                                                    <p className="text-xs1 text-muted-foreground">
                                                         {lead.phone || "Sem telefone"}
                                                         {linkedImovel && <span> · <span className="text-primary">{linkedImovel}</span></span>}
                                                     </p>

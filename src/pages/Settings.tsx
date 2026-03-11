@@ -311,9 +311,9 @@ const Settings = () => {
                             <CardDescription>URL exclusiva para envio de eventos externos</CardDescription>
                           </div>
                         </div>
-                        <Badge variant="outline" className="gap-1 text-xs bg-primary/10 text-primary border-primary/30">
+                        <Badge variant="outline" className="gap-1 text-xs bg-primary/10 text-green-100 border-primary/30">
                           <CheckCircle2 className="w-3 h-3" />
-                          Ativo
+                          Inserir no Canal Pro
                         </Badge>
                       </div>
                     </CardHeader>

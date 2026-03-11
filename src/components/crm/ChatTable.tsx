@@ -30,6 +30,7 @@ interface ChatTableProps {
 const ChatTable = ({ chats, selectedChatId, onSelectChat, onEditChat, onDeleteChat }: ChatTableProps) => {
   const [searchTerm, setSearchTerm] = useState("");
   const [isSorted, setIsSorted] = useState(false);
+  const [filterMode, setFilterMode] = useState<"all" | "ia" | "human">("all");
 
   const getInitials = (name: string) => {
     return name.split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2);
@@ -39,7 +40,13 @@ const ChatTable = ({ chats, selectedChatId, onSelectChat, onEditChat, onDeleteCh
     const term = searchTerm.toLowerCase();
     const leadName = chat.lead?.name?.toLowerCase() || "";
     const lastMsg = chat.lastMessage?.toLowerCase() || "";
-    return leadName.includes(term) || lastMsg.includes(term);
+    const matchesSearch = leadName.includes(term) || lastMsg.includes(term);
+
+    let matchesMode = true;
+    if (filterMode === "ia") matchesMode = !!chat.lead?.aiActive;
+    if (filterMode === "human") matchesMode = !chat.lead?.aiActive;
+
+    return matchesSearch && matchesMode;
   });
 
   if (isSorted) {
@@ -52,9 +59,15 @@ const ChatTable = ({ chats, selectedChatId, onSelectChat, onEditChat, onDeleteCh
     displayedChats.sort((a, b) => {
       const pesoA = pesos[a.lead?.temperatura || ""] || 0;
       const pesoB = pesos[b.lead?.temperatura || ""] || 0;
-      return pesoB - pesoA; 
+      return pesoB - pesoA;
     });
+
   }
+  const toggleFilterMode = () => {
+    if (filterMode === "all") setFilterMode("ia");
+    else if (filterMode === "ia") setFilterMode("human");
+    else setFilterMode("all");
+  };
 
   return (
     <div className="bg-card rounded-xl border border-border overflow-hidden w-full h-full flex flex-col">
@@ -62,17 +75,33 @@ const ChatTable = ({ chats, selectedChatId, onSelectChat, onEditChat, onDeleteCh
         <div>
           <h2 className="text-md font-semibold text-card-foreground">Chats</h2>
           <p className="text-xs text-muted-foreground mt-0.5">
-            {chats.length} atendimentos ativos
+            {displayedChats.length} atendimentos filtrados
           </p>
         </div>
-        <button 
-          onClick={() => setIsSorted(!isSorted)} 
-          className={`text-xs px-2 py-1 rounded-md transition-colors ${
-            isSorted ? "bg-primary text-primary-foreground hover:bg-primary/90" : "text-muted-foreground bg-muted hover:bg-muted/80"
-          }`}
-        >
-          {isSorted ? "Remover Filtro" : "Mais Quentes"}
-        </button>
+
+        <div className="flex gap-2">
+          <button
+            onClick={() => setIsSorted(!isSorted)}
+            className={`text-xs px-2 py-1 rounded-md transition-colors ${isSorted ? "bg-orange-500 text-white" : "text-muted-foreground bg-muted hover:bg-muted/80"
+              }`}
+          >
+            {isSorted ? "Ordenado por Temp." : "Mais Quentes"}
+          </button>
+
+          <button
+            onClick={toggleFilterMode}
+            className={`text-xs px-2 py-1 rounded-md transition-colors border ${filterMode === "ia"
+              ? "bg-blue-600 text-white border-blue-600"
+              : filterMode === "human"
+                ? "bg-green-600 text-white border-green-600"
+                : "text-muted-foreground bg-muted border-transparent"
+              }`}
+          >
+            {filterMode === "all" && "Todos"}
+            {filterMode === "ia" && "Somente IA"}
+            {filterMode === "human" && "Somente Humano"}
+          </button>
+        </div>
       </div>
 
       <div className="p-3 border-b border-border bg-background/50">
@@ -124,7 +153,7 @@ const ChatTable = ({ chats, selectedChatId, onSelectChat, onEditChat, onDeleteCh
 
                 <div className="flex items-center gap-2 mt-0.5">
                   <div className={`w-2 h-2 rounded-full ${chat.status === 'open' ? 'bg-green-500' :
-                      chat.status === 'pending' ? 'bg-yellow-500' : 'bg-slate-400'
+                    chat.status === 'pending' ? 'bg-yellow-500' : 'bg-slate-400'
                     }`} />
                   <p className="text-xs text-muted-foreground truncate italic">
                     {chat.lastMessage}
