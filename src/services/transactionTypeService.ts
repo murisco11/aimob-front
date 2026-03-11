@@ -18,7 +18,7 @@ export const transactionTypeService = {
   },
 
   async update(id: number, data: UpdateTransactionTypeDto): Promise<TransactionType> {
-    const response = await apiClient.put<TransactionType>(`/transactionType`, data);
+    const response = await apiClient.put<TransactionType>(`/transactionType/${id}`, data);
     return response.data;
   },
 

@@ -33,7 +33,7 @@ export const imovelService = {
   },
 
   async update(data: UpdateImovelDto): Promise<Imovel> {
-    const response = await apiClient.put<Imovel>("/imovel", data);
+    const response = await apiClient.put<Imovel>(`/imovel/${data.id}`, data);
     return response.data;
   },
 
