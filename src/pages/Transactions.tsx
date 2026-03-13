@@ -50,13 +50,33 @@ const Transactions = () => {
   const [dialogOpen, setDialogOpen] = useState(false);
   const [editingTransaction, setEditingTransaction] = useState<Transaction | null>(null);
   const [formName, setFormName] = useState("");
-  const [formValor, setFormValor] = useState("");
+  const [formValor, setFormValor] = useState(""); // Agora guarda a string formatada (ex: 1.250,00)
   const [formIsProfit, setFormIsProfit] = useState(false);
   const [formTypeId, setFormTypeId] = useState<string>("");
 
   const [typeDialogOpen, setTypeDialogOpen] = useState(false);
   const [editingType, setEditingType] = useState<TransactionType | null>(null);
   const [formTypeName, setFormTypeName] = useState("");
+
+  // --- Função da Máscara de Moeda (BRL) ---
+  const handleValorChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    let value = e.target.value.replace(/\D/g, ""); // Remove tudo que não for número
+    
+    if (!value) {
+      setFormValor("");
+      return;
+    }
+
+    // Converte para decimal (dividindo por 100)
+    const numericValue = (Number(value) / 100).toFixed(2);
+    
+    // Adiciona os separadores de milhar e troca o ponto por vírgula
+    const formatted = numericValue
+      .replace(".", ",")
+      .replace(/(\d)(?=(\d{3})+(?!\d))/g, "$1.");
+
+    setFormValor(formatted);
+  };
 
   const resetTransactionForm = () => {
     setFormName("");
@@ -74,28 +94,42 @@ const Transactions = () => {
   const openEditTransaction = (t: Transaction) => {
     setEditingTransaction(t);
     setFormName(t.name);
-    setFormValor(t.valor.toString());
+    // Formata o valor numérico que vem do banco para o padrão brasileiro de volta pro input
+    const formattedValor = new Intl.NumberFormat('pt-BR', {
+      minimumFractionDigits: 2,
+      maximumFractionDigits: 2
+    }).format(t.valor);
+    
+    setFormValor(formattedValor);
     setFormIsProfit(t.isProfit);
     setFormTypeId(t.transactionType?.id?.toString() || "");
     setDialogOpen(true);
   };
 
   const handleSaveTransaction = async () => {
-    if (!formName.trim() || !formValor.trim()) {
-      toast({ title: "Atenção", description: "Preencha o nome e o valor", variant: "destructive" });
-      return;
+    // --- VALIDAÇÕES DA TRANSAÇÃO ---
+    if (!formName.trim()) {
+      return toast({ title: "Atenção", description: "O nome da transação é obrigatório.", variant: "destructive" });
     }
-    const valor = parseFloat(formValor);
-    if (isNaN(valor) || valor <= 0) {
-      toast({ title: "Atenção", description: "Informe um valor válido", variant: "destructive" });
-      return;
+
+    // Converte a string "1.250,00" de volta para o número real (float) 1250.00
+    const cleanValorString = formValor.replace(/\./g, "").replace(",", ".");
+    const numericValor = parseFloat(cleanValorString);
+
+    if (!formValor || isNaN(numericValor) || numericValor <= 0) {
+      return toast({ title: "Atenção", description: "Informe um valor válido e maior que zero.", variant: "destructive" });
     }
+
+    if (!formTypeId) {
+      return toast({ title: "Atenção", description: "Selecione uma categoria para a transação.", variant: "destructive" });
+    }
+    // --- FIM DAS VALIDAÇÕES ---
 
     const payload = {
       name: formName.trim(),
-      valor,
+      valor: numericValor, // Envia o valor limpo para a API
       isProfit: formIsProfit,
-      transactionType: formTypeId ? types.find(t => t.id == Number(formTypeId)) : undefined,
+      transactionType: types.find(t => t.id === Number(formTypeId)),
     };
 
     try {
@@ -142,9 +176,9 @@ const Transactions = () => {
   };
 
   const handleSaveType = async () => {
+    // --- VALIDAÇÃO DA CATEGORIA ---
     if (!formTypeName.trim()) {
-      toast({ title: "Atenção", description: "Informe o nome do tipo", variant: "destructive" });
-      return;
+      return toast({ title: "Atenção", description: "O nome da categoria é obrigatório.", variant: "destructive" });
     }
 
     const payload = {
@@ -161,7 +195,7 @@ const Transactions = () => {
       }
       setTypeDialogOpen(false);
     } catch (error) {
-      toast({ title: "Erro", description: "Erro ao salvar cateogira", variant: "destructive" });
+      toast({ title: "Erro", description: "Erro ao salvar categoria", variant: "destructive" });
     }
   };
 
@@ -169,7 +203,7 @@ const Transactions = () => {
     try {
       await openConfirm({
         title: "Excluir Categoria",
-        description: `Tem certeza que deseja excluir permanentemente a categorias? Esta ação não pode ser desfeita.`,
+        description: `Tem certeza que deseja excluir permanentemente a categoria? Esta ação não pode ser desfeita.`,
         confirmText: "Sim, Excluir",
         onConfirm: async () => {
           await deleteTransactionType(id);
@@ -179,7 +213,7 @@ const Transactions = () => {
         }
       });
     } catch (error) {
-      toast({ title: "Erro", description: "Erro ao excluir cateogira", variant: "destructive" });
+      toast({ title: "Erro", description: "Erro ao excluir categoria", variant: "destructive" });
     }
   };
 
@@ -385,7 +419,7 @@ const Transactions = () => {
           </DialogHeader>
           <div className="space-y-4 py-2">
             <div className="space-y-2">
-              <Label>Nome</Label>
+              <Label>Nome <span className="text-destructive">*</span></Label>
               <Input
                 placeholder="Ex: Comissão Apt. Centro"
                 value={formName}
@@ -393,18 +427,16 @@ const Transactions = () => {
               />
             </div>
             <div className="space-y-2">
-              <Label>Valor (R$)</Label>
+              <Label>Valor (R$) <span className="text-destructive">*</span></Label>
               <Input
-                type="number"
-                placeholder="0.00"
+                type="tel" // Usar 'tel' puxa o teclado numérico em celulares
+                placeholder="0,00"
                 value={formValor}
-                onChange={(e) => setFormValor(e.target.value)}
-                min="0"
-                step="0.01"
+                onChange={handleValorChange} // <-- Nova função de máscara conectada
               />
             </div>
             <div className="space-y-2">
-              <Label>Categoria</Label>
+              <Label>Categoria <span className="text-destructive">*</span></Label>
               <Select value={formTypeId} onValueChange={setFormTypeId}>
                 <SelectTrigger>
                   <SelectValue placeholder="Selecione uma categoria" />
@@ -442,7 +474,7 @@ const Transactions = () => {
           </DialogHeader>
           <div className="space-y-4 py-2">
             <div className="space-y-2">
-              <Label>Nome da Categoria</Label>
+              <Label>Nome da Categoria <span className="text-destructive">*</span></Label>
               <Input
                 placeholder="Ex: Comissão, Marketing..."
                 value={formTypeName}

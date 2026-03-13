@@ -57,7 +57,7 @@ const SignUp = () => {
 
     return (
         <div className="min-h-screen bg-background flex flex-col items-center justify-center px-4 py-16">
-            <div className="w-full max-w-md">
+            <div className="flex flex-col items-center">
                 <button
                     onClick={() => navigate("/pricing")}
                     className="flex items-center gap-1 text-sm text-muted-foreground hover:text-foreground mb-6 transition-colors"

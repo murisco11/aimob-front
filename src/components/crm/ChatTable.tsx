@@ -82,24 +82,24 @@ const ChatTable = ({ chats, selectedChatId, onSelectChat, onEditChat, onDeleteCh
         <div className="flex gap-2">
           <button
             onClick={() => setIsSorted(!isSorted)}
-            className={`text-xs px-2 py-1 rounded-md transition-colors ${isSorted ? "bg-orange-500 text-white" : "text-muted-foreground bg-muted hover:bg-muted/80"
+            className={`text-xs px-2 py-1 rounded-md transition-colors ${isSorted ? "bg-red-700 text-white" : "text-muted-foreground bg-muted hover:bg-muted/80"
               }`}
           >
-            {isSorted ? "Ordenado por Temp." : "Mais Quentes"}
+            {isSorted ? "Remover filtro" : "Mais Quentes"}
           </button>
 
           <button
             onClick={toggleFilterMode}
             className={`text-xs px-2 py-1 rounded-md transition-colors border ${filterMode === "ia"
-              ? "bg-blue-600 text-white border-blue-600"
+              ? "bg-blue-700 text-white border-blue-700"
               : filterMode === "human"
-                ? "bg-green-600 text-white border-green-600"
+                ? "bg-green-700 text-white border-green-700"
                 : "text-muted-foreground bg-muted border-transparent"
               }`}
           >
             {filterMode === "all" && "Todos"}
-            {filterMode === "ia" && "Somente IA"}
-            {filterMode === "human" && "Somente Humano"}
+            {filterMode === "ia" && "IA"}
+            {filterMode === "human" && "Humano"}
           </button>
         </div>
       </div>

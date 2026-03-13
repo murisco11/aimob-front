@@ -7,7 +7,7 @@ export const useUser = () => {
     user: store.selectedItem,
     isLoading: store.isLoading,
     error: store.error,
-    fetchUser: store.fetchById,
+    fetchUser: store.fetchUser,
     updateUser: store.updateItem,
     clearUser: store.clearSelected
   };

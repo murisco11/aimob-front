@@ -11,6 +11,7 @@ interface WhatsappStore {
   generateQrCode: () => Promise<void>;
   checkStatus: () => Promise<void>;
   clearQrCode: () => void;
+  disconnect: () => Promise<void>; 
 }
 
 export const useWhatsappStore = create<WhatsappStore>((set, get) => ({
@@ -48,5 +49,19 @@ export const useWhatsappStore = create<WhatsappStore>((set, get) => ({
     }
   },
 
-  clearQrCode: () => set({ qrCode: null })
+  clearQrCode: () => set({ qrCode: null }),
+  disconnect: async () => {
+    set({ isLoading: true, error: null });
+    try {
+      await whatsappService.logout();
+      set({ 
+        status: "disconnected", 
+        qrCode: null, 
+        isLoading: false 
+      });
+    } catch (err) {
+      console.error("Erro ao desconectar:", err);
+      set({ error: "Erro ao desconectar da instância", isLoading: false });
+    }
+  }
 }));

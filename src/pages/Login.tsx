@@ -9,7 +9,7 @@ import { useToast } from "@/hooks/use-toast";
 
 const Login = () => {
   const navigate = useNavigate();
-  const { login, isLoading } = useAuth();
+  const { login, isLoading, error } = useAuth();
   const { toast } = useToast();
   const [isLoginMode, setIsLoginMode] = useState(true);
   const [showPassword, setShowPassword] = useState(false);
@@ -37,11 +37,10 @@ const Login = () => {
         variant: "success"
       });
       navigate("/");
-    } catch (error) {
+    } catch (err) {
       toast({
         title: "Erro ao fazer login",
-        description:
-          error instanceof Error ? error.message : "Tente novamente mais tarde",
+        description: error,
         variant: "destructive",
       });
     }

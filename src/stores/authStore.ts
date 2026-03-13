@@ -1,5 +1,6 @@
 import { create } from "zustand";
 import { persist } from "zustand/middleware";
+import axios from "axios"; // <-- Importação do Axios adicionada
 import { AuthUser, LoginInput, AuthResponse } from "@/services/types";
 import { authService } from "@/services/authService";
 import { apiClient } from "@/services/api";
@@ -29,7 +30,7 @@ export const useAuthStore = create<AuthStore>()(
           set({ isLoading: true, error: null });
           const response: AuthResponse = await authService.login(credentials);
           apiClient.setToken(response.token);
-          console.log(response.user)
+          console.log(response.user);
           set({
             user: response.user,
             isAuthenticated: true,
@@ -37,7 +38,15 @@ export const useAuthStore = create<AuthStore>()(
             isLoading: false,
           });
         } catch (err) {
-          const message = err instanceof Error ? err.message : "Falha ao fazer login";
+          console.log("Erro no login:", err);
+          
+          let message = "Falha ao fazer login";
+          if (axios.isAxiosError(err) && err.response?.data?.message) {
+            message = err.response.data.message;
+          } else if (err instanceof Error) {
+            message = err.message;
+          }
+
           set({
             error: message,
             isLoading: false,
@@ -60,7 +69,15 @@ export const useAuthStore = create<AuthStore>()(
             isLoading: false,
           });
         } catch (err) {
-          const message = err instanceof Error ? err.message : "Falha ao fazer logout";
+          console.log("Erro no logout:", err);
+          
+          let message = "Falha ao fazer logout";
+          if (axios.isAxiosError(err) && err.response?.data?.message) {
+            message = err.response.data.message;
+          } else if (err instanceof Error) {
+            message = err.message;
+          }
+
           set({ error: message, isLoading: false });
           throw err;
         }
@@ -88,7 +105,14 @@ export const useAuthStore = create<AuthStore>()(
           }
         } catch (err) {
           apiClient.clearToken();
-          const message = err instanceof Error ? err.message : "Falha ao verificar autenticação";
+          
+          let message = "Falha ao verificar autenticação";
+          if (axios.isAxiosError(err) && err.response?.data?.message) {
+            message = err.response.data.message;
+          } else if (err instanceof Error) {
+            message = err.message;
+          }
+
           set({
             user: null,
             isAuthenticated: false,

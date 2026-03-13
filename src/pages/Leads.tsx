@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
-import { Search, Plus, Instagram, MessageCircle, Globe, MessageSquare, Clock, ChevronRight, Phone, Home, Sparkles, LayoutGrid, List, Calendar, PenBox } from "lucide-react";
+import { Search, Plus, MessageCircle, Globe, MessageSquare, Clock, ChevronRight, Phone, Home, Sparkles, LayoutGrid, List, Calendar, PenBox } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sheet";
@@ -15,6 +15,7 @@ import LeadStatusBadge from "@/components/crm/LeadStatusBadge";
 import { useLead } from "@/hooks/useLead";
 import { Lead } from "@/types/LeadType";
 import { VisitaStatus } from "@/types/VisitaType";
+import { formatCurrency } from "@/utils/formatCurrency";
 
 const pipelineColumns: { stage: Lead["status"]; label: string; color: string }[] = [
   { stage: "qualificacao_ia", label: "Qualificação IA", color: "bg-info" },
@@ -25,7 +26,7 @@ const pipelineColumns: { stage: Lead["status"]; label: string; color: string }[]
 ];
 
 const originIcon = (instanceName?: string) => {
-  if (instanceName?.toLowerCase().includes("insta")) return <Instagram className="w-3.5 h-3.5 text-pink-400" />;
+  if (instanceName?.toLowerCase().includes("insta")) return <MessageCircle className="w-3.5 h-3.5 text-green-500" />;
   if (instanceName?.toLowerCase().includes("site")) return <Globe className="w-3.5 h-3.5 text-info" />;
   return <MessageCircle className="w-3.5 h-3.5 text-leads-accent" />;
 };
@@ -351,7 +352,7 @@ function LeadDetailPanel({ lead, onOpenChat }: { lead: Lead; onOpenChat: (leadId
                   <div className="p-3">
                     <p className="font-medium text-sm">{imovel.name || `Imóvel #${imovel.id}`}</p>
                     {imovel.address && <p className="text-xs text-muted-foreground">{imovel.address}</p>}
-                    {imovel.valor && <p className="text-sm font-semibold text-leads-accent mt-1">R$ {imovel.valor}</p>}
+                    {imovel.valor && <p className="text-sm font-semibold text-leads-accent mt-1">R$ {formatCurrency(imovel.valor)}</p>}
                   </div>
                 </div>
               ))}

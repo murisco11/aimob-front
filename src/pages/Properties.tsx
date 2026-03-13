@@ -7,17 +7,11 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { useImovel } from "@/hooks/useImovel"; 
+import { formatCurrency } from "@/utils/formatCurrency";
 
 const statusStyles: Record<string, string> = {
   active: "bg-success/10 text-success border-success/20",
   inactive: "bg-muted text-muted-foreground border-border",
-};
-
-const formatCurrency = (value: number) => {
-  return new Intl.NumberFormat("pt-BR", {
-    style: "currency",
-    currency: "BRL",
-  }).format(value);
 };
 
 const Properties = () => {

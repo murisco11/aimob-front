@@ -110,6 +110,7 @@ const Documents = () => {
       await uploadDocumento(file, currentUserId, finalName);
       toast({ title: "Sucesso", description: "Arquivo enviado com sucesso", variant: "success" });
       resetModal();
+      fetchDocs()
       console.log(documents)
     } catch (error) {
       toast({ title: "Erro", description: "Erro ao enviar arquivo", variant: "destructive" });

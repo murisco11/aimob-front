@@ -24,9 +24,13 @@ import { useVisita } from "@/hooks/useVisita";
 import { Lead, CreateLeadDto, UpdateLeadDto } from "@/types/LeadType";
 import { Visit } from "@/services/types";
 import { useToast } from "@/hooks/use-toast";
+import { formatCurrency } from "@/utils/formatCurrency";
 
 interface FieldErrors {
   name?: string;
+  description?: string;
+  phone?: string;
+  temperatura?: string;
   status?: string;
 }
 
@@ -91,10 +95,10 @@ const LeadForm = () => {
         setStatus(existingLead.status || "");
 
         if (existingLead.imoveis) {
-          setSelectedPropertyIds(existingLead.imoveis.map(i => i.id));
+          setSelectedPropertyIds(existingLead.imoveis.map((i) => i.id));
         }
         if (existingLead.visitas) {
-          setSelectedVisitIds(existingLead.visitas.map(v => v.id));
+          setSelectedVisitIds(existingLead.visitas.map((v) => v.id));
         }
       }
     }
@@ -114,19 +118,37 @@ const LeadForm = () => {
 
   const validate = (): FieldErrors => {
     const errs: FieldErrors = {};
+    
     if (!name.trim()) errs.name = "Nome é obrigatório";
+    
+    if (!description.trim()) errs.description = "Descrição é obrigatória";
+    
     if (!status) errs.status = "Selecione o status";
+    
+    if (!temperatura) errs.temperatura = "Selecione a temperatura";
+
+    // Validação de telefone (exige ao menos 10 dígitos para contemplar DDD + Número)
+    if (!phone.trim()) {
+      errs.phone = "Telefone é obrigatório";
+    } else {
+      const justNumbers = phone.replace(/\D/g, "");
+      if (justNumbers.length < 10) {
+        errs.phone = "Telefone inválido. Lembre-se de incluir o DDD (Ex: 84999999999)";
+      }
+    }
+
     return errs;
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setSubmitted(true);
+    
     const errs = validate();
     setErrors(errs);
 
     if (Object.keys(errs).length > 0) {
-      toast({ title: "Atenção", description: "Preencha os campos obrigatórios" });
+      toast({ title: "Atenção", description: "Verifique os campos obrigatórios marcados em vermelho.", variant: "destructive" });
       return;
     }
 
@@ -161,8 +183,8 @@ const LeadForm = () => {
     }
   };
 
-  const onChangeField = (field: keyof FieldErrors, value: string) => {
-    if (field === "name") setName(value);
+  // Função auxiliar para limpar os erros em tempo real enquanto o usuário digita
+  const clearErrorOnTyping = (field: keyof FieldErrors, value: string) => {
     if (submitted) {
       setErrors((prev) => {
         const next = { ...prev };
@@ -241,20 +263,28 @@ const LeadForm = () => {
                     <Input
                       placeholder="Nome completo do lead"
                       value={name}
-                      onChange={(e) => onChangeField("name", e.target.value)}
+                      onChange={(e) => {
+                        setName(e.target.value);
+                        clearErrorOnTyping("name", e.target.value);
+                      }}
                       className={errors.name ? errorClass : ""}
                     />
                     {errors.name && <p className="text-xs text-destructive">{errors.name}</p>}
                   </div>
 
                   <div className={`${fieldClass} md:col-span-2`}>
-                    <Label>Descrição</Label>
+                    <Label>Descrição<RequiredDot /></Label>
                     <Textarea
                       placeholder="Resumo do perfil, interesses, contexto..."
                       rows={3}
                       value={description}
-                      onChange={(e) => setDescription(e.target.value)}
+                      onChange={(e) => {
+                        setDescription(e.target.value);
+                        clearErrorOnTyping("description", e.target.value);
+                      }}
+                      className={errors.description ? errorClass : ""}
                     />
+                    {errors.description && <p className="text-xs text-destructive">{errors.description}</p>}
                   </div>
 
                   <div className={fieldClass}>
@@ -263,7 +293,9 @@ const LeadForm = () => {
                       value={status}
                       onValueChange={(v) => {
                         setStatus(v as Lead["status"]);
-                        if (submitted) setErrors((prev) => { const n = { ...prev }; delete n.status; return n; });
+                        if (submitted) {
+                          setErrors((prev) => { const n = { ...prev }; delete n.status; return n; });
+                        }
                       }}
                     >
                       <SelectTrigger className={errors.status ? errorClass : ""}>
@@ -279,31 +311,41 @@ const LeadForm = () => {
                   </div>
 
                   <div className={fieldClass}>
-                    <Label>Temperatura</Label>
+                    <Label>Temperatura<RequiredDot /></Label>
                     <Select
-                      value={temperatura || "none"}
-                      onValueChange={(v) => setTemperatura(v === "none" ? "" : v as Lead["temperatura"])}
+                      value={temperatura || ""}
+                      onValueChange={(v) => {
+                        setTemperatura(v as Lead["temperatura"]);
+                        if (submitted) {
+                          setErrors((prev) => { const n = { ...prev }; delete n.temperatura; return n; });
+                        }
+                      }}
                     >
-                      <SelectTrigger>
-                        <SelectValue placeholder="Selecione" />
+                      <SelectTrigger className={errors.temperatura ? errorClass : ""}>
+                        <SelectValue placeholder="Selecione a temperatura" />
                       </SelectTrigger>
                       <SelectContent>
                         {temperaturaOptions.map((o) => (
                           <SelectItem key={o.value} value={o.value}>{o.label}</SelectItem>
                         ))}
-                        <SelectItem value="none">Não definida</SelectItem>
                       </SelectContent>
                     </Select>
+                    {errors.temperatura && <p className="text-xs text-destructive">{errors.temperatura}</p>}
                   </div>
 
-                  <div className={fieldClass}>
-                    <Label>Telefone</Label>
+                  <div className={`${fieldClass} md:col-span-2`}>
+                    <Label>Telefone<RequiredDot /></Label>
                     <Input
-                      placeholder="+55 84 99999-9999"
+                      placeholder="5584999999999"
                       value={phone}
                       disabled={isEditing}
-                      onChange={(e) => setPhone(e.target.value)}
+                      onChange={(e) => {
+                        setPhone(e.target.value);
+                        clearErrorOnTyping("phone", e.target.value);
+                      }}
+                      className={errors.phone ? errorClass : ""}
                     />
+                    {errors.phone && <p className="text-xs text-destructive">{errors.phone}</p>}
                   </div>
 
                   <div className={fieldClass}>
@@ -336,102 +378,103 @@ const LeadForm = () => {
                 </div>
               </div>
 
-              <div className="space-y-8">
+              {isEditing &&
+                <div className="space-y-8">
+                  <div>
+                    <div className="flex items-center gap-2 border-b border-border pb-2 mb-4">
+                      <Building2 className="w-4 h-4 text-primary" />
+                      <h2 className="text-sm font-semibold text-foreground uppercase tracking-wider">Imóveis de Interesse</h2>
+                    </div>
 
-                <div>
-                  <div className="flex items-center gap-2 border-b border-border pb-2 mb-4">
-                    <Building2 className="w-4 h-4 text-primary" />
-                    <h2 className="text-sm font-semibold text-foreground uppercase tracking-wider">Imóveis de Interesse</h2>
-                  </div>
-
-                  <div className="space-y-3 max-h-[300px] overflow-y-auto pr-2 scrollbar-thin">
-                    {imoveis?.length === 0 && (
-                      <p className="text-sm text-muted-foreground text-center py-6 bg-muted/30 rounded-lg">Nenhum imóvel cadastrado</p>
-                    )}
-                    {imoveis?.map((prop) => (
-                      <label
-                        key={prop.id}
-                        className={`flex items-center gap-4 rounded-lg border p-3 cursor-pointer transition-colors ${selectedPropertyIds.includes(prop.id)
-                          ? "border-primary bg-primary/5"
-                          : "border-border hover:border-muted-foreground/30 bg-card"
-                          }`}
-                      >
-                        <Checkbox
-                          checked={selectedPropertyIds.includes(prop.id)}
-                          onCheckedChange={() => toggleProperty(prop.id)}
-                        />
-                        <div className="w-12 h-10 rounded-md bg-secondary flex items-center justify-center flex-shrink-0 overflow-hidden">
-                          <ImageIcon className="w-4 h-4 text-muted-foreground" />
-                        </div>
-                        <div className="min-w-0 flex-1">
-                          <p className="text-sm font-medium text-foreground truncate">{prop.name}</p>
-                          {prop.address && <p className="text-xs text-muted-foreground truncate">{prop.address}</p>}
-                        </div>
-                        {prop.valor && (
-                          <div className="text-right flex-shrink-0">
-                            <p className="text-xs font-semibold text-primary">
-                              {new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL', maximumFractionDigits: 0 }).format(prop.valor)}
-                            </p>
-                          </div>
-                        )}
-                      </label>
-                    ))}
-                  </div>
-                </div>
-
-                <div>
-                  <div className="flex items-center gap-2 border-b border-border pb-2 mb-4">
-                    <CalendarCheck className="w-4 h-4 text-primary" />
-                    <h2 className="text-sm font-semibold text-foreground uppercase tracking-wider">Visitas Associadas</h2>
-
-                    <Button onClick={() => navigate(`/visits/new?leadId=${id}`)} className="bg-leads-accent ml-auto  hover:bg-leads-accent/90 text-leads-accent-foreground">
-                      <Plus className="w-4 h-4 mr-1.5" /> Criar Visita
-                    </Button>
-                  </div>
-
-                  <div className="space-y-3 max-h-[300px] overflow-y-auto pr-2 scrollbar-thin">
-                    {(!visitasDoLead || visitasDoLead.length === 0) && (
-                      <p className="text-sm text-muted-foreground text-center py-6 bg-muted/30 rounded-lg">Nenhuma visita cadastrada</p>
-                    )}
-                    {visitasDoLead?.map((visit) => {
-                      const statusLabel =
-                        visit.status === "agendada" ? "Agendada"
-                          : visit.status === "realizada" ? "Realizada"
-                            : "Cancelada";
-
-                      const statusColor =
-                        visit.status === "agendada" ? "text-primary"
-                          : visit.status === "realizada" ? "text-green-500"
-                            : "text-muted-foreground";
-
-                      return (
+                    <div className="space-y-3 max-h-[300px] overflow-y-auto pr-2 scrollbar-thin">
+                      {imoveis?.length === 0 && (
+                        <p className="text-sm text-muted-foreground text-center py-6 bg-muted/30 rounded-lg">Nenhum imóvel cadastrado</p>
+                      )}
+                      {imoveis?.map((prop) => (
                         <label
-                          key={visit.id}
-                          className={`flex items-center gap-4 rounded-lg border p-3 cursor-pointer transition-colors ${selectedVisitIds.includes(visit.id)
+                          key={prop.id}
+                          className={`flex items-center gap-4 rounded-lg border p-3 cursor-pointer transition-colors ${selectedPropertyIds.includes(prop.id)
                             ? "border-primary bg-primary/5"
                             : "border-border hover:border-muted-foreground/30 bg-card"
                             }`}
                         >
-                          <div className="min-w-0 flex-1">
-                            <div className="flex items-center justify-between gap-2 mb-0.5">
-                              <p className="text-sm font-medium text-foreground truncate">
-                                {visit.imovel?.name || "Imóvel não informado"}
-                              </p>
-                              <span className={`text-[10px] uppercase tracking-wider font-bold px-2 py-0.5 rounded-full bg-background ${statusColor} border border-border`}>
-                                {statusLabel}
-                              </span>
-                            </div>
-                            <p className="text-xs text-muted-foreground">
-                              {visit.data ? format(new Date(visit.data), "dd/MM/yyyy 'às' HH:mm", { locale: ptBR }) : "Data não definida"}
-                            </p>
+                          <Checkbox
+                            checked={selectedPropertyIds.includes(prop.id)}
+                            onCheckedChange={() => toggleProperty(prop.id)}
+                          />
+                          <div className="w-12 h-10 rounded-md bg-secondary flex items-center justify-center flex-shrink-0 overflow-hidden">
+                            <ImageIcon className="w-4 h-4 text-muted-foreground" />
                           </div>
+                          <div className="min-w-0 flex-1">
+                            <p className="text-sm font-medium text-foreground truncate">{prop.name}</p>
+                            {prop.address && <p className="text-xs text-muted-foreground truncate">{prop.address}</p>}
+                          </div>
+                          {prop.valor && (
+                            <div className="text-right flex-shrink-0">
+                              <p className="text-xs font-semibold text-primary">
+                                {formatCurrency(prop.valor)}
+                              </p>
+                            </div>
+                          )}
                         </label>
-                      );
-                    })}
+                      ))}
+                    </div>
                   </div>
-                </div>
 
-              </div>
+                  <div>
+                    <div className="flex items-center gap-2 border-b border-border pb-2 mb-4">
+                      <CalendarCheck className="w-4 h-4 text-primary" />
+                      <h2 className="text-sm font-semibold text-foreground uppercase tracking-wider">Visitas Associadas</h2>
+
+                      <Button type="button" onClick={() => navigate(`/visits/new?leadId=${id}`)} className="bg-leads-accent ml-auto hover:bg-leads-accent/90 text-leads-accent-foreground">
+                        <Plus className="w-4 h-4 mr-1.5" /> Criar Visita
+                      </Button>
+                    </div>
+
+                    <div className="space-y-3 max-h-[300px] overflow-y-auto pr-2 scrollbar-thin">
+                      {(!visitasDoLead || visitasDoLead.length === 0) && (
+                        <p className="text-sm text-muted-foreground text-center py-6 bg-muted/30 rounded-lg">Nenhuma visita cadastrada</p>
+                      )}
+                      {visitasDoLead?.map((visit) => {
+                        const statusLabel =
+                          visit.status === "agendada" ? "Agendada"
+                            : visit.status === "realizada" ? "Realizada"
+                              : "Cancelada";
+
+                        const statusColor =
+                          visit.status === "agendada" ? "text-primary"
+                            : visit.status === "realizada" ? "text-green-500"
+                              : "text-muted-foreground";
+
+                        return (
+                          <label
+                            key={visit.id}
+                            className={`flex items-center gap-4 rounded-lg border p-3 cursor-pointer transition-colors ${selectedVisitIds.includes(visit.id)
+                              ? "border-primary bg-primary/5"
+                              : "border-border hover:border-muted-foreground/30 bg-card"
+                              }`}
+                          >
+                            <div className="min-w-0 flex-1">
+                              <div className="flex items-center justify-between gap-2 mb-0.5">
+                                <p className="text-sm font-medium text-foreground truncate">
+                                  {visit.imovel?.name || "Imóvel não informado"}
+                                </p>
+                                <span className={`text-[10px] uppercase tracking-wider font-bold px-2 py-0.5 rounded-full bg-background ${statusColor} border border-border`}>
+                                  {statusLabel}
+                                </span>
+                              </div>
+                              <p className="text-xs text-muted-foreground">
+                                {visit.data ? format(new Date(visit.data), "dd/MM/yyyy 'às' HH:mm", { locale: ptBR }) : "Data não definida"}
+                              </p>
+                            </div>
+                          </label>
+                        );
+                      })}
+                    </div>
+                  </div>
+
+                </div>
+              }
             </div>
 
             <div className="mt-8 pt-5 border-t border-border flex items-center gap-3 max-w-7xl mx-auto">

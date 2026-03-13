@@ -7,7 +7,7 @@ interface UserStore {
   isLoading: boolean;
   error: string | null;
 
-  fetchById: (id: number) => Promise<void>;
+  fetchUser: () => Promise<void>;
   updateItem: (id: number, data: UpdateUserDto) => Promise<void>;
   clearSelected: () => void;
 }
@@ -17,10 +17,10 @@ export const useUserStore = create<UserStore>((set, get) => ({
   isLoading: false,
   error: null,
 
-  fetchById: async (id: number) => {
+  fetchUser: async () => {
     set({ isLoading: true, error: null });
     try {
-      const user = await userService.getById(id);
+      const user = await userService.getUser();
       set({ selectedItem: user, isLoading: false });
     } catch (err) {
       console.error("Erro ao buscar usuário:", err);

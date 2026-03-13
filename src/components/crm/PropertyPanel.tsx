@@ -6,6 +6,7 @@ import { useEffect, useState } from "react";
 import { Imovel } from "@/types/ImovelType";
 import { useNavigate } from "react-router-dom";
 import { useLead } from "@/hooks/useLead";
+import { formatCurrency } from "@/utils/formatCurrency";
 
 interface PropertyPanelProps {
   leadId: number
@@ -50,7 +51,7 @@ const PropertyPanel = ({ leadId }: PropertyPanelProps) => {
                 </div>
               </div>
             </div>
-            <p className="text-sm font-semibold text-primary mb-2">{property.valor}</p>
+            <p className="text-sm font-semibold text-primary mb-2">{formatCurrency(property.valor)}</p>
             <div className="grid grid-cols-2 gap-y-2 gap-x-1 text-[11px] text-muted-foreground">
               <span className="flex items-center gap-2">
                 <Bed className="w-3.5 h-3.5" />

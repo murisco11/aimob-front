@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import InputMask from "react-input-mask";
 import {
   User,
   Plug,
@@ -10,7 +11,8 @@ import {
   QrCode,
   Copy,
   RefreshCw,
-  Smartphone
+  Smartphone,
+  LogOut
 } from "lucide-react";
 import CrmSidebar from "@/components/crm/CrmSidebar";
 import MobileHeader from "@/components/crm/MobileHeader";
@@ -42,15 +44,15 @@ const Settings = () => {
     status: waStatus,
     isLoading: isWaLoading,
     generateQrCode,
-    checkStatus
+    checkStatus,
+    disconnect
   } = useWhatsapp();
 
   const [name, setName] = useState("");
   const [phone, setPhone] = useState("");
 
   useEffect(() => {
-    const loggedInUserId = 1;
-    fetchUser(loggedInUserId);
+    fetchUser();
   }, [fetchUser]);
 
   useEffect(() => {
@@ -63,7 +65,7 @@ const Settings = () => {
   useEffect(() => {
     let interval: ReturnType<typeof setInterval>;
     if (activeTab === "integrations") {
-      checkStatus(); 
+      checkStatus();
 
       if (waStatus !== "open") {
         interval = setInterval(() => {
@@ -77,17 +79,36 @@ const Settings = () => {
 
   const handleSaveProfile = async () => {
     if (!user) return;
+
+    if (!name.trim()) {
+      return toast({
+        title: "Atenção",
+        description: "O campo Nome Completo é obrigatório.",
+        variant: "destructive"
+      });
+    }
+
+    const unmaskedPhone = phone.replace(/\D/g, "");
+
+    if (!unmaskedPhone || unmaskedPhone.length < 10) {
+      return toast({
+        title: "Atenção",
+        description: "Informe um número de WhatsApp válido.",
+        variant: "destructive"
+      });
+    }
+
     try {
       await updateUser(user.id, { name, phone });
-      toast({ 
-        title: "Sucesso", 
-        description: "Perfil atualizado com sucesso!" 
+      toast({
+        title: "Sucesso",
+        description: "Perfil atualizado com sucesso!"
       });
     } catch (error) {
-      toast({ 
-        title: "Erro", 
-        description: "Erro ao atualizar o perfil.", 
-        variant: "destructive" 
+      toast({
+        title: "Erro",
+        description: "Erro ao atualizar o perfil.",
+        variant: "destructive"
       });
     }
   };
@@ -95,9 +116,9 @@ const Settings = () => {
   const handleCopyWebhook = () => {
     const url = `aimob.com.br/webhook/canalpro/${user?.hashId || "carregando..."}`;
     navigator.clipboard.writeText(url);
-    toast({ 
-      title: "Copiado!", 
-      description: "URL do Webhook copiada para a área de transferência." 
+    toast({
+      title: "Copiado!",
+      description: "URL do Webhook copiada para a área de transferência."
     });
   };
 
@@ -185,12 +206,13 @@ const Settings = () => {
                     <CardContent className="p-6 space-y-4">
                       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                         <div className="space-y-2">
-                          <Label htmlFor="name">Nome Completo</Label>
+                          <Label htmlFor="name">Nome Completo <span className="text-destructive">*</span></Label>
                           <Input
                             id="name"
                             value={name}
                             onChange={(e) => setName(e.target.value)}
                             disabled={isUserLoading}
+                            placeholder="Digite seu nome"
                           />
                         </div>
                         <div className="space-y-2">
@@ -207,13 +229,22 @@ const Settings = () => {
 
                       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                         <div className="space-y-2">
-                          <Label htmlFor="phone">Telefone (WhatsApp)</Label>
-                          <Input
-                            id="phone"
+                          <Label htmlFor="phone">Telefone (WhatsApp) <span className="text-destructive">*</span></Label>
+                          <InputMask
+                            mask="(99) 99999-9999"
                             value={phone}
                             onChange={(e) => setPhone(e.target.value)}
                             disabled={isUserLoading}
-                          />
+                          >
+                            {(inputProps: any) => (
+                              <Input
+                                {...inputProps}
+                                id="phone"
+                                type="tel"
+                                placeholder="(00) 00000-0000"
+                              />
+                            )}
+                          </InputMask>
                         </div>
                         <div className="space-y-2">
                           <Label htmlFor="instanceName">Nome da Instância</Label>
@@ -270,6 +301,21 @@ const Settings = () => {
                               <p className="text-sm font-medium text-foreground">Aparelho Conectado!</p>
                               <p className="text-xs text-muted-foreground mt-1">Seu WhatsApp está pronto para enviar e receber mensagens.</p>
                             </div>
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              className="gap-2 text-destructive border-destructive/30 hover:bg-destructive/10 hover:text-destructive"
+                              onClick={async () => {
+                                await disconnect();
+                                toast({
+                                  title: "Desconectado",
+                                  description: "Seu WhatsApp foi desvinculado com sucesso.",
+                                });
+                              }}
+                            >
+                              {isWaLoading ? <RefreshCw className="w-4 h-4 animate-spin" /> : <LogOut className="w-4 h-4" />}
+                              Desconectar Aparelho
+                            </Button>
                           </div>
                         ) : qrCode ? (
                           <div className="flex flex-col items-center text-center">

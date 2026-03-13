@@ -10,5 +10,8 @@ export const whatsappService = {
   async getStatus(): Promise<WhatsappStatusResponse> {
     const response = await apiClient.get<WhatsappStatusResponse>("/whatsapp/status");
     return response.data;
+  },
+  async logout(): Promise<void> {
+    await apiClient.delete("/whatsapp/logout");
   }
 };
