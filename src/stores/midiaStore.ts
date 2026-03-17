@@ -12,6 +12,7 @@ interface MidiaStore {
   fetchById: (id: number) => Promise<void>;
   createItem: (data: CreateMidiaDto) => Promise<void>;
   updateItem: (id: number, data: UpdateMidiaDto) => Promise<void>;
+  uploadMidia: (file: File, imovelId: number) => Promise<Midia>;
   deleteItem: (id: number) => Promise<void>;
 }
 
@@ -20,7 +21,23 @@ export const useMidiaStore = create<MidiaStore>((set, get) => ({
   selectedItem: null,
   isLoading: false,
   error: null,
+  uploadMidia: async (file: File, imovelId: number) => {
+    set({ isLoading: true, error: null });
+    try {
+      const newMidia = await midiaService.uploadFile(file, imovelId);
 
+      set((state) => ({
+        items: [...state.items, newMidia],
+        isLoading: false
+      }));
+
+      return newMidia;
+    } catch (err) {
+      console.error("Erro ao fazer upload da mídia:", err);
+      set({ error: "Erro ao enviar arquivo", isLoading: false });
+      throw err;
+    }
+  },
   fetchAll: async () => {
     set({ isLoading: true, error: null });
     try {

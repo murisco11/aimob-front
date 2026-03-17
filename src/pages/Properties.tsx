@@ -77,9 +77,7 @@ const Properties = () => {
               {filtered.map((imovel) => {
                 const primeiraMidia = imovel.midias && imovel.midias.length > 0 ? imovel.midias[0] : null;
                 
-                const coverImageBase64 = primeiraMidia?.base64Data 
-                  ? `data:image/jpeg;base64,${primeiraMidia.base64Data}` 
-                  : null;
+                const coverImageBase64 = primeiraMidia.url;
 
                 const statusKey = imovel.isActive ? "active" : "inactive";
 

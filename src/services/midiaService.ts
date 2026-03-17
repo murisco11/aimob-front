@@ -12,6 +12,26 @@ export const midiaService = {
     return response.data;
   },
 
+  async uploadFile(file: File, imovelId: number): Promise<Midia> {
+    const formData = new FormData();
+    formData.append("file", file);
+    formData.append("imovelId", String(imovelId));
+
+    const response = await apiClient.post<Midia>(
+        "/midia/upload",
+        formData,
+        {
+          transformRequest: (data, headers) => {
+            delete headers['Content-Type'];
+            delete headers['content-type'];
+            return data;
+          }
+        }
+    );
+
+    return response.data;
+  },
+
   async create(data: CreateMidiaDto): Promise<Midia> {
     const response = await apiClient.post<Midia>("/midia", data);
     return response.data;

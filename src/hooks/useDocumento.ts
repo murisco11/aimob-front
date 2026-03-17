@@ -9,6 +9,7 @@ export const useDocumento = () => {
     isLoading: store.isLoading,
     error: store.error,
     fetchAllDocumento: store.fetchAll,
+    getDownloadLink: store.getDownloadLink,
     fetchById: store.fetchById,
     createDocumento: store.createItem,
     updateDocumento: store.updateItem,

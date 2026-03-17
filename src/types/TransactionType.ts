@@ -1,5 +1,6 @@
 import { User } from "./UserType";
-import { TransactionType as TransactionCategory } from "./TransactionTypeType"; 
+import { TransactionType as TransactionCategory } from "./TransactionTypeType";
+import {Imovel} from "@/types/ImovelType.ts";
 
 export interface Transaction {
   id: number;
@@ -9,6 +10,7 @@ export interface Transaction {
   createdAt: string | Date;
   transactionType?: TransactionCategory;
   user?: User;
+  imovel?: Imovel;
 }
 
 export type CreateTransactionDto = Omit<Transaction, "id" | "createdAt" | "transactionType" | "user"> & {

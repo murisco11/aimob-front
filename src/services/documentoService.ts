@@ -12,6 +12,11 @@ export const documentoService = {
     return response.data;
   },
 
+  async getDownloadLink(id: number): Promise<string> {
+    const response = await apiClient.get<{ url: string }>(`/documento/${id}/download`);
+    return response.data.url;
+  },
+
   async create(data: CreateDocumentoDto): Promise<Documento> {
     const response = await apiClient.post<Documento>("/documento", data);
     return response.data;

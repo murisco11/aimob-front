@@ -8,6 +8,7 @@ export const useMidia = () => {
     selectedMidia: store.selectedItem,
     isLoading: store.isLoading,
     error: store.error,
+    uploadMidia: store.uploadMidia,
     fetchAllMidia: store.fetchAll,
     fetchByIdMidia: store.fetchById,
     createMidia: store.createItem,

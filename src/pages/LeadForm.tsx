@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import React, { useState, useEffect } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import CrmSidebar from "@/components/crm/CrmSidebar";
 import MobileHeader from "@/components/crm/MobileHeader";
@@ -22,7 +22,6 @@ import { useLead } from "@/hooks/useLead";
 import { useImovel } from "@/hooks/useImovel";
 import { useVisita } from "@/hooks/useVisita";
 import { Lead, CreateLeadDto, UpdateLeadDto } from "@/types/LeadType";
-import { Visit } from "@/services/types";
 import { useToast } from "@/hooks/use-toast";
 import { formatCurrency } from "@/utils/formatCurrency";
 
@@ -120,9 +119,7 @@ const LeadForm = () => {
     const errs: FieldErrors = {};
     
     if (!name.trim()) errs.name = "Nome é obrigatório";
-    
-    if (!description.trim()) errs.description = "Descrição é obrigatória";
-    
+
     if (!status) errs.status = "Selecione o status";
     
     if (!temperatura) errs.temperatura = "Selecione a temperatura";
@@ -212,12 +209,6 @@ const LeadForm = () => {
     }
   };
 
-  const toggleVisit = (visitId: number) => {
-    setSelectedVisitIds((prev) =>
-      prev.includes(visitId) ? prev.filter((v) => v !== visitId) : [...prev, visitId]
-    );
-  };
-
   const visitasDoLead = visitas?.filter((v) => v.lead?.id === Number(id)) || [];
 
   const errorClass = "border-destructive focus-visible:ring-destructive";
@@ -273,7 +264,7 @@ const LeadForm = () => {
                   </div>
 
                   <div className={`${fieldClass} md:col-span-2`}>
-                    <Label>Descrição<RequiredDot /></Label>
+                    <Label>Descrição</Label>
                     <Textarea
                       placeholder="Resumo do perfil, interesses, contexto..."
                       rows={3}

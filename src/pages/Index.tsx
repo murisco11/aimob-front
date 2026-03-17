@@ -36,7 +36,7 @@ const Index = () => {
   useEffect(() => {
     const socket = io(import.meta.env.VITE_API_URL || "http://localhost:3333");
 
-    socket.on("nova_mensagem_whatsapp", (data: { conversaId: number, mensagem: any }) => {
+    socket.on("nova_mensagem_whatsapp", (data: { conversaId: number, mensagem: Mensagem }) => {
       console.log("Chegou mensagem via Socket:", data);
 
       const chatExistente = useChatStore.getState().chats.find(c => c.id === data.conversaId);
@@ -100,9 +100,9 @@ const Index = () => {
           return;
         }
 
-        await openConfirm({
+        openConfirm({
           title: "Excluir Lead",
-          description: `Tem certeza que deseja excluir permanentemente o lead? Esta ação não pode ser desfeita.`,
+          description: `Tem certeza que deseja remover este lead? O número deixará de aparecer no seu funil do sistema. Você poderá restaurá-lo futuramente acessando as Configurações.`,
           confirmText: "Sim, Excluir",
           onConfirm: async () => {
             await deleteLead(Number(leadId));
@@ -153,7 +153,7 @@ const Index = () => {
             )}
           </div>
           {selectedChat &&
-            <div className="hidden xl:flex w-[380px] flex-col shrink-0 p-3 border-l border-border">
+            <div className="hidden xl:flex w-[340px] flex-col shrink-0 p-3 border-l border-border">
               <PropertyPanel
                 leadId={Number(selectedChat.lead.id)}
               />
