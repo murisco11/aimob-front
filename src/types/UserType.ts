@@ -4,6 +4,7 @@ export interface User {
   name: string;
   email: string;
   phone: string;
+  aiActive: boolean;
   role: "user" | "coach" | "admin";
   instanceName?: string;
   instagramAccountId?: string;

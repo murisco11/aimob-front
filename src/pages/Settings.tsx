@@ -14,7 +14,8 @@ import {
     Smartphone,
     LogOut,
     Ban,
-    Trash2
+    Trash2,
+    Bot // <-- Novo import
 } from "lucide-react";
 import CrmSidebar from "@/components/crm/CrmSidebar";
 import MobileHeader from "@/components/crm/MobileHeader";
@@ -23,11 +24,13 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
+import { Switch } from "@/components/ui/switch"; // <-- Novo import
 import { cn } from "@/lib/utils";
 import { useUser } from "@/hooks/useUser";
 import { useWhatsapp } from "@/hooks/useWhatsapp";
 import { useToast } from "@/hooks/use-toast";
 import { useBlockedPerson } from "@/hooks/useBlockedPerson";
+import { useConfirmStore } from "@/stores/confirmStore"; // <-- Novo import
 
 const tabs = [
     { id: "profile", label: "Perfil", icon: User },
@@ -40,6 +43,7 @@ type TabId = typeof tabs[number]["id"];
 const Settings = () => {
     const [activeTab, setActiveTab] = useState<TabId>("profile");
     const { toast } = useToast();
+    const { openConfirm } = useConfirmStore(); // <-- Hook de confirmação
 
     const { user, isLoading: isUserLoading, fetchUser, updateUser } = useUser();
 
@@ -141,7 +145,6 @@ const Settings = () => {
         });
     };
 
-    // Função para remover o bloqueio (excluir o item)
     const handleUnban = async (id: number) => {
         try {
             await unblockPerson(id);
@@ -155,6 +158,49 @@ const Settings = () => {
                 description: "Falha ao desbloquear o número.",
                 variant: "destructive"
             });
+        }
+    };
+
+    // Nova função para lidar com o toggle da IA
+    const handleToggleAi = async (checked: boolean) => {
+        if (!user) return;
+
+        if (checked) {
+            openConfirm({
+                title: "Ativar Assistente de IA Automático",
+                description: "Tem certeza que deseja ativar essa função? Quando ativada, TODO NOVO CONTATO que enviar mensagem terá a IA ativada automaticamente para respondê-lo.",
+                confirmText: "Sim, ativar IA",
+                onConfirm: async () => {
+                    try {
+                        await updateUser(user.id, { aiActive: true });
+                        toast({
+                            title: "Sucesso",
+                            description: "IA automática ativada com sucesso!",
+                            variant: "success"
+                        });
+                    } catch (error) {
+                        toast({
+                            title: "Erro",
+                            description: "Falha ao ativar a IA automática.",
+                            variant: "destructive"
+                        });
+                    }
+                }
+            });
+        } else {
+            try {
+                await updateUser(user.id, { aiActive: false });
+                toast({
+                    title: "Desativado",
+                    description: "A IA não será mais ativada automaticamente para novos leads."
+                });
+            } catch (error) {
+                toast({
+                    title: "Erro",
+                    description: "Falha ao desativar a configuração.",
+                    variant: "destructive"
+                });
+            }
         }
     };
 
@@ -231,9 +277,9 @@ const Settings = () => {
                         </div>
 
                         <div className="max-w-2xl">
+                            {/* ABA DE PERFIL */}
                             {activeTab === "profile" && (
                                 <div className="space-y-6">
-                                    {/* CONTEÚDO DA ABA PERFIL (MANTIDO) */}
                                     <div>
                                         <h3 className="text-lg font-semibold text-foreground">Perfil</h3>
                                         <p className="text-sm text-muted-foreground">Suas informações de acesso e contato</p>
@@ -305,6 +351,7 @@ const Settings = () => {
                                 </div>
                             )}
 
+                            {/* ABA DE BANIDOS */}
                             {activeTab === "bans" && (
                                 <div className="space-y-6">
                                     <div>
@@ -357,13 +404,36 @@ const Settings = () => {
                                 </div>
                             )}
 
+                            {/* ABA DE INTEGRAÇÕES */}
                             {activeTab === "integrations" && (
                                 <div className="space-y-6">
-                                    {/* CONTEÚDO DA ABA INTEGRAÇÕES (MANTIDO INTACTO) */}
                                     <div>
                                         <h3 className="text-lg font-semibold text-foreground">Integrações</h3>
                                         <p className="text-sm text-muted-foreground">Conecte seus canais de comunicação e automação</p>
                                     </div>
+
+                                    {/* NOVO CARD: ATIVAÇÃO AUTOMÁTICA DA IA */}
+                                    <Card className="border-border">
+                                        <CardHeader>
+                                            <div className="flex items-center justify-between">
+                                                <div className="flex items-center gap-3">
+                                                    <div className="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center">
+                                                        <Bot className="w-5 h-5 text-primary" />
+                                                    </div>
+                                                    <div>
+                                                        <CardTitle className="text-sm">Assistente de IA</CardTitle>
+                                                        <CardDescription>Ativar Inteligência Artificial para novos leads</CardDescription>
+                                                    </div>
+                                                </div>
+                                                <Switch
+                                                    // Substitua `user?.aiActive` pela propriedade real do seu user
+                                                    checked={user?.aiActive || false}
+                                                    onCheckedChange={handleToggleAi}
+                                                    disabled={isUserLoading}
+                                                />
+                                            </div>
+                                        </CardHeader>
+                                    </Card>
 
                                     <Card className="border-border">
                                         <CardHeader>

@@ -20,6 +20,7 @@ export interface Lead {
   imoveis?: Imovel[];
   conversas?: Chat[];
   visitas?: Visita[];
+  resumo?: string;
 }
 
 export type CreateLeadDto = Omit<Lead, "id" | "createdAt" | "updatedAt" | "user" | "imoveis" | "conversas" | "visitas"> & {

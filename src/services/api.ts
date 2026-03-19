@@ -34,9 +34,16 @@ class ApiClient {
       (error: AxiosError) => {
         if (error.response?.status === 401) {
           this.clearToken();
-          
+
           if (window.location.pathname !== "/login") {
             window.location.href = "/login";
+          }
+        } else if (
+          error.response?.status === 403 &&
+          (error.response.data as any)?.code === "PAYMENT_REQUIRED"
+        ) {
+          if (window.location.pathname !== "/pricing") {
+            window.location.href = "/pricing";
           }
         }
         return Promise.reject(error);
@@ -45,7 +52,7 @@ class ApiClient {
   }
 
   setToken(token: string) {
-    localStorage.setItem(TOKEN_KEY, token); 
+    localStorage.setItem(TOKEN_KEY, token);
   }
 
   getToken(): string | null {
@@ -60,12 +67,12 @@ class ApiClient {
     return this.client;
   }
 
- get<T = any>(url: string, config?: AxiosRequestConfig) {
+  get<T = any>(url: string, config?: AxiosRequestConfig) {
     return this.client.get<T>(url, config);
   }
 
   post<T = any>(url: string, data?: any, config?: AxiosRequestConfig) {
-    return this.client.post<T>(url, data, config); 
+    return this.client.post<T>(url, data, config);
   }
 
   patch<T = any>(url: string, data?: any, config?: AxiosRequestConfig) {

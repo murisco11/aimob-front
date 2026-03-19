@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import {
     Bed, Bath, Maximize, CalendarPlus,
-    Home, Car, Calendar, Clock, MapPin
+    Home, Car, Calendar, Clock, MapPin, Loader2
 } from "lucide-react";
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
@@ -11,7 +11,8 @@ import { Button } from "@/components/ui/button";
 import { Imovel } from "@/types/ImovelType";
 import { useLead } from "@/hooks/useLead";
 import { formatCurrency } from "@/utils/formatCurrency";
-import {Visita} from "@/types/VisitaType.ts";
+import { Visita } from "@/types/VisitaType.ts";
+import { useToast } from "@/hooks/use-toast";
 
 interface PropertyPanelProps {
     leadId: number
@@ -20,7 +21,9 @@ interface PropertyPanelProps {
 
 const PropertyPanel = ({ leadId }: PropertyPanelProps) => {
     const navigate = useNavigate();
-    const { selectedLead, fetchByIdLead, isLoading } = useLead();
+    const { selectedLead, fetchByIdLead, isLoading, gerarResumoLead } = useLead();
+    const { toast } = useToast();
+    const [isGeneratingResumo, setIsGeneratingResumo] = useState(false);
 
     useEffect(() => {
         if (leadId) {
@@ -32,6 +35,19 @@ const PropertyPanel = ({ leadId }: PropertyPanelProps) => {
     const imoveis: Imovel[] = selectedLead?.id === leadId ? (selectedLead.imoveis || []) : [];
     const visitas: Visita[] = selectedLead?.id === leadId ? (selectedLead.visitas || []) : [];
 
+    const handleGerarResumo = async () => {
+        if (!selectedLead?.id) return;
+        setIsGeneratingResumo(true);
+        try {
+            await gerarResumoLead(selectedLead.id);
+            toast({ title: "Sucesso", description: "Resumo gerado com sucesso!", variant: "success" });
+        } catch (error) {
+            toast({ title: "Erro", description: "Não foi possível gerar o resumo.", variant: "destructive" });
+        } finally {
+            setIsGeneratingResumo(false);
+        }
+    };
+
     return (
         <div className="bg-card rounded-xl border border-border overflow-hidden flex flex-col h-full w-full">
             <div className="px-5 py-4 border-b border-border">
@@ -42,6 +58,31 @@ const PropertyPanel = ({ leadId }: PropertyPanelProps) => {
             </div>
 
             <div className="flex-1 overflow-y-auto p-4 scrollbar-thin">
+
+                <div className="mb-6">
+                    <div className="flex items-center justify-between mb-3">
+                        <h3 className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">
+                            Resumo do Lead
+                        </h3>
+                        <Button 
+                            variant="outline" 
+                            size="sm" 
+                            className="h-7 text-[10px]" 
+                            onClick={handleGerarResumo}
+                            disabled={isGeneratingResumo}
+                        >
+                            {isGeneratingResumo ? <Loader2 className="w-3 h-3 mr-1 animate-spin" /> : null}
+                            {isGeneratingResumo ? "Gerando..." : "Gerar resumo de 3 dias"}
+                        </Button>
+                    </div>
+                    {selectedLead?.resumo ? (
+                        <div className="text-xs text-card-foreground bg-muted/30 p-3 rounded-lg border border-border italic whitespace-pre-wrap">
+                             {selectedLead.resumo}
+                        </div>
+                    ) : (
+                        <p className="text-xs text-muted-foreground italic text-center py-2 bg-muted/30 rounded-lg border border-dashed border-border">Nenhum resumo gerado.</p>
+                    )}
+                 </div>
 
                 <div className="mb-6">
                     <h3 className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-3">

@@ -6,7 +6,7 @@ import { Home, MapPin, Bed, Bath, Car, Search, Plus, Filter, Loader2 } from "luc
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { useImovel } from "@/hooks/useImovel"; 
+import { useImovel } from "@/hooks/useImovel";
 import { formatCurrency } from "@/utils/formatCurrency";
 
 const statusStyles: Record<string, string> = {
@@ -17,7 +17,7 @@ const statusStyles: Record<string, string> = {
 const Properties = () => {
   const navigate = useNavigate();
   const [search, setSearch] = useState("");
-  
+
   const { imoveis, isLoading, fetchAllImovel } = useImovel();
 
   useEffect(() => {
@@ -76,8 +76,8 @@ const Properties = () => {
             <div className="p-6 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
               {filtered.map((imovel) => {
                 const primeiraMidia = imovel.midias && imovel.midias.length > 0 ? imovel.midias[0] : null;
-                
-                const coverImageBase64 = primeiraMidia.url;
+
+                const coverImageBase64 = primeiraMidia?.url;
 
                 const statusKey = imovel.isActive ? "active" : "inactive";
 
@@ -116,7 +116,7 @@ const Properties = () => {
                         <MapPin className="w-3 h-3 shrink-0" />
                         {imovel.address || "Endereço não informado"}
                       </p>
-                      
+
                       <div className="mt-auto pt-3">
                         <p className="text-base font-bold text-primary">
                           {formatCurrency(imovel.valor)}

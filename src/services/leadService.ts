@@ -29,5 +29,10 @@ export const leadService = {
   async updateAiActive(id: number, aiActive: boolean): Promise<Lead> {
     const response = await apiClient.put<Lead>(`/lead/${id}`, { aiActive });
     return response.data;
+  },
+
+  async gerarResumo(id: number): Promise<Lead> {
+    const response = await apiClient.post<Lead>(`/lead/${id}/resumo`);
+    return response.data;
   }
 };

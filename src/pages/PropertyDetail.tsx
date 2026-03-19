@@ -266,7 +266,7 @@ const PropertyDetail = () => {
     }
 
     const coverMedia = imovel.midias && imovel.midias.length > 0 ? imovel.midias[0] : null;
-    const coverImageSrc = coverMedia.url;
+    const coverImageSrc = coverMedia?.url;
     const statusKey = imovel.isActive ? "active" : "inactive";
     const interestedLeads = imovel.leads || [];
 
@@ -275,20 +275,20 @@ const PropertyDetail = () => {
 
     return (
         <div className="flex h-screen w-full overflow-hidden">
-            <CrmSidebar/>
+            <CrmSidebar />
             <div className="flex-1 flex flex-col min-w-0">
-                <MobileHeader/>
+                <MobileHeader />
                 <div className="flex-1 overflow-y-auto scrollbar-thin">
 
                     <div className="px-6 py-4 border-b border-border flex items-center gap-4">
                         <Button variant="ghost" size="sm" onClick={() => navigate("/properties")}
-                                className="gap-1.5 text-xs">
-                            <ArrowLeft className="w-4 h-4"/> Voltar
+                            className="gap-1.5 text-xs">
+                            <ArrowLeft className="w-4 h-4" /> Voltar
                         </Button>
-                        <div className="flex-1"/>
+                        <div className="flex-1" />
                         <div className="flex items-center gap-2">
                             <Badge className={`text-[10px] capitalize border ${statusStyles[statusKey]}`}
-                                   variant="outline">
+                                variant="outline">
                                 {imovel.isActive ? "Ativo" : "Inativo"}
                             </Badge>
                             <Button
@@ -297,7 +297,7 @@ const PropertyDetail = () => {
                                 className="h-6 px-2 text-[10px] gap-1"
                                 onClick={() => navigate(`/properties/edit/${imovel.id}`)}
                             >
-                                <Edit className="w-3 h-3"/> Editar
+                                <Edit className="w-3 h-3" /> Editar
                             </Button>
                             <Button
                                 variant="outline"
@@ -305,7 +305,7 @@ const PropertyDetail = () => {
                                 className="h-6 text-destructive focus:text-destructive focus:bg-destructive/10 px-2 text-[10px] gap-1"
                                 onClick={handleDeleteImovel}
                             >
-                                <Trash2 className="w-3 h-3"/> Deletar
+                                <Trash2 className="w-3 h-3" /> Deletar
                             </Button>
                         </div>
                     </div>
@@ -315,10 +315,10 @@ const PropertyDetail = () => {
                             <div
                                 className="w-full md:w-[360px] shrink-0 aspect-[4/3] rounded-xl overflow-hidden bg-muted relative">
                                 {coverImageSrc ? (
-                                    <img src={coverImageSrc} alt={imovel.name} className="w-full h-full object-cover"/>
+                                    <img src={coverImageSrc} alt={imovel.name} className="w-full h-full object-cover" />
                                 ) : (
                                     <div className="w-full h-full flex items-center justify-center">
-                                        <Home className="w-12 h-12 text-muted-foreground/30"/>
+                                        <Home className="w-12 h-12 text-muted-foreground/30" />
                                     </div>
                                 )}
                             </div>
@@ -326,7 +326,7 @@ const PropertyDetail = () => {
                             <div className="flex-1 min-w-0">
                                 <h1 className="text-xl font-bold text-foreground">{imovel.name}</h1>
                                 <p className="text-sm text-muted-foreground flex items-center gap-1 mt-1">
-                                    <MapPin className="w-3.5 h-3.5"/> {imovel.address || "Endereço não informado"}
+                                    <MapPin className="w-3.5 h-3.5" /> {imovel.address || "Endereço não informado"}
                                 </p>
                                 <p className="text-2xl font-bold text-primary mt-3">{formatCurrency(imovel.valor)}</p>
 
@@ -352,8 +352,8 @@ const PropertyDetail = () => {
                                             label: "Vagas",
                                             value: imovel.vagas ? imovel.vagas : "Não informado"
                                         },
-                                        {icon: Maximize, label: "Área", value: imovel.area ? `${imovel.area} m²` : "-"},
-                                        {icon: House, label: "Condomínio", value: formatCurrency(imovel.condominio)},
+                                        { icon: Maximize, label: "Área", value: imovel.area ? `${imovel.area} m²` : "-" },
+                                        { icon: House, label: "Condomínio", value: formatCurrency(imovel.condominio) },
                                         {
                                             icon: DollarSign,
                                             label: "Comissão",
@@ -364,12 +364,12 @@ const PropertyDetail = () => {
                                             label: "Mobiliado",
                                             value: imovel.mobiliado ? "Sim" : "Não"
                                         },
-                                        {icon: Dog, label: "Aceita Pet", value: imovel.aceitaPets ? "Sim" : "Não"},
+                                        { icon: Dog, label: "Aceita Pet", value: imovel.aceitaPets ? "Sim" : "Não" },
                                     ].map((spec) => (
                                         <div key={spec.label} className="flex items-center gap-2 text-sm">
                                             <div
                                                 className="w-8 h-8 rounded-md bg-secondary flex items-center justify-center shrink-0">
-                                                <spec.icon className="w-4 h-4 text-secondary-foreground"/>
+                                                <spec.icon className="w-4 h-4 text-secondary-foreground" />
                                             </div>
                                             <div>
                                                 <p className="text-[11px] text-muted-foreground">{spec.label}</p>
@@ -392,13 +392,13 @@ const PropertyDetail = () => {
                                         disabled={aiTrained}
                                     >
                                         {aiTrained ? (
-                                            <><CheckCircle2 className="w-3.5 h-3.5 text-success"/> IA Treinada</>
+                                            <><CheckCircle2 className="w-3.5 h-3.5 text-success" /> IA Treinada</>
                                         ) : (
-                                            <><Brain className="w-3.5 h-3.5"/> Treinar IA com este Imóvel</>
+                                            <><Brain className="w-3.5 h-3.5" /> Treinar IA com este Imóvel</>
                                         )}
                                     </Button>
                                     <Button size="sm" variant="outline" onClick={handleVisit} className="gap-2 text-xs">
-                                        <CalendarPlus className="w-3.5 h-3.5"/> Agendar Visita
+                                        <CalendarPlus className="w-3.5 h-3.5" /> Agendar Visita
                                     </Button>
                                 </div>
                             </div>
@@ -409,9 +409,9 @@ const PropertyDetail = () => {
                         <Tabs defaultValue="info" className="w-full">
                             <TabsList className="mb-4">
                                 <TabsTrigger value="info" className="gap-1.5 text-xs"><FileText
-                                    className="w-3.5 h-3.5"/> Informações</TabsTrigger>
+                                    className="w-3.5 h-3.5" /> Informações</TabsTrigger>
                                 <TabsTrigger value="leads" className="gap-1.5 text-xs"><Users
-                                    className="w-3.5 h-3.5"/> Leads Interessados</TabsTrigger>
+                                    className="w-3.5 h-3.5" /> Leads Interessados</TabsTrigger>
                             </TabsList>
 
                             <TabsContent value="info" className="space-y-5">
@@ -508,15 +508,14 @@ const PropertyDetail = () => {
                                     {imovel.midias && imovel.midias.length > 0 ? (
                                         <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3">
                                             {imovel.midias.map((m: any) => {
-                                                const imgSrc = m.url;
+                                                const imgSrc = m?.url;
                                                 const isSelected = selectedMediaIds.includes(m.id);
 
                                                 return (
                                                     <div
                                                         key={m.id}
-                                                        className={`relative aspect-[4/3] rounded-lg overflow-hidden bg-muted group border transition-all ${
-                                                            isSelected ? 'border-primary ring-2 ring-primary/20' : 'border-border'
-                                                        }`}
+                                                        className={`relative aspect-[4/3] rounded-lg overflow-hidden bg-muted group border transition-all ${isSelected ? 'border-primary ring-2 ring-primary/20' : 'border-border'
+                                                            }`}
                                                     >
                                                         {imgSrc ? (
                                                             isSelectionMode ? (
@@ -535,7 +534,7 @@ const PropertyDetail = () => {
                                                             )
                                                         ) : (
                                                             <div className="w-full h-full flex flex-col items-center justify-center gap-1">
-                                                                <ImageIcon className="w-8 h-8 text-muted-foreground/40"/>
+                                                                <ImageIcon className="w-8 h-8 text-muted-foreground/40" />
                                                             </div>
                                                         )}
 
@@ -557,7 +556,7 @@ const PropertyDetail = () => {
                                                                 <DropdownMenu>
                                                                     <DropdownMenuTrigger asChild>
                                                                         <Button variant="secondary" size="icon" className="h-7 w-7 bg-background/80 backdrop-blur-sm hover:bg-background shadow-sm">
-                                                                            <MoreVertical className="h-4 w-4"/>
+                                                                            <MoreVertical className="h-4 w-4" />
                                                                         </Button>
                                                                     </DropdownMenuTrigger>
                                                                     <DropdownMenuContent align="end" className="w-40">
@@ -565,14 +564,14 @@ const PropertyDetail = () => {
                                                                             className="text-destructive focus:text-destructive focus:bg-destructive/10 cursor-pointer"
                                                                             onSelect={() => handleDeleteSingleMedia(m.id)}
                                                                         >
-                                                                            <Trash2 className="mr-2 h-4 w-4"/>
+                                                                            <Trash2 className="mr-2 h-4 w-4" />
                                                                             <span>Remover</span>
                                                                         </DropdownMenuItem>
                                                                         <DropdownMenuItem
                                                                             className="cursor-pointer"
                                                                             onSelect={() => handleSendSingleMediaClick(m)}
                                                                         >
-                                                                            <Send className="mr-2 h-4 w-4"/>
+                                                                            <Send className="mr-2 h-4 w-4" />
                                                                             <span>Enviar para Lead</span>
                                                                         </DropdownMenuItem>
                                                                     </DropdownMenuContent>
@@ -658,7 +657,7 @@ const PropertyDetail = () => {
                                             : isSelected
                                                 ? 'border-primary bg-primary/5 cursor-pointer'
                                                 : 'border-border hover:border-primary/30 cursor-pointer'
-                                        }`}
+                                            }`}
                                     >
                                         <div
                                             className="w-8 h-8 rounded-full bg-secondary flex items-center justify-center text-xs font-semibold shrink-0 uppercase">
@@ -670,7 +669,7 @@ const PropertyDetail = () => {
                                             {!hasChat &&
                                                 <p className="text-[10px] text-destructive mt-0.5">Sem chat ativo</p>}
                                         </div>
-                                        {isSelected && <CheckCircle2 className="w-5 h-5 text-primary shrink-0"/>}
+                                        {isSelected && <CheckCircle2 className="w-5 h-5 text-primary shrink-0" />}
                                     </div>
                                 )
                             })
@@ -687,8 +686,8 @@ const PropertyDetail = () => {
                             disabled={selectedLeads.length === 0 || isSendingToLeads}
                             className="gap-2"
                         >
-                            {isSendingToLeads ? <Loader2 className="w-4 h-4 animate-spin"/> :
-                                <Send className="w-4 h-4"/>}
+                            {isSendingToLeads ? <Loader2 className="w-4 h-4 animate-spin" /> :
+                                <Send className="w-4 h-4" />}
                             Enviar para {selectedLeads.length} Lead(s)
                         </Button>
                     </DialogFooter>

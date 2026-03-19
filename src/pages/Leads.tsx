@@ -16,6 +16,7 @@ import { useLead } from "@/hooks/useLead";
 import { Lead } from "@/types/LeadType";
 import { VisitaStatus } from "@/types/VisitaType";
 import { formatCurrency } from "@/utils/formatCurrency";
+import { useToast } from "@/hooks/use-toast";
 
 const pipelineColumns: { stage: Lead["status"]; label: string; color: string }[] = [
   { stage: "qualificacao_ia", label: "Qualificação IA", color: "bg-info" },
@@ -46,6 +47,7 @@ const Leads = () => {
   const [view, setView] = useState<"kanban" | "list">("kanban");
   const [selectedLeadData, setSelectedLeadData] = useState<Lead | null>(null);
   const [dragOverStage, setDragOverStage] = useState<Lead["status"] | null>(null);
+  const { toast } = useToast();
 
   useEffect(() => {
     fetchAllLead();
@@ -91,8 +93,10 @@ const Leads = () => {
 
     try {
       await updateLead(leadId, { status: stage });
+      toast({ title: "Sucesso", description: "Status do lead atualizado", variant: "success" });
     } catch (error) {
       console.error("Erro ao mover card", error);
+      toast({ title: "Erro", description: "Erro ao atualizar status do lead", variant: "destructive" });
     }
   };
 
@@ -192,10 +196,10 @@ const Leads = () => {
                               <LeadStatusBadge status={lead.temperatura || "cold"} />
                             </div>
 
-                            {lead.description && (
+                            {(lead.description || lead.resumo) && (
                               <p className="text-xs text-muted-foreground italic mb-3 line-clamp-2">
                                 <span className="text-leads-accent font-medium not-italic">Resumo: </span>
-                                {lead.description}
+                                {lead.description || lead.resumo}
                               </p>
                             )}
 
@@ -226,6 +230,7 @@ const Leads = () => {
                         <TableHead className="text-muted-foreground">Origem</TableHead>
                         <TableHead className="text-muted-foreground">Status (Etapa)</TableHead>
                         <TableHead className="text-muted-foreground">Temperatura</TableHead>
+                        <TableHead className="text-muted-foreground">Descrição</TableHead>
                         <TableHead className="text-muted-foreground">Resumo</TableHead>
                         <TableHead />
                       </TableRow>
@@ -253,7 +258,10 @@ const Leads = () => {
                           </TableCell>
                           <TableCell><LeadStatusBadge status={lead.temperatura || "cold"} /></TableCell>
                           <TableCell className="max-w-[200px]">
-                            <p className="text-xs text-muted-foreground italic truncate">{lead.description || "Sem resumo"}</p>
+                            <p className="text-xs text-muted-foreground italic truncate">{lead.description || "Sem descrição"}</p>
+                          </TableCell>
+                          <TableCell className="max-w-[200px]">
+                            <p className="text-xs text-muted-foreground italic truncate">{lead.resumo || "Sem resumo"}</p>
                           </TableCell>
                           <TableCell><ChevronRight className="w-4 h-4 text-muted-foreground" /></TableCell>
                         </TableRow>
@@ -272,7 +280,7 @@ const Leads = () => {
           {selectedLeadData && (
             <LeadDetailPanel
               lead={selectedLeadData}
-              onOpenChat={(leadId) => {navigate(`/?chatId=${selectedLeadData.conversas[0].id}`);} }
+              onOpenChat={(leadId) => { navigate(`/?chatId=${selectedLeadData.conversas[0].id}`); }}
             />
           )}
         </SheetContent>
@@ -335,7 +343,7 @@ function LeadDetailPanel({ lead, onOpenChat }: { lead: Lead; onOpenChat: (leadId
           </h4>
           <div className="rounded-lg bg-secondary/80 border border-border p-3 space-y-1.5 text-sm">
             <p><span className="text-muted-foreground">Inteligência Artificial:</span> <span className="font-medium">{lead.aiActive ? "Ativada" : "Desativada"}</span></p>
-            <p className="text-muted-foreground text-xs mt-2">{lead.description ? lead.description : "Nenhum resumo disponível."}</p>
+            <p className="text-muted-foreground text-xs mt-2">{lead.description || "Nenhuma descrição disponível."}</p>
           </div>
         </section>
 

@@ -269,10 +269,12 @@ const ChatInterface = ({chat}: ChatInterfaceProps) => {
                                                     className="rounded-lg max-w-full mb-1 max-h-60 object-contain"
                                                 />
                                             ) : msg.type === "audio" && msg.mediaUrl ? (
-                                                <audio controls src={msg.mediaUrl} className="max-w-full h-10 mb-1"/>
-                                            ) : null}
+                                                    <audio controls src={msg.mediaUrl} className="max-w-full h-10 mb-1"/>
+                                                ) : (msg.type !== "conversation" || msg.body == "Mensagem vazia") &&
+                                                <p className="text-xs text-red-200 leading-relaxed whitespace-pre-wrap break-words italic">Mensagem com tipo não suportado para o sistema</p>}
 
-                                            {msg.body &&
+
+                                            {(msg.body && msg.body !== "Mensagem vazia") &&
                                                 <p className="text-sm leading-relaxed whitespace-pre-wrap break-words">{msg.body}</p>}
 
                                             <p className={`text-[10px] mt-1 text-right ${!msg.fromMe ? "text-muted-foreground" : "text-chat-self-foreground/70"}`}>
@@ -283,7 +285,6 @@ const ChatInterface = ({chat}: ChatInterfaceProps) => {
                                             </p>
                                         </div>
 
-                                        {/* BOTÃO DE RESPONDER */}
                                         <button
                                             onClick={() => setReplyingTo(msg)}
                                             className="shrink-0 p-1.5 bg-muted rounded-full opacity-0 group-hover:opacity-100 transition-opacity hover:bg-muted-foreground/20"

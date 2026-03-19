@@ -15,6 +15,7 @@ export const useLead = () => {
     updateLead: store.updateItem,
     deleteLead: store.deleteItem,
     
-    updateLeadAiActive: store.updateLeadAiActive
+    updateLeadAiActive: store.updateLeadAiActive,
+    gerarResumoLead: store.gerarResumo
   };
 };

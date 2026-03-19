@@ -14,6 +14,7 @@ interface LeadStore {
   updateItem: (id: number, data: UpdateLeadDto) => Promise<void>;
   deleteItem: (id: number) => Promise<void>;
   updateLeadAiActive: (id: number, aiActive: boolean) => Promise<void>;
+  gerarResumo: (id: number) => Promise<void>;
 }
 
 export const useLeadStore = create<LeadStore>((set, get) => ({
@@ -94,6 +95,21 @@ export const useLeadStore = create<LeadStore>((set, get) => ({
       }));
     } catch (err) {
       console.error(`Erro ao atualizar status de IA do lead ${id}:`, err);
+      throw err;
+    }
+  },
+
+  gerarResumo: async (id: number) => {
+    try {
+      const updated = await leadService.gerarResumo(id);
+      set((state) => ({
+        items: state.items.map((lead) =>
+          lead.id === id ? updated : lead
+        ),
+        selectedItem: state.selectedItem?.id === id ? updated : state.selectedItem
+      }));
+    } catch (err) {
+      console.error(`Erro ao gerar resumo do lead ${id}:`, err);
       throw err;
     }
   }
