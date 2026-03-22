@@ -1,13 +1,17 @@
-import { LayoutDashboard, Users, Home, Calendar, Settings, TrendingUp, LogOut } from "lucide-react";
+import { LayoutDashboard, Users, Home, Calendar, Settings, TrendingUp, LogOut, Bot, DollarSign, File, FileText } from "lucide-react";
 import { useNavigate, useLocation } from "react-router-dom";
+import { useAuth } from "@/hooks/useAuth";
+import { useToast } from "../ui/use-toast";
 
 const navItems = [
-  { icon: LayoutDashboard, label: "Dashboard", path: "/" },
+  { icon: LayoutDashboard, label: "Início", path: "/dashboard" },
   { icon: Users, label: "Leads", path: "/leads" },
-  { icon: Home, label: "Properties", path: "/properties" },
-  { icon: Calendar, label: "Visits", path: "/visits" },
-  { icon: TrendingUp, label: "Analytics", path: "/analytics" },
-  { icon: Settings, label: "Settings", path: "/settings" },
+  { icon: Home, label: "Imóveis", path: "/properties" },
+  { icon: Calendar, label: "Calendário", path: "/visits" },
+  { icon: Bot, label: "IA", path: "/ai" },
+  { icon: DollarSign, label: "Transações", path: "/transactions" },
+  { icon: FileText, label: "Documentos", path: "/documents" },
+  { icon: Settings, label: "Configurações", path: "/settings" },
 ];
 
 interface CrmSidebarProps {
@@ -15,26 +19,38 @@ interface CrmSidebarProps {
 }
 
 const CrmSidebar = ({ activeItem }: CrmSidebarProps) => {
+  const { toast } = useToast();
   const navigate = useNavigate();
   const location = useLocation();
+  const { user, logout } = useAuth();
 
   const getIsActive = (item: typeof navItems[0]) => {
     if (activeItem) return item.label === activeItem;
     if (item.path !== "/" && location.pathname.startsWith(item.path)) return true;
-    if (item.label === "Dashboard") return location.pathname === "/";
+    if (item.label === "Dashboard") return location.pathname === "/dashboard";
     return false;
+  };
+
+  const handleLogout = async () => {
+    await logout();
+    navigate("/login");
+
+    toast({
+      title: "Sucesso",
+      description: "Você saiu da sua conta!",
+    });
   };
 
   return (
     <aside className="hidden lg:flex flex-col w-[220px] bg-sidebar text-sidebar-foreground border-r border-sidebar-border shrink-0">
       <div className="p-5 border-b border-sidebar-border">
         <div className="flex items-center gap-2.5">
-          <div className="w-8 h-8 rounded-lg bg-sidebar-primary flex items-center justify-center">
-            <Home className="w-4 h-4 text-sidebar-primary-foreground" />
+          <div className="w-8 h-8 flex items-center justify-center">
+            <img src="/logo.png" alt="AIMOB CRM" className="h-8 w-auto object-contain" />
           </div>
           <div>
-            <h1 className="text-sm font-semibold text-sidebar-accent-foreground">LeadIQ</h1>
-            <p className="text-[11px] text-sidebar-foreground/60">Real Estate CRM</p>
+            <h1 className="text-sm font-semibold text-sidebar-accent-foreground">{user.name}</h1>
+            <p className="text-[11px] text-sidebar-foreground/60">AIMOB</p>
           </div>
         </div>
       </div>
@@ -46,11 +62,10 @@ const CrmSidebar = ({ activeItem }: CrmSidebarProps) => {
             <button
               key={item.label}
               onClick={() => navigate(item.path)}
-              className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm transition-colors ${
-                isActive
-                  ? "bg-sidebar-accent text-sidebar-accent-foreground font-medium"
-                  : "text-sidebar-foreground hover:bg-sidebar-accent/50 hover:text-sidebar-accent-foreground"
-              }`}
+              className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm transition-colors ${isActive
+                ? "bg-sidebar-accent text-sidebar-accent-foreground font-medium"
+                : "text-sidebar-foreground hover:bg-sidebar-accent/50 hover:text-sidebar-accent-foreground"
+                }`}
             >
               <item.icon className="w-4 h-4" />
               <span>{item.label}</span>
@@ -62,13 +77,19 @@ const CrmSidebar = ({ activeItem }: CrmSidebarProps) => {
       <div className="p-3 border-t border-sidebar-border">
         <div className="flex items-center gap-3 px-3 py-2">
           <div className="w-8 h-8 rounded-full bg-sidebar-accent flex items-center justify-center text-xs font-semibold text-sidebar-accent-foreground">
-            JR
+            {user?.name?.charAt(0).toUpperCase() || "U"}
           </div>
           <div className="flex-1 min-w-0">
-            <p className="text-sm font-medium text-sidebar-accent-foreground truncate">João Reis</p>
-            <p className="text-[11px] text-sidebar-foreground/60 truncate">CRECI 12345</p>
+            <p className="text-sm font-medium text-sidebar-accent-foreground truncate">{user?.name || "Usuário"}</p>
+            <p className="text-[11px] text-sidebar-foreground/60 truncate">{user?.role === "admin" ? "Admin" : "Agent"}</p>
           </div>
-          <LogOut className="w-4 h-4 text-sidebar-foreground/40 hover:text-sidebar-foreground cursor-pointer" />
+          <button
+            onClick={handleLogout}
+            className="p-1 text-sidebar-foreground/40 hover:text-sidebar-foreground hover:bg-sidebar-accent/30 rounded transition-colors"
+            title="Logout"
+          >
+            <LogOut className="w-4 h-4" />
+          </button>
         </div>
       </div>
     </aside>

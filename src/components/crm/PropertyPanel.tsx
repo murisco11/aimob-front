@@ -1,69 +1,185 @@
-import { Bed, Bath, Maximize, CalendarPlus, CheckCircle2, FileText, Home } from "lucide-react";
-import { Property } from "@/data/mockData";
+import { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
+import {
+    Bed, Bath, Maximize, CalendarPlus,
+    Home, Car, Calendar, Clock, MapPin, Loader2
+} from "lucide-react";
+import { format } from "date-fns";
+import { ptBR } from "date-fns/locale";
+
 import { Button } from "@/components/ui/button";
+import { Imovel } from "@/types/ImovelType";
+import { useLead } from "@/hooks/useLead";
+import { formatCurrency } from "@/utils/formatCurrency";
+import { Visita } from "@/types/VisitaType.ts";
+import { useToast } from "@/hooks/use-toast";
 
 interface PropertyPanelProps {
-  properties: Property[];
+    leadId: number
 }
 
-const statusStyles = {
-  active: "bg-success/10 text-success",
-  pending: "bg-warning/10 text-warm",
-  sold: "bg-muted text-muted-foreground",
-};
 
-const PropertyPanel = ({ properties }: PropertyPanelProps) => {
-  return (
-    <div className="bg-card rounded-xl border border-border overflow-hidden flex flex-col h-full">
-      <div className="px-5 py-4 border-b border-border">
-        <h2 className="text-sm font-semibold text-card-foreground">Active Properties</h2>
-        <p className="text-xs text-muted-foreground mt-0.5">{properties.length} listings</p>
-      </div>
+const PropertyPanel = ({ leadId }: PropertyPanelProps) => {
+    const navigate = useNavigate();
+    const { selectedLead, fetchByIdLead, isLoading, gerarResumoLead } = useLead();
+    const { toast } = useToast();
+    const [isGeneratingResumo, setIsGeneratingResumo] = useState(false);
 
-      <div className="flex-1 overflow-y-auto p-3 space-y-3 scrollbar-thin">
-        {properties.map((property) => (
-          <div key={property.id} className="rounded-lg border border-border p-3 hover:border-primary/30 transition-colors">
-            <div className="flex items-start justify-between mb-2">
-              <div className="flex items-center gap-2">
-                <div className="w-8 h-8 rounded-md bg-secondary flex items-center justify-center">
-                  <Home className="w-4 h-4 text-secondary-foreground" />
+    useEffect(() => {
+        if (leadId) {
+            fetchByIdLead(leadId);
+        }
+    }, [leadId, fetchByIdLead]);
+
+    // Extraindo imóveis e visitas do lead selecionado
+    const imoveis: Imovel[] = selectedLead?.id === leadId ? (selectedLead.imoveis || []) : [];
+    const visitas: Visita[] = selectedLead?.id === leadId ? (selectedLead.visitas || []) : [];
+
+    const handleGerarResumo = async () => {
+        if (!selectedLead?.id) return;
+        setIsGeneratingResumo(true);
+        try {
+            await gerarResumoLead(selectedLead.id);
+            toast({ title: "Sucesso", description: "Resumo gerado com sucesso!", variant: "success" });
+        } catch (error) {
+            toast({ title: "Erro", description: "Não foi possível gerar o resumo.", variant: "destructive" });
+        } finally {
+            setIsGeneratingResumo(false);
+        }
+    };
+
+    return (
+        <div className="bg-card rounded-xl border border-border overflow-hidden flex flex-col h-full w-full">
+            <div className="px-5 py-4 border-b border-border">
+                <h2 className="text-sm font-semibold text-card-foreground">Interesses e Visitas</h2>
+                <p className="text-xs text-muted-foreground mt-0.5">
+                    {imoveis.length} {imoveis.length === 1 ? "imóvel" : "imóveis"} • {visitas.length} {visitas.length === 1 ? "visita" : "visitas"}
+                </p>
+            </div>
+
+            <div className="flex-1 overflow-y-auto p-4 scrollbar-thin">
+
+                <div className="mb-6">
+                    <div className="flex items-center justify-between mb-3">
+                        <h3 className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">
+                            Resumo do Lead
+                        </h3>
+                        <Button 
+                            variant="outline" 
+                            size="sm" 
+                            className="h-7 text-[10px]" 
+                            onClick={handleGerarResumo}
+                            disabled={isGeneratingResumo}
+                        >
+                            {isGeneratingResumo ? <Loader2 className="w-3 h-3 mr-1 animate-spin" /> : null}
+                            {isGeneratingResumo ? "Gerando..." : "Gerar resumo de 3 dias"}
+                        </Button>
+                    </div>
+                    {selectedLead?.resumo ? (
+                        <div className="text-xs text-card-foreground bg-muted/30 p-3 rounded-lg border border-border italic whitespace-pre-wrap">
+                             {selectedLead.resumo}
+                        </div>
+                    ) : (
+                        <p className="text-xs text-muted-foreground italic text-center py-2 bg-muted/30 rounded-lg border border-dashed border-border">Nenhum resumo gerado.</p>
+                    )}
+                 </div>
+
+                <div className="mb-6">
+                    <h3 className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-3">
+                        Imóveis ({imoveis.length})
+                    </h3>
+
+                    {imoveis.length === 0 ? (
+                        <p className="text-xs text-muted-foreground italic text-center py-2 bg-muted/30 rounded-lg border border-dashed border-border">Nenhum imóvel vinculado.</p>
+                    ) : (
+                        <div className="space-y-3">
+                            {imoveis.map((property) => (
+                                <div onClick={() => navigate(`/properties/${property.id}`)} key={property.id}
+                                     className="rounded-lg cursor-pointer border border-border p-3 hover:bg-muted/50 hover:border-primary/30 transition-colors">
+                                    <div className="flex items-start justify-between mb-2">
+                                        <div className="flex items-center gap-2">
+                                            <div className="w-8 h-8 rounded-md bg-secondary flex items-center justify-center shrink-0">
+                                                <Home className="w-4 h-4 text-secondary-foreground" />
+                                            </div>
+                                            <div>
+                                                <p className="text-sm font-medium text-card-foreground leading-tight line-clamp-1">{property.name}</p>
+                                                <p className="text-[11px] text-muted-foreground line-clamp-1">{property.address}</p>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <p className="text-sm font-semibold text-primary mb-2">{formatCurrency(property.valor)}</p>
+                                    <div className="grid grid-cols-2 gap-y-2 gap-x-1 text-[11px] text-muted-foreground">
+                                        <span className="flex items-center gap-2">
+                                            <Bed className="w-3.5 h-3.5" /> {property.quartos} Quartos
+                                        </span>
+                                        <span className="flex items-center gap-2">
+                                            <Car className="w-3.5 h-3.5" /> {property.vagas} Vagas
+                                        </span>
+                                        <span className="flex items-center gap-2">
+                                            <Bath className="w-3.5 h-3.5" /> {property.banheiros} Banh.
+                                        </span>
+                                        <span className="flex items-center gap-2">
+                                            <Maximize className="w-3.5 h-3.5" /> {property.area} m²
+                                        </span>
+                                    </div>
+                                </div>
+                            ))}
+                        </div>
+                    )}
                 </div>
+
                 <div>
-                  <p className="text-sm font-medium text-card-foreground leading-tight">{property.title}</p>
-                  <p className="text-[11px] text-muted-foreground">{property.address}</p>
-                </div>
-              </div>
-              <span className={`text-[10px] font-medium px-1.5 py-0.5 rounded-full capitalize ${statusStyles[property.status]}`}>
-                {property.status}
-              </span>
-            </div>
-            <p className="text-sm font-semibold text-primary mb-2">{property.price}</p>
-            <div className="flex items-center gap-3 text-[11px] text-muted-foreground">
-              <span className="flex items-center gap-1"><Bed className="w-3 h-3" />{property.beds} bed</span>
-              <span className="flex items-center gap-1"><Bath className="w-3 h-3" />{property.baths} bath</span>
-              <span className="flex items-center gap-1"><Maximize className="w-3 h-3" />{property.sqft} ft²</span>
-            </div>
-          </div>
-        ))}
-      </div>
+                    <h3 className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-3">
+                        Visitas Agendadas ({visitas.length})
+                    </h3>
 
-      {/* Action Buttons */}
-      <div className="p-4 border-t border-border space-y-2">
-        <Button className="w-full justify-start gap-2 h-9 text-xs" variant="default">
-          <CalendarPlus className="w-3.5 h-3.5" />
-          Schedule Visit
-        </Button>
-        <Button className="w-full justify-start gap-2 h-9 text-xs" variant="outline">
-          <CheckCircle2 className="w-3.5 h-3.5" />
-          Mark as Sold
-        </Button>
-        <Button className="w-full justify-start gap-2 h-9 text-xs" variant="outline">
-          <FileText className="w-3.5 h-3.5" />
-          Generate Follow-up Script
-        </Button>
-      </div>
-    </div>
-  );
+                    {visitas.length === 0 ? (
+                        <p className="text-xs text-muted-foreground italic text-center py-2 bg-muted/30 rounded-lg border border-dashed border-border">Nenhuma visita agendada.</p>
+                    ) : (
+                        <div className="space-y-3">
+                            {visitas.map((visita) => (
+                                <div key={visita.id} className="rounded-lg border border-border p-3 bg-muted/20">
+                                    <div className="flex items-center gap-2 mb-2">
+                                        <div className="w-8 h-8 rounded-md bg-primary/10 flex items-center justify-center shrink-0">
+                                            <Calendar className="w-4 h-4 text-primary" />
+                                        </div>
+                                        <div>
+                                            <p className="text-sm font-medium text-card-foreground">
+                                                {/* Usando o date-fns que discutimos antes! */}
+                                                {format(new Date(visita.data), "dd 'de' MMMM", { locale: ptBR })}
+                                            </p>
+                                            <p className="text-[11px] text-muted-foreground flex items-center gap-1">
+                                                <Clock className="w-3 h-3" />
+                                                {format(new Date(visita.data), "HH:mm", { locale: ptBR })}
+                                            </p>
+                                        </div>
+                                    </div>
+                                    <div className="mt-2 pt-2 border-t border-border/50">
+                                        <p className="text-xs text-muted-foreground flex items-center gap-1 line-clamp-1">
+                                            <MapPin className="w-3.5 h-3.5 shrink-0" />
+                                            {visita.imovel?.name || "Imóvel não especificado"}
+                                        </p>
+                                    </div>
+                                </div>
+                            ))}
+                        </div>
+                    )}
+                </div>
+
+            </div>
+
+            <div className="p-4 border-t border-border space-y-2 bg-card">
+                <Button
+                    onClick={() => navigate(`/visits/new?leadId=${leadId}`)}
+                    className="w-full justify-start gap-2 h-9 text-xs"
+                    variant="default"
+                >
+                    <CalendarPlus className="w-3.5 h-3.5" />
+                    Marcar Visita
+                </Button>
+            </div>
+        </div>
+    );
 };
 
 export default PropertyPanel;

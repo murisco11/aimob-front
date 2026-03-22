@@ -15,7 +15,7 @@
     --popover: 222 40% 7%;
     --popover-foreground: 210 20% 95%;
 
-    --primary: 160 84% 39%;
+    --primary: 180 85% 45%;
     --primary-foreground: 0 0% 100%;
 
     --secondary: 215 22% 14%;
@@ -32,18 +32,18 @@
 
     --border: 215 20% 16%;
     --input: 215 20% 16%;
-    --ring: 160 84% 39%;
+    --ring: 180 85% 45%;
 
     --radius: 0.5rem;
 
     --sidebar-background: 222 47% 3%;
     --sidebar-foreground: 214 18% 75%;
-    --sidebar-primary: 160 84% 39%;
+    --sidebar-primary: 180 85% 45%;
     --sidebar-primary-foreground: 0 0% 100%;
     --sidebar-accent: 222 40% 10%;
     --sidebar-accent-foreground: 214 18% 90%;
     --sidebar-border: 215 20% 12%;
-    --sidebar-ring: 160 84% 39%;
+    --sidebar-ring: 180 85% 45%;
 
     /* Custom tokens */
     --success: 152 60% 42%;
@@ -56,12 +56,12 @@
     --info: 210 80% 55%;
     --info-foreground: 0 0% 100%;
 
-    --chat-bubble-self: 160 84% 30%;
+    --chat-bubble-self: 180 85% 35%;
     --chat-bubble-self-foreground: 0 0% 100%;
     --chat-bubble-other: 215 22% 14%;
     --chat-bubble-other-foreground: 210 20% 90%;
 
-    --leads-accent: 160 84% 39%;
+    --leads-accent: 180 85% 45%;
     --leads-accent-foreground: 0 0% 100%;
   }
 }
