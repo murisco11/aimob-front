@@ -43,6 +43,11 @@ export const useAuthStore = create<AuthStore>()(
           let message = "Falha ao fazer login";
           if (axios.isAxiosError(err) && err.response?.data?.message) {
             message = err.response.data.message;
+
+            if (err.response.data.code === "PAYMENT_REQUIRED" && err.response.data.url) {
+              window.location.href = err.response.data.url;
+              return;
+            }
           } else if (err instanceof Error) {
             message = err.message;
           }

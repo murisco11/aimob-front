@@ -68,12 +68,12 @@ const SignUp = () => {
                 <Card className="border shadow-lg">
                     <CardHeader className="text-center pb-2">
                         <div className="flex items-center justify-center gap-2 mb-2">
-                            <Building2 className="h-7 w-7 text-primary" />
+                            <img src="/logo.png" alt="AIMOB CRM" className="h-7 w-auto object-contain" />
                             <span className="text-xl font-bold text-foreground">AIMOB</span>
                         </div>
                         <h1 className="text-xl font-bold text-foreground">Crie sua conta</h1>
                         <p className="text-sm text-muted-foreground">
-                            Plano Pro · R$ 79/mês
+                            Plano Pro · R$ 119/mês
                         </p>
                     </CardHeader>
                     <CardContent>

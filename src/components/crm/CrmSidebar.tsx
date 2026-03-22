@@ -4,7 +4,7 @@ import { useAuth } from "@/hooks/useAuth";
 import { useToast } from "../ui/use-toast";
 
 const navItems = [
-  { icon: LayoutDashboard, label: "Início", path: "/" },
+  { icon: LayoutDashboard, label: "Início", path: "/dashboard" },
   { icon: Users, label: "Leads", path: "/leads" },
   { icon: Home, label: "Imóveis", path: "/properties" },
   { icon: Calendar, label: "Calendário", path: "/visits" },
@@ -27,7 +27,7 @@ const CrmSidebar = ({ activeItem }: CrmSidebarProps) => {
   const getIsActive = (item: typeof navItems[0]) => {
     if (activeItem) return item.label === activeItem;
     if (item.path !== "/" && location.pathname.startsWith(item.path)) return true;
-    if (item.label === "Dashboard") return location.pathname === "/";
+    if (item.label === "Dashboard") return location.pathname === "/dashboard";
     return false;
   };
 
@@ -45,8 +45,8 @@ const CrmSidebar = ({ activeItem }: CrmSidebarProps) => {
     <aside className="hidden lg:flex flex-col w-[220px] bg-sidebar text-sidebar-foreground border-r border-sidebar-border shrink-0">
       <div className="p-5 border-b border-sidebar-border">
         <div className="flex items-center gap-2.5">
-          <div className="w-8 h-8 rounded-lg bg-sidebar-primary flex items-center justify-center">
-            <Home className="w-4 h-4 text-sidebar-primary-foreground" />
+          <div className="w-8 h-8 flex items-center justify-center">
+            <img src="/logo.png" alt="AIMOB CRM" className="h-8 w-auto object-contain" />
           </div>
           <div>
             <h1 className="text-sm font-semibold text-sidebar-accent-foreground">{user.name}</h1>

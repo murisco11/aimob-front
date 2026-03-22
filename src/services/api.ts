@@ -42,7 +42,10 @@ class ApiClient {
           error.response?.status === 403 &&
           (error.response.data as any)?.code === "PAYMENT_REQUIRED"
         ) {
-          if (window.location.pathname !== "/pricing") {
+          const checkoutUrl = (error.response.data as any)?.url;
+          if (checkoutUrl) {
+            window.location.href = checkoutUrl;
+          } else if (window.location.pathname !== "/pricing") {
             window.location.href = "/pricing";
           }
         }

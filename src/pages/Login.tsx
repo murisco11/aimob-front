@@ -36,7 +36,7 @@ const Login = () => {
         description: "Login realizado com sucesso!",
         variant: "success"
       });
-      navigate("/");
+      navigate("/dashboard");
     } catch (err) {
       toast({
         title: "Erro ao fazer login",

@@ -4,14 +4,14 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardFooter, CardHeader } from "@/components/ui/card";
 
 const benefits = [
-  "Gestão completa de Leads",
-  "Funil de Imóveis inteligente",
-  "Lembretes automáticos de follow-up",
-  "Controle de visitas e agendamentos",
-  "Relatórios e analytics avançados",
-  "Gestão de documentos e contratos",
-  "Chat integrado com clientes",
-  "Suporte prioritário por WhatsApp",
+  "Automação no Whatsapp",
+  "Inteligência Artificial",
+  "Gerenciar visitas",
+  "Módulo de transações",
+  "Armazenar documentos",
+  "CRM completo com estrutura de leads",
+  "Qualificação automática após atendimento",
+  "Mensagens ilimitadas"
 ];
 
 const Pricing = () => {
@@ -21,7 +21,7 @@ const Pricing = () => {
     <div className="min-h-screen bg-background flex flex-col items-center justify-center px-4 py-16">
       {/* Header */}
       <div className="flex items-center gap-2 mb-4">
-        <Building2 className="h-8 w-8 text-primary" />
+        <img src="/logo.png" alt="AIMOB CRM" className="h-8 w-auto object-contain" />
         <span className="text-2xl font-bold tracking-tight text-foreground">AIMOB</span>
       </div>
       <h1 className="text-3xl md:text-4xl font-extrabold text-center text-foreground mb-2">
@@ -39,12 +39,12 @@ const Pricing = () => {
             Mais popular
           </div>
           <h2 className="text-2xl font-bold text-foreground">Plano Pro</h2>
-          <p className="text-muted-foreground text-sm">Tudo que você precisa para decolar</p>
+          <p className="text-muted-foreground text-sm">Para quem quer o pacote completo de CRM e inteligência artificial</p>
         </CardHeader>
         <CardContent className="text-center">
           <div className="flex items-end justify-center gap-1 mb-6">
             <span className="text-muted-foreground text-lg">R$</span>
-            <span className="text-5xl font-extrabold text-foreground leading-none">79</span>
+            <span className="text-5xl font-extrabold text-foreground leading-none">119</span>
             <span className="text-muted-foreground text-lg">/mês</span>
           </div>
           <ul className="text-left space-y-3">
