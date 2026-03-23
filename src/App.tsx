@@ -1,8 +1,12 @@
+import { useEffect } from "react";
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
+import { ProtectedRoute } from "@/components/ProtectedRoute";
+import { useAuthStore } from "@/stores/authStore";
+import LandingPage from "./pages/LandingPage";
 import Index from "./pages/Index";
 import Login from "./pages/Login";
 import Visits from "./pages/Visits";
@@ -12,10 +16,184 @@ import PropertyRegister from "./pages/PropertyRegister";
 import Leads from "./pages/Leads";
 import Analytics from "./pages/Analytics";
 import Settings from "./pages/Settings";
-import NewVisit from "./pages/NewVisit";
+import NewVisit from "./pages/VisitForm";
 import NotFound from "./pages/NotFound";
+import { GlobalConfirmDialog } from "./components/crm/Confirm";
+import LeadForm from "./pages/LeadForm";
+import AIConfig from "./pages/AiConfig";
+import Transactions from "./pages/Transactions";
+import Documents from "./pages/Documents";
+import Pricing from "./pages/Pricing";
+import SignUp from "./pages/SignUp";
+import Success from "./pages/Success";
 
 const queryClient = new QueryClient();
+
+const AppRoutes = () => {
+  const checkAuth = useAuthStore((state) => state.checkAuth);
+
+  useEffect(() => {
+    checkAuth();
+  }, [checkAuth]);
+
+  return (
+    <Routes>
+      <Route path="/" element={<LandingPage />} />
+      <Route path="/login" element={<Login />} />
+
+      {/* Rotas Protegidas */}
+      <Route
+        path="/dashboard"
+        element={
+          <ProtectedRoute>
+            <Index />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/leads"
+        element={
+          <ProtectedRoute>
+            <Leads />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/transactions"
+        element={
+          <ProtectedRoute>
+            <Transactions />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/documents"
+        element={
+          <ProtectedRoute>
+            <Documents />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/pricing"
+        element={
+          <Pricing />
+        }
+      />
+      <Route
+        path="/signup"
+        element={
+          <SignUp />
+        }
+      />
+      <Route
+        path="/sucesso"
+        element={
+          <Success />
+        }
+      />
+      <Route
+        path="/leads/new"
+        element={
+          <ProtectedRoute>
+            <LeadForm />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/leads/:id"
+        element={
+          <ProtectedRoute>
+            <LeadForm />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/ai"
+        element={
+          <ProtectedRoute>
+            <AIConfig />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/visits"
+        element={
+          <ProtectedRoute>
+            <Visits />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/visits/new"
+        element={
+          <ProtectedRoute>
+            <NewVisit />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/visits/:id"
+        element={
+          <ProtectedRoute>
+            <NewVisit />
+          </ProtectedRoute>
+        } />
+      <Route
+        path="/properties/edit/:id"
+        element={
+          <ProtectedRoute>
+            <PropertyRegister />
+          </ProtectedRoute>
+        }
+      />
+      < Route
+        path="/properties"
+        element={
+          < ProtectedRoute >
+            <Properties />
+          </ProtectedRoute >
+        }
+      />
+      < Route
+        path="/properties/new"
+        element={
+          < ProtectedRoute >
+            <PropertyRegister />
+          </ProtectedRoute >
+        }
+      />
+      < Route
+        path="/properties/:id"
+        element={
+          < ProtectedRoute >
+            <PropertyDetail />
+          </ProtectedRoute >
+        }
+      />
+      < Route
+        path="/analytics"
+        element={
+          < ProtectedRoute >
+            <Analytics />
+          </ProtectedRoute >
+        }
+      />
+      < Route
+        path="/settings"
+        element={
+          < ProtectedRoute >
+            <Settings />
+          </ProtectedRoute >
+        }
+      />
+
+      {/* Rota 404 - deve ser última */}
+      <Route path="*" element={<NotFound />} />
+
+    </Routes >
+  );
+};
 
 const App = () => (
   <QueryClientProvider client={queryClient}>
@@ -23,20 +201,8 @@ const App = () => (
       <Toaster />
       <Sonner />
       <BrowserRouter>
-        <Routes>
-          <Route path="/" element={<Index />} />
-          <Route path="/login" element={<Login />} />
-          <Route path="/leads" element={<Leads />} />
-          <Route path="/visits" element={<Visits />} />
-          <Route path="/visits/new" element={<NewVisit />} />
-          <Route path="/properties" element={<Properties />} />
-          <Route path="/properties/new" element={<PropertyRegister />} />
-          <Route path="/properties/:id" element={<PropertyDetail />} />
-          <Route path="/analytics" element={<Analytics />} />
-          <Route path="/settings" element={<Settings />} />
-          {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
-          <Route path="*" element={<NotFound />} />
-        </Routes>
+        <AppRoutes />
+        <GlobalConfirmDialog />
       </BrowserRouter>
     </TooltipProvider>
   </QueryClientProvider>

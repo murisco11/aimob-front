@@ -15,11 +15,11 @@ const MobileHeader = () => {
           <div className="flex flex-col h-full bg-sidebar text-sidebar-foreground">
             <div className="p-5 border-b border-sidebar-border">
               <div className="flex items-center gap-2.5">
-                <div className="w-8 h-8 rounded-lg bg-sidebar-primary flex items-center justify-center">
-                  <Home className="w-4 h-4 text-sidebar-primary-foreground" />
+                <div className="w-8 h-8 flex items-center justify-center">
+                  <img src="/logo.png" alt="AIMOB CRM" className="h-8 w-auto object-contain" />
                 </div>
                 <div>
-                  <h1 className="text-sm font-semibold text-sidebar-accent-foreground">LeadIQ</h1>
+                  <h1 className="text-sm font-semibold text-sidebar-accent-foreground">AIMOB</h1>
                   <p className="text-[11px] text-sidebar-foreground/60">Real Estate CRM</p>
                 </div>
               </div>
@@ -28,10 +28,8 @@ const MobileHeader = () => {
         </SheetContent>
       </Sheet>
       <div className="flex items-center gap-2">
-        <div className="w-7 h-7 rounded-lg bg-primary flex items-center justify-center">
-          <Home className="w-3.5 h-3.5 text-primary-foreground" />
-        </div>
-        <span className="text-sm font-semibold text-foreground">LeadIQ</span>
+        <img src="/logo.png" alt="AIMOB CRM" className="h-7 w-auto object-contain" />
+        <span className="text-sm font-semibold text-foreground">AIMOB</span>
       </div>
     </header>
   );
