@@ -3,21 +3,21 @@ import { Clock, ShieldCheck, Share2 } from "lucide-react"
 const items = [
   {
     icon: Clock,
-    title: "Resposta 24/7",
+    title: "Disponibilidade total",
     description:
-      "Nunca mais perca um lead por não responder a tempo. Sua IA trabalha enquanto você dorme.",
+      "Sua IA trabalha enquanto você dorme. Garanta atendimento imediato e não deixe nenhum cliente esfriar esperando na fila.",
   },
   {
     icon: ShieldCheck,
-    title: "Nenhum lead deixado para trás",
+    title: "Gestão automática",
     description:
-      "Cada mensagem é respondida, cada contato é qualificado e categorizado automaticamente.",
+      "Esqueça o trabalho manual. Cada novo contato é avaliado, qualificado e categorizado direto no seu funil de vendas.",
   },
   {
     icon: Share2,
-    title: "Redes sociais integradas",
+    title: "Tudo em um só lugar",
     description:
-      "Instagram e WhatsApp conectados ao seu CRM. Tudo em um só lugar, sem alternar entre apps.",
+      "CANAL PRO e WhatsApp integrados diretamente ao seu CRM. Controle toda a sua operação em uma única tela, sem alternar entre apps.",
   },
 ]
 
@@ -34,7 +34,7 @@ export function PainPoints() {
             Por que corretores de elite estão automatizando?
           </h2>
           <p className="mx-auto mt-4 max-w-xl text-muted-foreground">
-            O mercado imobiliário é veloz. Quem responde primeiro, vende primeiro.
+            O mercado imobiliário é veloz. A agilidade no primeiro contato é o que define quem fecha negócio.
           </p>
         </div>
 

@@ -23,7 +23,7 @@ export function Hero() {
             </p>
 
             <p className="mt-6 max-w-xl text-pretty text-lg leading-relaxed text-muted-foreground md:text-xl">
-              Automatize seu Instagram, qualifique leads no WhatsApp 24/7 e
+              Automatize seu Whatsapp, qualifique leads 24/7 e
               gerencie seus imóveis e leads em um CRM inteligente feito para quem não quer
               perder tempo com burocracia.
             </p>
