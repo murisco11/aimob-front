@@ -1,6 +1,6 @@
 "use client"
 
-import { Bot, User, ArrowRight, Home, TrendingUp, MessageSquare, BarChart3 } from "lucide-react"
+import { Bot, User, ArrowRight, Home, TrendingUp, MessageSquare, BarChart3, Users, Calendar, DollarSign, FileText, LayoutDashboard } from "lucide-react"
 
 function InstagramMockup() {
   const messages = [
@@ -13,7 +13,7 @@ function InstagramMockup() {
   return (
     <div className="glass-card rounded-2xl p-5">
       <div className="mb-4 flex items-center gap-3">
-        <div className="flex h-8 w-8 items-center justify-center rounded-full bg-gradient-to-br from-pink-500 to-orange-400">
+        <div className="flex h-8 w-8 items-center justify-center rounded-full bg-gradient-to-br from-green-500 to-emerald-400">
           <MessageSquare className="h-4 w-4 text-foreground" />
         </div>
         <div>
@@ -33,8 +33,8 @@ function InstagramMockup() {
           >
             <div
               className={`flex max-w-[85%] items-start gap-2 rounded-2xl px-4 py-2.5 text-sm ${msg.from === "user"
-                  ? "bg-secondary text-secondary-foreground"
-                  : "bg-primary/20 text-foreground"
+                ? "bg-secondary text-secondary-foreground"
+                : "bg-primary/20 text-foreground"
                 }`}
             >
               {msg.from === "user" && (
@@ -52,64 +52,40 @@ function InstagramMockup() {
   )
 }
 
-function CRMDashboardMockup() {
-  const leads = [
-    { name: "Maria Silva", status: "Quente", property: "Apt. Jardins", score: 92 },
-    { name: "João Santos", status: "Morno", property: "Casa Morumbi", score: 67 },
-    { name: "Ana Costa", status: "Quente", property: "Cobertura Pinheiros", score: 88 },
+function ModulesMockup() {
+  const modules = [
+    { label: "Leads", desc: "Gestão de contatos", icon: Users, color: "text-blue-500", bg: "bg-blue-500/20" },
+    { label: "Imóveis", desc: "Catálogo completo", icon: Home, color: "text-orange-500", bg: "bg-orange-500/20" },
+    { label: "Documentos", desc: "Contratos e arquivos", icon: FileText, color: "text-emerald-500", bg: "bg-emerald-500/20" },
+    { label: "Transações", desc: "Controle financeiro", icon: DollarSign, color: "text-yellow-500", bg: "bg-yellow-500/20" },
+    { label: "Calendário", desc: "Agendamentos automáticos", icon: Calendar, color: "text-purple-500", bg: "bg-purple-500/20" },
+    { label: "Inteligência Artificial", desc: "Auto-atendimento", icon: Bot, color: "text-primary", bg: "bg-primary/20" },
   ]
 
   return (
     <div className="glass-card rounded-2xl p-5">
       <div className="mb-4 flex items-center gap-3">
         <div className="flex h-8 w-8 items-center justify-center rounded-full bg-primary/20">
-          <BarChart3 className="h-4 w-4 text-primary" />
+          <LayoutDashboard className="h-4 w-4 text-primary" />
         </div>
         <div>
-          <p className="text-sm font-semibold text-foreground">CRM Dashboard</p>
-          <p className="text-xs text-muted-foreground">Atualizado em tempo real</p>
+          <p className="text-sm font-semibold text-foreground">Módulos do Sistema</p>
+          <p className="text-xs text-muted-foreground">Tudo que sua imobiliária precisa</p>
         </div>
-      </div>
-
-      <div className="mb-4 grid grid-cols-3 gap-3">
-        {[
-          { label: "Leads hoje", value: "24", icon: TrendingUp },
-          { label: "Visitas", value: "8", icon: Home },
-          { label: "Conversão", value: "33%", icon: BarChart3 },
-        ].map((stat) => (
-          <div key={stat.label} className="rounded-xl bg-secondary/50 p-3 text-center">
-            <stat.icon className="mx-auto h-4 w-4 text-primary" />
-            <p className="mt-1 text-lg font-bold text-foreground">{stat.value}</p>
-            <p className="text-xs text-muted-foreground">{stat.label}</p>
-          </div>
-        ))}
       </div>
 
       <div className="flex flex-col gap-2">
-        {leads.map((lead) => (
+        {modules.map((mod) => (
           <div
-            key={lead.name}
-            className="flex items-center justify-between rounded-xl bg-secondary/30 px-4 py-3"
+            key={mod.label}
+            className="flex items-center gap-3 rounded-xl bg-secondary/30 px-4 py-3 transition-colors hover:bg-secondary/50"
           >
-            <div className="flex items-center gap-3">
-              <div className="flex h-8 w-8 items-center justify-center rounded-full bg-primary/10 text-xs font-bold text-primary">
-                {lead.name.split(" ").map((n) => n[0]).join("")}
-              </div>
-              <div>
-                <p className="text-sm font-medium text-foreground">{lead.name}</p>
-                <p className="text-xs text-muted-foreground">{lead.property}</p>
-              </div>
+            <div className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-full ${mod.bg}`}>
+              <mod.icon className={`h-5 w-5 ${mod.color}`} />
             </div>
-            <div className="flex items-center gap-3">
-              <span
-                className={`rounded-full px-2 py-0.5 text-xs font-medium ${lead.status === "Quente"
-                    ? "bg-green-500/20 text-green-400"
-                    : "bg-yellow-500/20 text-yellow-400"
-                  }`}
-              >
-                {lead.status}
-              </span>
-              <span className="text-sm font-bold text-primary">{lead.score}</span>
+            <div>
+              <p className="text-sm font-medium text-foreground">{mod.label}</p>
+              <p className="text-xs text-muted-foreground">{mod.desc}</p>
             </div>
           </div>
         ))}
@@ -144,7 +120,7 @@ export function SystemPreview() {
             <InstagramMockup />
           </div>
           <div className="animate-float" style={{ animationDelay: "1s" }}>
-            <CRMDashboardMockup />
+            <ModulesMockup />
           </div>
         </div>
 

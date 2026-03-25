@@ -60,10 +60,10 @@ const Login = () => {
             Gerencie seus imóveis e leads com inteligência
           </h1>
           <p className="text-muted-foreground text-lg text-center">
-            CRM imobiliário com IA integrada para qualificação automática de leads,
-            agendamento de visitas e marketing inteligente.
+            CRM imobiliário com IA integrada para qualificação automática de leads, transações, gerenciamento de documentos e
+            agendamento de visitas
           </p>
-          <div className="mt-10 grid grid-cols-3 gap-6 text-center">
+          {/* <div className="mt-10 grid grid-cols-3 gap-6 text-center">
             <div>
               <p className="text-3xl font-bold text-primary">150+</p>
               <p className="text-xs text-muted-foreground mt-1">Imóveis ativos</p>
@@ -76,7 +76,7 @@ const Login = () => {
               <p className="text-3xl font-bold text-primary">98%</p>
               <p className="text-xs text-muted-foreground mt-1">Satisfação</p>
             </div>
-          </div>
+          </div> */}
         </div>
       </div>
 
@@ -87,7 +87,7 @@ const Login = () => {
             <img
               src="/logo.png"
               alt="AIMOB CRM"
-              className="h-[155px] w-auto object-contain"  />
+              className="h-[155px] w-auto object-contain" />
             <span className="lg:hidden text-xl font-bold text-foreground mt-2">AIMOB CRM</span>
           </div>
 

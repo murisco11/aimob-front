@@ -1,4 +1,5 @@
-import { Brain, Smartphone, Building2, LineChart } from "lucide-react"
+import { Brain, Smartphone, Building2, LineChart, DollarSign, Calendar1 } from "lucide-react"
+import { Calendar } from "../ui/calendar"
 
 interface Feature {
   icon: typeof Brain
@@ -10,28 +11,22 @@ interface Feature {
 const features: Feature[] = [
   {
     icon: Brain,
-    title: "Qualificação por IA",
+    title: "Ecossistema de Vendas (WhatsApp, Canal Pro e IA)",
     description:
-      "O robô separa os curiosos dos reais compradores. Cada lead recebe um score inteligente baseado em comportamento e intenção real de compra.",
+      "A inteligência artificial trabalha em paralelo com seu número de WhatsApp e seus leads do Canal Pro. O robô atende de forma humanizada, filtra os curiosos e entrega apenas clientes com real intenção de compra no seu funil.",
   },
   {
-    icon: Smartphone,
-    title: "WhatsApp & Insta no App",
+    icon: Calendar1,
+    title: "Agendamento e Controle de Visitas",
     description:
-      "Continue usando seu celular normalmente enquanto a IA trabalha em paralelo. Respostas humanizadas e personalizadas 24/7.",
+      "Elimine o vaivém de mensagens para marcar horários. Organize sua agenda, acompanhe o status de cada visitação aos imóveis e otimize seu tempo focando em quem já está pronto para dar o próximo passo.",
+  },
+  {
+    icon: DollarSign,
+    title: "Documentos e Transações",
+    description:
+      "Descomplique a burocracia do fechamento. Centralize propostas, contratos e o recebimento de documentação dos clientes em um ambiente seguro, acompanhando cada etapa da transação até a assinatura final.",
     badge: "DIFERENCIAL EXCLUSIVO",
-  },
-  {
-    icon: Building2,
-    title: "Gestão de Imóveis",
-    description:
-      "Seus posts do Insta conectados diretamente aos dados das suas propriedades. Atualize um e o outro sincroniza automaticamente.",
-  },
-  {
-    icon: LineChart,
-    title: "Relatórios de ROI",
-    description:
-      "Saiba exatamente qual anúncio está trazendo comissão. Dashboards em tempo real com métricas que importam.",
   },
 ]
 
