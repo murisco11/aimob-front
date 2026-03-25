@@ -22,6 +22,10 @@ export type CreateVisitaDto = Omit<Visita, "id" | "createdAt" | "updatedAt" | "u
   user: number;
   imovel: number;
   lead: number;
+  mensagemAgendada?: {
+    texto: string;
+    dataEnvio: string;
+  };
 };
 
-export type UpdateVisitaDto = Partial<CreateVisitaDto>;
+export type UpdateVisitaDto = Partial<Omit<CreateVisitaDto, "mensagemAgendada">>;

@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { useNavigate, useParams, useSearchParams } from "react-router-dom";
-import { ArrowLeft, CalendarIcon, Clock, User, MapPin, FileText, Activity } from "lucide-react";
+import { ArrowLeft, CalendarIcon, Clock, User, MapPin, FileText, Activity, MessageSquare } from "lucide-react";
 import CrmSidebar from "@/components/crm/CrmSidebar";
 import MobileHeader from "@/components/crm/MobileHeader";
 import { Button } from "@/components/ui/button";
@@ -11,6 +11,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Calendar } from "@/components/ui/calendar";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { Switch } from "@/components/ui/switch";
 import { toast } from "sonner";
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
@@ -46,6 +47,11 @@ const VisitForm = () => {
   const [errors, setErrors] = useState<FieldErrors>({});
   const [submitted, setSubmitted] = useState(false);
 
+  const [scheduleMessage, setScheduleMessage] = useState(false);
+  const [messageText, setMessageText] = useState("");
+  const [messageDate, setMessageDate] = useState<Date | undefined>();
+  const [messageTime, setMessageTime] = useState("");
+
   useEffect(() => {
     fetchAllLead();
     fetchAllImovel();
@@ -76,6 +82,13 @@ const VisitForm = () => {
     if (!propertyId) errs.propertyId = "Selecione um imóvel";
     if (!selectedDate) errs.date = "Selecione uma data";
     if (!time) errs.time = "Informe o horário";
+
+    if (!isEditing && scheduleMessage) {
+      if (!messageText) errs.messageText = "Insira a mensagem";
+      if (!messageDate) errs.messageDate = "Selecione uma data para a mensagem";
+      if (!messageTime) errs.messageTime = "Informe o horário para a mensagem";
+    }
+
     return errs;
   };
   const handleDelete = async () => {
@@ -123,6 +136,17 @@ const VisitForm = () => {
         imovel: Number(propertyId),
         user: 1,
       };
+
+      if (!isEditing && scheduleMessage) {
+        const [msgHours, msgMinutes] = messageTime.split(":");
+        const finalMsgDate = new Date(messageDate!);
+        finalMsgDate.setHours(Number(msgHours), Number(msgMinutes), 0, 0);
+
+        (payload as CreateVisitaDto).mensagemAgendada = {
+          texto: messageText,
+          dataEnvio: finalMsgDate.toISOString(),
+        };
+      }
 
       if (isEditing) {
         await updateVisita(Number(id), payload as UpdateVisitaDto);
@@ -319,6 +343,76 @@ const VisitForm = () => {
                 />
               </CardContent>
             </Card>
+
+            {!isEditing && (
+              <Card className="border-border">
+                <CardHeader className="pb-3 flex flex-row items-center justify-between">
+                  <div className="flex items-center gap-2">
+                    <MessageSquare className="w-4 h-4 text-primary" />
+                    <CardTitle className="text-sm font-medium">Agendar Mensagem Automática</CardTitle>
+                  </div>
+                  <Switch checked={scheduleMessage} onCheckedChange={setScheduleMessage} />
+                </CardHeader>
+                {scheduleMessage && (
+                  <CardContent className="space-y-4">
+                    <div>
+                      <Label className="text-xs text-muted-foreground">Mensagem <RequiredDot /></Label>
+                      <Textarea 
+                        placeholder="Ex: Olá, passando para confirmar nossa visita amanhã..."
+                        value={messageText}
+                        onChange={(e) => setMessageText(e.target.value)}
+                        rows={3}
+                        className={cn("mt-1", submitted && errors.messageText && "border-destructive")}
+                      />
+                      {fieldError("messageText")}
+                    </div>
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                      <div>
+                        <Label className="text-xs text-muted-foreground">Data de Envio <RequiredDot /></Label>
+                        <Popover>
+                          <PopoverTrigger asChild>
+                            <Button
+                              variant="outline"
+                              className={cn(
+                                "w-full mt-1 justify-start text-left font-normal",
+                                !messageDate && "text-muted-foreground",
+                                submitted && errors.messageDate && "border-destructive"
+                              )}
+                            >
+                              <CalendarIcon className="mr-2 h-4 w-4" />
+                              {messageDate ? format(messageDate, "dd/MM/yyyy") : "Selecionar data"}
+                            </Button>
+                          </PopoverTrigger>
+                          <PopoverContent className="w-auto p-0" align="start">
+                            <Calendar
+                              mode="single"
+                              selected={messageDate}
+                              onSelect={setMessageDate}
+                              locale={ptBR}
+                              className="pointer-events-auto"
+                            />
+                          </PopoverContent>
+                        </Popover>
+                        {fieldError("messageDate")}
+                      </div>
+                      <div>
+                        <Label className="text-xs text-muted-foreground">Horário <RequiredDot /></Label>
+                        <div className="relative mt-1">
+                          <Clock className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+                          <Input
+                            type="time"
+                            value={messageTime}
+                            onChange={(e) => setMessageTime(e.target.value)}
+                            className={cn("pl-9", submitted && errors.messageTime && "border-destructive")}
+                          />
+                        </div>
+                        {fieldError("messageTime")}
+                      </div>
+                    </div>
+                  </CardContent>
+                )}
+              </Card>
+            )}
 
             <div className="flex gap-3 justify-end pb-6">
               <Button variant="outline" onClick={() => navigate("/visits")}>
