@@ -81,7 +81,7 @@ const CrmSidebar = ({ activeItem }: CrmSidebarProps) => {
           </div>
           <div className="flex-1 min-w-0">
             <p className="text-sm font-medium text-sidebar-accent-foreground truncate">{user?.name || "Usuário"}</p>
-            <p className="text-[11px] text-sidebar-foreground/60 truncate">{user?.role === "admin" ? "Admin" : "Agent"}</p>
+            <p className="text-[11px] text-sidebar-foreground/60 truncate">{user?.role === "admin" ? "Admin" : "Corretor"}</p>
           </div>
           <button
             onClick={handleLogout}
