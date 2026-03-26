@@ -1,11 +1,51 @@
-import { Menu, Home } from "lucide-react";
+import { Menu, LayoutDashboard, Users, Home, Calendar, Settings, Bot, DollarSign, FileText, LogOut } from "lucide-react";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
-import CrmSidebar from "./CrmSidebar";
+import { useNavigate, useLocation } from "react-router-dom";
+import { useAuth } from "@/hooks/useAuth";
+import { useToast } from "../ui/use-toast";
+import { useState } from "react";
+
+const navItems = [
+  { icon: LayoutDashboard, label: "Início", path: "/dashboard" },
+  { icon: Users, label: "Leads", path: "/leads" },
+  { icon: Home, label: "Imóveis", path: "/properties" },
+  { icon: Calendar, label: "Calendário", path: "/visits" },
+  { icon: Bot, label: "IA", path: "/ai" },
+  { icon: DollarSign, label: "Transações", path: "/transactions" },
+  { icon: FileText, label: "Documentos", path: "/documents" },
+  { icon: Settings, label: "Configurações", path: "/settings" },
+];
 
 const MobileHeader = () => {
+  const { toast } = useToast();
+  const navigate = useNavigate();
+  const location = useLocation();
+  const { user, logout } = useAuth();
+  const [open, setOpen] = useState(false);
+
+  const getIsActive = (path: string) => {
+    if (path !== "/" && location.pathname.startsWith(path)) return true;
+    return false;
+  };
+
+  const handleNavigation = (path: string) => {
+    navigate(path);
+    setOpen(false);
+  };
+
+  const handleLogout = async () => {
+    setOpen(false);
+    await logout();
+    navigate("/login");
+    toast({
+      title: "Sucesso",
+      description: "Você saiu da sua conta!",
+    });
+  };
+
   return (
     <header className="lg:hidden flex items-center gap-3 px-4 py-3 bg-card border-b border-border">
-      <Sheet>
+      <Sheet open={open} onOpenChange={setOpen}>
         <SheetTrigger asChild>
           <button className="p-1.5 rounded-md hover:bg-muted">
             <Menu className="w-5 h-5 text-foreground" />
@@ -13,20 +53,65 @@ const MobileHeader = () => {
         </SheetTrigger>
         <SheetContent side="left" className="p-0 w-[220px]">
           <div className="flex flex-col h-full bg-sidebar text-sidebar-foreground">
+            {/* Logo / Header */}
             <div className="p-5 border-b border-sidebar-border">
               <div className="flex items-center gap-2.5">
                 <div className="w-8 h-8 flex items-center justify-center">
                   <img src="/logo.png" alt="AIMOB CRM" className="h-8 w-auto object-contain" />
                 </div>
                 <div>
-                  <h1 className="text-sm font-semibold text-sidebar-accent-foreground">AIMOB</h1>
-                  <p className="text-[11px] text-sidebar-foreground/60">Real Estate CRM</p>
+                  <h1 className="text-sm font-semibold text-sidebar-accent-foreground">{user?.name}</h1>
+                  <p className="text-[11px] text-sidebar-foreground/60">AIMOB</p>
                 </div>
+              </div>
+            </div>
+
+            {/* Nav items */}
+            <nav className="flex-1 p-3 space-y-0.5 overflow-y-auto">
+              {navItems.map((item) => {
+                const isActive = getIsActive(item.path);
+                return (
+                  <button
+                    key={item.label}
+                    onClick={() => handleNavigation(item.path)}
+                    className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm transition-colors ${
+                      isActive
+                        ? "bg-sidebar-accent text-sidebar-accent-foreground font-medium"
+                        : "text-sidebar-foreground hover:bg-sidebar-accent/50 hover:text-sidebar-accent-foreground"
+                    }`}
+                  >
+                    <item.icon className="w-4 h-4" />
+                    <span>{item.label}</span>
+                  </button>
+                );
+              })}
+            </nav>
+
+            {/* User footer */}
+            <div className="p-3 border-t border-sidebar-border">
+              <div className="flex items-center gap-3 px-3 py-2">
+                <div className="w-8 h-8 rounded-full bg-sidebar-accent flex items-center justify-center text-xs font-semibold text-sidebar-accent-foreground">
+                  {user?.name?.charAt(0).toUpperCase() || "U"}
+                </div>
+                <div className="flex-1 min-w-0">
+                  <p className="text-sm font-medium text-sidebar-accent-foreground truncate">{user?.name || "Usuário"}</p>
+                  <p className="text-[11px] text-sidebar-foreground/60 truncate">
+                    {user?.role === "admin" ? "Admin" : "Corretor"}
+                  </p>
+                </div>
+                <button
+                  onClick={handleLogout}
+                  className="p-1 text-sidebar-foreground/40 hover:text-sidebar-foreground hover:bg-sidebar-accent/30 rounded transition-colors"
+                  title="Logout"
+                >
+                  <LogOut className="w-4 h-4" />
+                </button>
               </div>
             </div>
           </div>
         </SheetContent>
       </Sheet>
+
       <div className="flex items-center gap-2">
         <img src="/logo.png" alt="AIMOB CRM" className="h-7 w-auto object-contain" />
         <span className="text-sm font-semibold text-foreground">AIMOB</span>
