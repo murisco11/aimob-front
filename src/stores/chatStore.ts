@@ -84,9 +84,13 @@ export const useChatStore = create<ChatStore>()(
 
                 const novaMensagem = await chatService.sendMessage(data);
 
+                // O socket pode ter chegado antes da resposta HTTP e já adicionou
+                // esta mensagem via addIncomingMessage. Verificamos antes de adicionar.
                 const mensagensAtuais = get().selectedChat || [];
-
-                set({ selectedChat: [...mensagensAtuais, novaMensagem] });
+                const jaExiste = mensagensAtuais.some(m => m.id === novaMensagem.id);
+                if (!jaExiste) {
+                    set({ selectedChat: [...mensagensAtuais, novaMensagem] });
+                }
 
             } catch (error) {
                 console.error("Failed to send message:", error);
