@@ -9,6 +9,7 @@ export const useWhatsapp = () => {
     isLoading: store.isLoading,
     error: store.error,
     disconnect: store.disconnect,
+    reconnect: store.reconnect,
     generateQrCode: store.generateQrCode,
     checkStatus: store.checkStatus,
     clearQrCode: store.clearQrCode

@@ -13,5 +13,10 @@ export const whatsappService = {
   },
   async logout(): Promise<void> {
     await apiClient.delete("/whatsapp/logout");
+  },
+
+  async reconnect(): Promise<WhatsappConnectResponse> {
+    const response = await apiClient.post<WhatsappConnectResponse>("/whatsapp/reconnect");
+    return response.data;
   }
 };

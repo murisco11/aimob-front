@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
-import { Search, Plus, MessageCircle, Globe, MessageSquare, Clock, ChevronRight, Phone, Home, Sparkles, LayoutGrid, List, Calendar, PenBox } from "lucide-react";
+import { Search, Plus, MessageCircle, Globe, MessageSquare, Clock, ChevronRight, Phone, Home, Sparkles, LayoutGrid, List, Calendar, PenBox, GripVertical } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sheet";
@@ -20,6 +20,7 @@ import { useToast } from "@/hooks/use-toast";
 
 const pipelineColumns: { stage: Lead["status"]; label: string; color: string }[] = [
   { stage: "qualificacao_ia", label: "Qualificação IA", color: "bg-info" },
+  { stage: "atendimento", label: "Atendimento", color: "bg-primary" },
   { stage: "visita_agendada", label: "Visita Agendada", color: "bg-warning" },
   { stage: "em_negociacao", label: "Em Negociação", color: "bg-leads-accent" },
   { stage: "fechado", label: "Fechado/Ganho", color: "bg-success" },
@@ -47,6 +48,7 @@ const Leads = () => {
   const [view, setView] = useState<"kanban" | "list">("kanban");
   const [selectedLeadData, setSelectedLeadData] = useState<Lead | null>(null);
   const [dragOverStage, setDragOverStage] = useState<Lead["status"] | null>(null);
+  const [mobileMoveLeadId, setMobileMoveLeadId] = useState<number | null>(null);
   const { toast } = useToast();
 
   useEffect(() => {
@@ -96,6 +98,16 @@ const Leads = () => {
       toast({ title: "Sucesso", description: "Status do lead atualizado", variant: "success" });
     } catch (error) {
       console.error("Erro ao mover card", error);
+      toast({ title: "Erro", description: "Erro ao atualizar status do lead", variant: "destructive" });
+    }
+  };
+
+  const handleMoveLeadMobile = async (leadId: number, stage: Lead["status"]) => {
+    setMobileMoveLeadId(null);
+    try {
+      await updateLead(leadId, { status: stage });
+      toast({ title: "Sucesso", description: "Status do lead atualizado", variant: "success" });
+    } catch (error) {
       toast({ title: "Erro", description: "Erro ao atualizar status do lead", variant: "destructive" });
     }
   };
@@ -174,13 +186,15 @@ const Leads = () => {
                         <span className="ml-auto text-xs text-muted-foreground bg-secondary px-2 py-0.5 rounded-full">{stageLeads.length}</span>
                       </div>
                       <div className="space-y-3 flex-1">
-                        {stageLeads.map((lead) => (
+                        {stageLeads.map((lead) => {
+                          const isMobileMenuOpen = mobileMoveLeadId === lead.id;
+                          return (
                           <div
                             key={lead.id}
                             draggable
                             onDragStart={(e) => handleDragStart(e, lead.id)}
                             onClick={() => setSelectedLeadData(lead)}
-                            className="w-full text-left rounded-xl border border-border bg-card p-3.5 hover:border-leads-accent/50 transition-colors cursor-grab active:cursor-grabbing group"
+                            className="w-full text-left rounded-xl border border-border bg-card p-3.5 hover:border-leads-accent/50 transition-colors cursor-grab active:cursor-grabbing group relative"
                           >
                             <div className="flex items-center gap-2 mb-2">
                               <div className="w-8 h-8 rounded-full bg-secondary flex items-center justify-center text-xs font-semibold text-foreground">
@@ -190,6 +204,17 @@ const Leads = () => {
                                 <p className="text-sm font-medium text-foreground truncate">{lead.name}</p>
                               </div>
                               {originIcon(lead.instanceName)}
+                              {/* Mobile move button */}
+                              <button
+                                className="md:hidden p-1 rounded-md hover:bg-muted text-muted-foreground"
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  setMobileMoveLeadId(isMobileMenuOpen ? null : lead.id);
+                                }}
+                                title="Mover lead"
+                              >
+                                <GripVertical className="w-4 h-4" />
+                              </button>
                             </div>
 
                             <div className="mb-2">
@@ -213,8 +238,31 @@ const Leads = () => {
                                 </span>
                               )}
                             </div>
+
+                            {/* Mobile stage selector */}
+                            {isMobileMenuOpen && (
+                              <div
+                                className="md:hidden absolute left-0 right-0 top-full mt-1 z-20 bg-popover border border-border rounded-xl shadow-lg overflow-hidden"
+                                onClick={(e) => e.stopPropagation()}
+                              >
+                                <p className="text-[11px] font-semibold text-muted-foreground px-3 pt-2 pb-1 uppercase tracking-wide">Mover para:</p>
+                                {pipelineColumns
+                                  .filter(c => c.stage !== col.stage)
+                                  .map(c => (
+                                  <button
+                                    key={c.stage}
+                                    onClick={() => handleMoveLeadMobile(lead.id, c.stage)}
+                                    className="w-full text-left px-3 py-2 text-sm hover:bg-muted flex items-center gap-2"
+                                  >
+                                    <div className={`w-2 h-2 rounded-full ${c.color}`} />
+                                    {c.label}
+                                  </button>
+                                ))}
+                              </div>
+                            )}
                           </div>
-                        ))}
+                          );
+                        })}
                       </div>
                     </div>
                   );

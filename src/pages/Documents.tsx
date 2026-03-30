@@ -5,7 +5,7 @@ import {Button} from "@/components/ui/button";
 import {Input} from "@/components/ui/input";
 import {Label} from "@/components/ui/label";
 import {Badge} from "@/components/ui/badge";
-import {Dialog, DialogContent, DialogHeader, DialogTitle} from "@/components/ui/dialog";
+import {Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter} from "@/components/ui/dialog";
 import {
     FileText,
     UploadCloud,
@@ -18,10 +18,15 @@ import {
     File as FileIcon,
     Search,
     Loader2,
+    Send,
+    CheckCircle2,
 } from "lucide-react";
 
 import {useDocumento} from "@/hooks/useDocumento";
+import {useLead} from "@/hooks/useLead";
 import {useToast} from "@/hooks/use-toast";
+import {documentoService} from "@/services/documentoService";
+import {Documento} from "@/types/DocumentoType";
 
 const getFileName = (url: string) => {
     if (!url) return "Documento Desconhecido";
@@ -71,25 +76,33 @@ const Documents = () => {
         getDownloadLink
     } = useDocumento();
 
+    const {leads, fetchAllLead} = useLead();
+
     const [searchDoc, setSearchDoc] = useState("");
     const {toast} = useToast();
     const [showNewDoc, setShowNewDoc] = useState(false);
     const [docName, setDocName] = useState("");
     const [dragOver, setDragOver] = useState(false);
 
+    // Send-to-leads state
+    const [docToSend, setDocToSend] = useState<Documento | null>(null);
+    const [selectedLeads, setSelectedLeads] = useState<number[]>([]);
+    const [isLeadModalOpen, setIsLeadModalOpen] = useState(false);
+    const [isSending, setIsSending] = useState(false);
+    const [leadSearchDoc, setLeadSearchDoc] = useState("");
+
     useEffect(() => {
         fetchDocs();
-    }, [fetchDocs]);
+        fetchAllLead();
+    }, [fetchDocs, fetchAllLead]);
 
     const handleDeleteDoc = async (id: number) => {
         try {
             await deleteDoc(id);
             toast({title: "Sucesso", description: "Documento excluído com sucesso", variant: "success"});
-
             fetchDocs()
         } catch (error) {
             toast({title: "Erro", description: "Erro ao excluir documento", variant: "destructive"});
-
         }
     };
 
@@ -97,10 +110,49 @@ const Documents = () => {
         toast({ title: "Preparando...", description: "Gerando link seguro do documento" });
         try {
             const urlSegura = await getDownloadLink(id);
-
             window.open(urlSegura, '_blank');
         } catch (error) {
             toast({ variant: "destructive", title: "Erro", description: "Falha ao abrir documento." });
+        }
+    };
+
+    const handleSendClick = (doc: Documento) => {
+        setDocToSend(doc);
+        setSelectedLeads([]);
+        setLeadSearchDoc("");
+        setIsLeadModalOpen(true);
+    };
+
+    const toggleLeadSelection = (leadId: number) => {
+        setSelectedLeads((prev) =>
+            prev.includes(leadId) ? prev.filter((id) => id !== leadId) : [...prev, leadId]
+        );
+    };
+
+    const confirmSendToLeads = async () => {
+        if (!docToSend || selectedLeads.length === 0) return;
+        setIsSending(true);
+        try {
+            const result = await documentoService.sendToLeads(docToSend.id, selectedLeads);
+            if (result.sent > 0) {
+                toast({
+                    title: "Documento(s) Enviado(s)",
+                    description: `Enviado com sucesso para ${result.sent} lead(s).`,
+                    variant: "success"
+                });
+            }
+            if (result.errors.length > 0) {
+                result.errors.forEach((err) =>
+                    toast({ title: "Aviso", description: err, variant: "destructive" })
+                );
+            }
+            setIsLeadModalOpen(false);
+            setDocToSend(null);
+            setSelectedLeads([]);
+        } catch (error) {
+            toast({title: "Erro", description: "Falha ao enviar documento.", variant: "destructive"});
+        } finally {
+            setIsSending(false);
         }
     };
 
@@ -123,7 +175,6 @@ const Documents = () => {
             toast({title: "Sucesso", description: "Arquivo enviado com sucesso", variant: "success"});
             resetModal();
             fetchDocs()
-            console.log(documents)
         } catch (error) {
             toast({title: "Erro", description: "Erro ao enviar arquivo", variant: "destructive"});
         }
@@ -176,9 +227,7 @@ const Documents = () => {
                                     <tr className="border-b border-border bg-muted/50">
                                         <th className="text-left px-4 py-3 font-medium text-muted-foreground">Arquivo</th>
                                         <th className="text-left px-4 py-3 font-medium text-muted-foreground hidden sm:table-cell">Tipo</th>
-                                        <th className="text-left px-4 py-3 font-medium text-muted-foreground hidden md:table-cell">Criado
-                                            em
-                                        </th>
+                                        <th className="text-left px-4 py-3 font-medium text-muted-foreground hidden md:table-cell">Criado em</th>
                                         <th className="text-right px-4 py-3 font-medium text-muted-foreground">Ações</th>
                                     </tr>
                                     </thead>
@@ -209,8 +258,8 @@ const Documents = () => {
                                                             <span
                                                                 className="font-medium text-foreground truncate max-w-[200px] sm:max-w-none"
                                                                 title={fileName}>
-                                  {fileName}
-                                </span>
+                                                              {fileName}
+                                                            </span>
                                                         </div>
                                                     </td>
                                                     <td className="px-4 py-3 hidden sm:table-cell">
@@ -222,6 +271,12 @@ const Documents = () => {
                                                     </td>
                                                     <td className="px-4 py-3">
                                                         <div className="flex items-center justify-end gap-1">
+                                                            <Button variant="ghost" size="icon"
+                                                                    onClick={() => handleSendClick(doc)}
+                                                                    title="Enviar para Lead"
+                                                                    className="h-8 w-8 text-muted-foreground hover:text-primary">
+                                                                <Send className="w-4 h-4"/>
+                                                            </Button>
                                                             <Button variant="ghost" size="icon"
                                                                     onClick={() => handleDownloadDoc(doc.id, fileName)}
                                                                     className="h-8 w-8 text-muted-foreground hover:text-foreground">
@@ -246,6 +301,7 @@ const Documents = () => {
                 </div>
             </div>
 
+            {/* Modal: Upload */}
             <Dialog open={showNewDoc} onOpenChange={(open) => {
                 if (!open) resetModal();
             }}>
@@ -290,6 +346,83 @@ const Documents = () => {
                             </div>
                         </div>
                     </div>
+                </DialogContent>
+            </Dialog>
+
+            {/* Modal: Enviar para Leads */}
+            <Dialog open={isLeadModalOpen} onOpenChange={setIsLeadModalOpen}>
+                <DialogContent className="sm:max-w-md">
+                    <DialogHeader>
+                        <DialogTitle>Enviar Documento</DialogTitle>
+                        <DialogDescription>
+                            Selecione os leads que devem receber <strong>{docToSend?.name || "este documento"}</strong> via WhatsApp.
+                        </DialogDescription>
+                    </DialogHeader>
+
+                    {/* Searchbar */}
+                    <div className="relative mt-2 mb-3">
+                        <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+                        <input
+                            type="text"
+                            value={leadSearchDoc}
+                            onChange={(e) => setLeadSearchDoc(e.target.value)}
+                            placeholder="Buscar lead..."
+                            className="w-full pl-9 pr-3 py-2 text-sm bg-muted rounded-md border border-border focus:border-primary focus:ring-1 focus:ring-primary outline-none transition-all"
+                        />
+                    </div>
+
+                    <div className="max-h-[260px] overflow-y-auto space-y-2 pr-2 scrollbar-thin">
+                        {(() => {
+                            const filteredLeads = leads.filter((l: any) =>
+                                l.name?.toLowerCase().includes(leadSearchDoc.toLowerCase())
+                            );
+                            if (filteredLeads.length === 0) return (
+                                <p className="text-sm text-muted-foreground text-center py-4">Nenhum lead encontrado.</p>
+                            );
+                            return filteredLeads.map((lead: any) => {
+                                const isSelected = selectedLeads.includes(lead.id);
+                                const hasChat = lead.conversas && lead.conversas.length > 0;
+                                return (
+                                    <div
+                                        key={lead.id}
+                                        onClick={() => hasChat && toggleLeadSelection(lead.id)}
+                                        className={`flex items-center gap-3 p-3 rounded-lg border transition-colors ${
+                                            !hasChat
+                                                ? "opacity-50 cursor-not-allowed bg-muted/50"
+                                                : isSelected
+                                                    ? "border-primary bg-primary/5 cursor-pointer"
+                                                    : "border-border hover:border-primary/30 cursor-pointer"
+                                        }`}
+                                    >
+                                        <div className="w-8 h-8 rounded-full bg-secondary flex items-center justify-center text-xs font-semibold shrink-0 uppercase">
+                                            {lead.name?.substring(0, 2) || "US"}
+                                        </div>
+                                        <div className="flex-1 min-w-0">
+                                            <p className="text-sm font-medium truncate">{lead.name}</p>
+                                            <p className="text-xs text-muted-foreground truncate">{lead.phone || "Sem telefone"}</p>
+                                            {!hasChat && <p className="text-[10px] text-destructive mt-0.5">Sem chat ativo</p>}
+                                        </div>
+                                        {isSelected && <CheckCircle2 className="w-5 h-5 text-primary shrink-0"/>}
+                                    </div>
+                                );
+                            });
+                        })()}
+                    </div>
+
+                    <DialogFooter className="mt-4 gap-2 sm:justify-end">
+                        <Button type="button" variant="outline" onClick={() => setIsLeadModalOpen(false)}>
+                            Cancelar
+                        </Button>
+                        <Button
+                            type="button"
+                            onClick={confirmSendToLeads}
+                            disabled={selectedLeads.length === 0 || isSending}
+                            className="gap-2"
+                        >
+                            {isSending ? <Loader2 className="w-4 h-4 animate-spin"/> : <Send className="w-4 h-4"/>}
+                            Enviar para {selectedLeads.length} Lead(s)
+                        </Button>
+                    </DialogFooter>
                 </DialogContent>
             </Dialog>
         </div>

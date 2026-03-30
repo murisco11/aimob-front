@@ -1,4 +1,4 @@
-import { Chat } from "./ChatType"; 
+import { Chat } from "./ChatType";
 import { User } from "./UserType";
 import { Imovel } from "./ImovelType";
 import { Visita } from "./VisitaType";
@@ -12,7 +12,7 @@ export interface Lead {
   threadId?: string;
   lid?: string;
   temperatura?: "warm" | "cold" | "hot";
-  status: "qualificacao_ia" | "visita_agendada" | "em_negociacao" | "fechado" | "perdido";
+  status: "qualificacao_ia" | "visita_agendada" | "em_negociacao" | "fechado" | "perdido" | "atendimento";
   instanceName: string;
   createdAt: string | Date;
   updatedAt: string | Date;
@@ -24,7 +24,7 @@ export interface Lead {
 }
 
 export type CreateLeadDto = Omit<Lead, "id" | "createdAt" | "updatedAt" | "user" | "imoveis" | "conversas" | "visitas"> & {
-  userId?: number; 
+  userId?: number;
 };
 
 export type UpdateLeadDto = Partial<CreateLeadDto>;

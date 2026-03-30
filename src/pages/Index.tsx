@@ -1,10 +1,11 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import CrmSidebar from "@/components/crm/CrmSidebar";
 import MobileHeader from "@/components/crm/MobileHeader";
 import ChatTable from "@/components/crm/ChatTable";
 import ChatInterface from "@/components/crm/ChatInterface";
-import PropertyPanel from "@/components/crm/PropertyPanel"
+import PropertyPanel from "@/components/crm/PropertyPanel";
+import { ArrowLeft, User } from "lucide-react";
 import { io } from "socket.io-client";
 
 import { useChat } from "@/hooks/useChat";
@@ -26,6 +27,9 @@ const Index = () => {
   const [selectedChatId, setSelectedChatId] = useState<number | null>(
     chatIdFromUrl ? parseInt(chatIdFromUrl) : null
   );
+
+  // Mobile navigation: "list" | "chat" | "panel"
+  const [mobileView, setMobileView] = useState<"list" | "chat" | "panel">("list");
 
   const { chats, fetchChats, addIncomingMessage, setActiveChatId } = useChat();
 
@@ -84,6 +88,11 @@ const Index = () => {
 
   const selectedChat = chats.find((c) => c.id === selectedChatId) || null;
 
+  const handleSelectChat = useCallback((id: number) => {
+    setSelectedChatId(id);
+    setMobileView("chat");
+  }, []);
+
   const onEditChat = (id: number) => {
     const chatSelected = chats.find(c => c.id == id)
     navigate(`/leads?leadId=${chatSelected.lead.id}`)
@@ -130,20 +139,55 @@ const Index = () => {
       <CrmSidebar />
 
       <div className="flex-1 flex flex-col min-w-0">
-        <MobileHeader />
+        {/* Mobile header shown only on chat/panel views */}
+        {mobileView === "list" && <MobileHeader />}
+
+        {/* Mobile top bar when viewing chat or panel */}
+        {mobileView !== "list" && (
+          <div className="flex lg:hidden items-center gap-2 px-3 py-2 border-b border-border bg-card shrink-0">
+            <button
+              onClick={() => {
+                if (mobileView === "panel") setMobileView("chat");
+                else setMobileView("list");
+              }}
+              className="p-1.5 rounded-md hover:bg-muted transition-colors"
+            >
+              <ArrowLeft className="w-5 h-5" />
+            </button>
+            <span className="font-semibold text-sm truncate flex-1">
+              {mobileView === "chat" && (selectedChat?.lead?.name || "Chat")}
+              {mobileView === "panel" && "Informações do Lead"}
+            </span>
+            {mobileView === "chat" && selectedChat && (
+              <button
+                onClick={() => setMobileView("panel")}
+                className="p-1.5 rounded-md hover:bg-muted transition-colors"
+                title="Ver informações do lead"
+              >
+                <User className="w-5 h-5" />
+              </button>
+            )}
+          </div>
+        )}
 
         <div className="flex-1 flex overflow-hidden">
-          <div className="w-full lg:w-[340px] xl:w-[380px] shrink-0 p-3 border-r border-border flex flex-col">
+          {/* Chat list — always visible on desktop, hidden on mobile when not on list view */}
+          <div className={`${
+            mobileView === "list" ? "flex" : "hidden"
+          } lg:flex w-full lg:w-[340px] xl:w-[380px] shrink-0 p-3 border-r border-border flex-col`}>
             <ChatTable
               chats={chats}
               selectedChatId={selectedChatId}
-              onSelectChat={setSelectedChatId}
+              onSelectChat={handleSelectChat}
               onEditChat={onEditChat}
               onDeleteChat={onDeleteChat}
             />
           </div>
 
-          <div className="hidden md:flex flex-1 min-w-0 p-3">
+          {/* Chat area — always visible on desktop (md+), on mobile only when mobileView === "chat" */}
+          <div className={`${
+            mobileView === "chat" ? "flex" : "hidden"
+          } md:flex flex-1 min-w-0 p-3`}>
             {selectedChat ? (
               <ChatInterface chat={selectedChat} />
             ) : (
@@ -152,13 +196,15 @@ const Index = () => {
               </div>
             )}
           </div>
-          {selectedChat &&
-            <div className="hidden xl:flex w-[340px] flex-col shrink-0 p-3 border-l border-border">
-              <PropertyPanel
-                leadId={Number(selectedChat.lead.id)}
-              />
+
+          {/* Property panel — always visible on desktop (xl+), on mobile only when mobileView === "panel" */}
+          {selectedChat && (
+            <div className={`${
+              mobileView === "panel" ? "flex" : "hidden"
+            } xl:flex w-full xl:w-[340px] flex-col shrink-0 p-3 border-l border-border`}>
+              <PropertyPanel leadId={Number(selectedChat.lead.id)} />
             </div>
-          }
+          )}
         </div>
       </div>
     </div>
