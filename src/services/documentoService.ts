@@ -57,5 +57,10 @@ export const documentoService = {
     );
 
     return response.data;
+  },
+
+  async sendToLeads(docId: number, leadIds: number[]): Promise<{ sent: number; errors: string[] }> {
+    const response = await apiClient.post<{ sent: number; errors: string[] }>(`/documento/${docId}/send-to-leads`, { leadIds });
+    return response.data;
   }
 };

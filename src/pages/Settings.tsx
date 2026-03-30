@@ -61,7 +61,8 @@ const Settings = () => {
         isLoading: isWaLoading,
         generateQrCode,
         checkStatus,
-        disconnect
+        disconnect,
+        reconnect
     } = useWhatsapp();
 
     const [name, setName] = useState("");
@@ -461,21 +462,40 @@ const Settings = () => {
                                                             <p className="text-sm font-medium text-foreground">Aparelho Conectado!</p>
                                                             <p className="text-xs text-muted-foreground mt-1">Seu WhatsApp está pronto para enviar e receber mensagens.</p>
                                                         </div>
-                                                        <Button
-                                                            variant="outline"
-                                                            size="sm"
-                                                            className="gap-2 text-destructive border-destructive/30 hover:bg-destructive/10 hover:text-destructive"
-                                                            onClick={async () => {
-                                                                await disconnect();
-                                                                toast({
-                                                                    title: "Desconectado",
-                                                                    description: "Seu WhatsApp foi desvinculado com sucesso.",
-                                                                });
-                                                            }}
-                                                        >
-                                                            {isWaLoading ? <RefreshCw className="w-4 h-4 animate-spin" /> : <LogOut className="w-4 h-4" />}
-                                                            Desconectar Aparelho
-                                                        </Button>
+                                                        <div className="flex gap-2">
+                                                            <Button
+                                                                variant="outline"
+                                                                size="sm"
+                                                                className="gap-2"
+                                                                onClick={async () => {
+                                                                    await reconnect();
+                                                                    toast({
+                                                                        title: "Reconectando...",
+                                                                        description: "Escaneie o novo QR Code para vincular o aparelho.",
+                                                                    });
+                                                                }}
+                                                                disabled={isWaLoading}
+                                                            >
+                                                                {isWaLoading ? <RefreshCw className="w-4 h-4 animate-spin" /> : <RefreshCw className="w-4 h-4" />}
+                                                                Reconectar
+                                                            </Button>
+                                                            <Button
+                                                                variant="outline"
+                                                                size="sm"
+                                                                className="gap-2 text-destructive border-destructive/30 hover:bg-destructive/10 hover:text-destructive"
+                                                                onClick={async () => {
+                                                                    await disconnect();
+                                                                    toast({
+                                                                        title: "Desconectado",
+                                                                        description: "Seu WhatsApp foi desvinculado com sucesso.",
+                                                                    });
+                                                                }}
+                                                                disabled={isWaLoading}
+                                                            >
+                                                                {isWaLoading ? <RefreshCw className="w-4 h-4 animate-spin" /> : <LogOut className="w-4 h-4" />}
+                                                                Desconectar
+                                                            </Button>
+                                                        </div>
                                                     </div>
                                                 ) : qrCode ? (
                                                     <div className="flex flex-col items-center text-center">

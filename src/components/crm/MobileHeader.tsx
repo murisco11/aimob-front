@@ -1,5 +1,5 @@
 import { Menu, LayoutDashboard, Users, Home, Calendar, Settings, Bot, DollarSign, FileText, LogOut } from "lucide-react";
-import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
+import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
 import { useNavigate, useLocation } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
 import { useToast } from "../ui/use-toast";
@@ -54,17 +54,17 @@ const MobileHeader = () => {
         <SheetContent side="left" className="p-0 w-[220px]">
           <div className="flex flex-col h-full bg-sidebar text-sidebar-foreground">
             {/* Logo / Header */}
-            <div className="p-5 border-b border-sidebar-border">
+            <SheetHeader className="p-5 border-b border-sidebar-border">
               <div className="flex items-center gap-2.5">
                 <div className="w-8 h-8 flex items-center justify-center">
                   <img src="/logo.png" alt="AIMOB CRM" className="h-8 w-auto object-contain" />
                 </div>
                 <div>
-                  <h1 className="text-sm font-semibold text-sidebar-accent-foreground">{user?.name}</h1>
+                  <SheetTitle className="text-sm font-semibold text-sidebar-accent-foreground">{user?.name}</SheetTitle>
                   <p className="text-[11px] text-sidebar-foreground/60">AIMOB</p>
                 </div>
               </div>
-            </div>
+            </SheetHeader>
 
             {/* Nav items */}
             <nav className="flex-1 p-3 space-y-0.5 overflow-y-auto">

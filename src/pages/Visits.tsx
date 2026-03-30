@@ -70,7 +70,13 @@ const Visits = () => {
         <div className="flex-1 flex overflow-hidden">
           <div className="w-full md:w-[340px] xl:w-[360px] shrink-0 overflow-y-auto border-r border-border scrollbar-thin">
             <div className="p-4">
-              <h2 className="text-lg font-semibold text-foreground mb-1">Visitas</h2>
+              <div className="flex items-center justify-between mb-1">
+                <h2 className="text-lg font-semibold text-foreground">Visitas</h2>
+                <Button size="sm" className="gap-1.5 md:hidden" onClick={() => navigate("/visits/new")}>
+                  <CalendarPlus className="w-4 h-4" />
+                  Nova Visita
+                </Button>
+              </div>
               <p className="text-xs text-muted-foreground mb-4">Gerencie suas visitas e reuniões com leads</p>
 
               <Card className="border-border">
@@ -99,6 +105,60 @@ const Visits = () => {
                     </CardContent>
                   </Card>
                 ))}
+              </div>
+            </div>
+
+            {/* Visit list visible on mobile below the calendar */}
+            <div className="md:hidden border-t border-border">
+              <div className="p-4">
+                <h3 className="text-sm font-semibold text-foreground mb-3">
+                  {selectedDate
+                    ? format(selectedDate, "dd 'de' MMMM", { locale: ptBR })
+                    : "Todas as visitas"}
+                  <span className="ml-2 text-muted-foreground font-normal text-xs">{filteredVisits.length} visita{filteredVisits.length !== 1 ? "s" : ""}</span>
+                </h3>
+                {isLoading ? (
+                  <div className="flex items-center justify-center py-8 text-muted-foreground">
+                    <Loader2 className="w-6 h-6 animate-spin mr-2" />
+                    <span className="text-sm">Carregando...</span>
+                  </div>
+                ) : filteredVisits.length === 0 ? (
+                  <div className="flex flex-col items-center justify-center py-8 text-muted-foreground">
+                    <CalendarIcon className="w-8 h-8 mb-2 opacity-40" />
+                    <p className="text-sm">Nenhuma visita neste dia</p>
+                  </div>
+                ) : (
+                  <div className="space-y-3">
+                    {filteredVisits.map((visit) => {
+                      const config = statusConfig[visit.status] || statusConfig.agendada;
+                      const StatusIcon = config.icon;
+                      const leadName = visit.lead?.name || "Lead não identificado";
+                      const propertyName = visit.imovel?.name || "Imóvel não especificado";
+                      const visitTime = visit.data ? format(new Date(visit.data), "HH:mm") : "--:--";
+                      return (
+                        <Card
+                          key={visit.id}
+                          className="border-border hover:shadow-md transition-shadow cursor-pointer"
+                          onClick={() => navigate(`/visits/${visit.id}`)}
+                        >
+                          <CardContent className="p-3">
+                            <div className="flex items-center justify-between mb-1">
+                              <p className="text-sm font-medium text-foreground truncate flex-1">{leadName}</p>
+                              <Badge variant="outline" className={cn("text-[10px] gap-1 ml-2 shrink-0", config.className)}>
+                                <StatusIcon className="w-3 h-3" />
+                                {config.label}
+                              </Badge>
+                            </div>
+                            <p className="text-xs text-muted-foreground">{propertyName}</p>
+                            <p className="text-xs text-muted-foreground flex items-center gap-1 mt-1">
+                              <Clock className="w-3 h-3" />{visitTime}
+                            </p>
+                          </CardContent>
+                        </Card>
+                      );
+                    })}
+                  </div>
+                )}
               </div>
             </div>
           </div>

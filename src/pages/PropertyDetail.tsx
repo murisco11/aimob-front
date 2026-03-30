@@ -18,7 +18,7 @@ import {
     Brain, CheckCircle2, Home, MapPin, Image as ImageIcon,
     CalendarPlus, Users, Loader2, Upload,
     MoreVertical, Trash2, Edit, House, Refrigerator, Dog, Send,
-    CheckSquare, Circle
+    CheckSquare, Circle, Search
 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { useImovel } from "@/hooks/useImovel";
@@ -58,6 +58,7 @@ const PropertyDetail = () => {
     const [selectedMediaToShare, setSelectedMediaToShare] = useState<any[]>([]);
     const [selectedLeads, setSelectedLeads] = useState<number[]>([]);
     const [isSendingToLeads, setIsSendingToLeads] = useState(false);
+    const [leadSearch, setLeadSearch] = useState("");
 
     const [isSelectionMode, setIsSelectionMode] = useState(false);
     const [selectedMediaIds, setSelectedMediaIds] = useState<number[]>([]);
@@ -82,6 +83,7 @@ const PropertyDetail = () => {
     const handleSendSingleMediaClick = (midia: any) => {
         setSelectedMediaToShare([midia]);
         setSelectedLeads([]);
+        setLeadSearch("");
         setTimeout(() => setIsLeadModalOpen(true), 150);
     };
 
@@ -90,6 +92,7 @@ const PropertyDetail = () => {
         const mediaObjects = imovel.midias.filter((m: any) => selectedMediaIds.includes(m.id));
         setSelectedMediaToShare(mediaObjects);
         setSelectedLeads([]);
+        setLeadSearch("");
         setIsLeadModalOpen(true);
     };
 
@@ -640,14 +643,29 @@ const PropertyDetail = () => {
                         </DialogDescription>
                     </DialogHeader>
 
-                    <div className="max-h-[300px] overflow-y-auto space-y-2 mt-2 pr-2 scrollbar-thin">
-                        {leads.length === 0 ? (
-                            <p className="text-sm text-muted-foreground text-center py-4">Nenhum lead encontrado.</p>
-                        ) : (
-                            leads.map((lead: any) => {
+                    {/* Searchbar */}
+                    <div className="relative mt-2 mb-3">
+                        <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+                        <input
+                            type="text"
+                            value={leadSearch}
+                            onChange={(e) => setLeadSearch(e.target.value)}
+                            placeholder="Buscar lead..."
+                            className="w-full pl-9 pr-3 py-2 text-sm bg-muted rounded-md border border-border focus:border-primary focus:ring-1 focus:ring-primary outline-none transition-all"
+                        />
+                    </div>
+
+                    <div className="max-h-[260px] overflow-y-auto space-y-2 pr-2 scrollbar-thin">
+                        {(() => {
+                            const filteredLeads = leads.filter((l: any) =>
+                                l.name?.toLowerCase().includes(leadSearch.toLowerCase())
+                            );
+                            if (filteredLeads.length === 0) return (
+                                <p className="text-sm text-muted-foreground text-center py-4">Nenhum lead encontrado.</p>
+                            );
+                            return filteredLeads.map((lead: any) => {
                                 const isSelected = selectedLeads.includes(lead.id);
                                 const hasChat = lead.conversas && lead.conversas.length > 0;
-
                                 return (
                                     <div
                                         key={lead.id}
@@ -657,23 +675,21 @@ const PropertyDetail = () => {
                                             : isSelected
                                                 ? 'border-primary bg-primary/5 cursor-pointer'
                                                 : 'border-border hover:border-primary/30 cursor-pointer'
-                                            }`}
+                                        }`}
                                     >
-                                        <div
-                                            className="w-8 h-8 rounded-full bg-secondary flex items-center justify-center text-xs font-semibold shrink-0 uppercase">
+                                        <div className="w-8 h-8 rounded-full bg-secondary flex items-center justify-center text-xs font-semibold shrink-0 uppercase">
                                             {lead.name?.substring(0, 2) || "US"}
                                         </div>
                                         <div className="flex-1 min-w-0">
                                             <p className="text-sm font-medium truncate">{lead.name}</p>
                                             <p className="text-xs text-muted-foreground truncate">{lead.phone || "Sem telefone"}</p>
-                                            {!hasChat &&
-                                                <p className="text-[10px] text-destructive mt-0.5">Sem chat ativo</p>}
+                                            {!hasChat && <p className="text-[10px] text-destructive mt-0.5">Sem chat ativo</p>}
                                         </div>
                                         {isSelected && <CheckCircle2 className="w-5 h-5 text-primary shrink-0" />}
                                     </div>
-                                )
-                            })
-                        )}
+                                );
+                            });
+                        })()}
                     </div>
 
                     <DialogFooter className="mt-4 gap-2 sm:justify-end">
