@@ -191,13 +191,12 @@ const PropertyDetail = () => {
         if (!files || files.length === 0 || !imovel) return;
 
         try {
-            const file = files[0];
-
-            await uploadMidia(file, imovel.id);
+            const uploadPromises = Array.from(files).map(file => uploadMidia(file, imovel.id));
+            await Promise.all(uploadPromises);
 
             toast({
-                title: "Mídia adicionada",
-                description: "Imagem enviada com sucesso!",
+                title: files.length > 1 ? "Mídias adicionadas" : "Mídia adicionada",
+                description: files.length > 1 ? `${files.length} imagens enviadas com sucesso!` : "Imagem enviada com sucesso!",
                 variant: "success"
             });
 
@@ -206,7 +205,7 @@ const PropertyDetail = () => {
         } catch (error) {
             toast({
                 title: "Erro",
-                description: "Ocorreu um erro ao enviar a imagem.",
+                description: "Ocorreu um erro ao enviar as imagens.",
                 variant: "destructive"
             });
         } finally {
@@ -445,7 +444,7 @@ const PropertyDetail = () => {
                                         <h3 className="text-sm font-semibold text-card-foreground">Galeria de Mídia</h3>
 
                                         <div className="flex flex-wrap items-center gap-2">
-                                            <input type="file" className="hidden" ref={fileInputRef} accept="image/*" onChange={handleFileUpload} />
+                                            <input type="file" className="hidden" ref={fileInputRef} accept="image/*" multiple onChange={handleFileUpload} />
 
                                             {isSelectionMode ? (
                                                 <>
