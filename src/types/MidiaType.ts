@@ -7,6 +7,7 @@ export interface Midia {
   imovel?: Imovel;
   base64Data?: string;
   user?: User;
+  ordem?: number;
 }
 
 export interface CreateMidiaDto {

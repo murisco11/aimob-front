@@ -13,6 +13,8 @@ export const useMidia = () => {
     fetchByIdMidia: store.fetchById,
     createMidia: store.createItem,
     updateMidia: store.updateItem,
-    deleteMidia: store.deleteItem
+    deleteMidia: store.deleteItem,
+    reorderMidias: (imovelId: number, orderedMidias: Array<{ id: number; ordem: number }>) => 
+      store.reorderMidias(imovelId, orderedMidias)
   };
 };

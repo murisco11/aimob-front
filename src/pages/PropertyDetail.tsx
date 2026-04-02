@@ -18,7 +18,7 @@ import {
     Brain, CheckCircle2, Home, MapPin, Image as ImageIcon,
     CalendarPlus, Users, Loader2, Upload,
     MoreVertical, Trash2, Edit, House, Refrigerator, Dog, Send,
-    CheckSquare, Circle, Search
+    CheckSquare, Circle, Search, Rows3
 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { useImovel } from "@/hooks/useImovel";
@@ -29,6 +29,7 @@ import { useChat } from "@/hooks/useChat";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { useConfirmStore } from "@/stores/confirmStore";
 import { ExpandableImage } from "@/components/ExpandableImage";
+import { MidiaGalleryReorder } from "@/components/MidiaGalleryReorder";
 
 const statusStyles: Record<string, string> = {
     active: "bg-success/10 text-success border-success/20",
@@ -49,12 +50,13 @@ const PropertyDetail = () => {
     const { toast } = useToast();
 
     const { selectedImovel: imovel, isLoading, fetchByIdImovel, deleteImovel } = useImovel();
-    const { uploadMidia, isLoading: isUploading, deleteMidia } = useMidia();
+    const { uploadMidia, isLoading: isUploading, deleteMidia, reorderMidias } = useMidia();
     const { leads, fetchAllLead } = useLead();
     const { openConfirm } = useConfirmStore();
     const { sendMessage } = useChat();
 
     const [isLeadModalOpen, setIsLeadModalOpen] = useState(false);
+    const [isReorderModalOpen, setIsReorderModalOpen] = useState(false);
     const [selectedMediaToShare, setSelectedMediaToShare] = useState<any[]>([]);
     const [selectedLeads, setSelectedLeads] = useState<number[]>([]);
     const [isSendingToLeads, setIsSendingToLeads] = useState(false);
@@ -487,6 +489,15 @@ const PropertyDetail = () => {
                                                         size="sm"
                                                         variant="outline"
                                                         className="gap-1.5 text-xs"
+                                                        onClick={() => setIsReorderModalOpen(true)}
+                                                        disabled={!imovel.midias || imovel.midias.length <= 1}
+                                                    >
+                                                        <Rows3 className="w-3.5 h-3.5" /> Reordenar
+                                                    </Button>
+                                                    <Button
+                                                        size="sm"
+                                                        variant="outline"
+                                                        className="gap-1.5 text-xs"
                                                         onClick={() => setIsSelectionMode(true)}
                                                         disabled={!imovel.midias || imovel.midias.length === 0}
                                                     >
@@ -704,6 +715,36 @@ const PropertyDetail = () => {
                             {isSendingToLeads ? <Loader2 className="w-4 h-4 animate-spin" /> :
                                 <Send className="w-4 h-4" />}
                             Enviar para {selectedLeads.length} Lead(s)
+                        </Button>
+                    </DialogFooter>
+                </DialogContent>
+            </Dialog>
+
+            <Dialog open={isReorderModalOpen} onOpenChange={setIsReorderModalOpen}>
+                <DialogContent className="sm:max-w-2xl">
+                    <DialogHeader>
+                        <DialogTitle>Reordenar Mídias</DialogTitle>
+                        <DialogDescription>
+                            Arraste as mídias para reordenar. A ordem será atualizada automaticamente.
+                        </DialogDescription>
+                    </DialogHeader>
+
+                    <div className="py-4 max-h-[500px] overflow-y-auto">
+                        {imovel?.midias && imovel.midias.length > 0 && (
+                            <MidiaGalleryReorder
+                                midias={imovel.midias}
+                                onReorder={async (orderedMidias) => {
+                                    await reorderMidias(imovel.id, orderedMidias);
+                                    if (id) fetchByIdImovel(Number(id));
+                                }}
+                                onDelete={deleteMidia}
+                            />
+                        )}
+                    </div>
+
+                    <DialogFooter>
+                        <Button variant="outline" onClick={() => setIsReorderModalOpen(false)}>
+                            Fechar
                         </Button>
                     </DialogFooter>
                 </DialogContent>
