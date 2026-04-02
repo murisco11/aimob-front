@@ -14,6 +14,7 @@ interface MidiaStore {
   updateItem: (id: number, data: UpdateMidiaDto) => Promise<void>;
   uploadMidia: (file: File, imovelId: number) => Promise<Midia>;
   deleteItem: (id: number) => Promise<void>;
+  reorderMidias: (imovelId: number, orderedMidias: Array<{ id: number; ordem: number }>) => Promise<void>;
 }
 
 export const useMidiaStore = create<MidiaStore>((set, get) => ({
@@ -93,6 +94,17 @@ export const useMidiaStore = create<MidiaStore>((set, get) => ({
       }));
     } catch (err) {
       console.error(err);
+      throw err;
+    }  },
+
+  reorderMidias: async (imovelId: number, orderedMidias: Array<{ id: number; ordem: number }>) => {
+    set({ isLoading: true, error: null });
+    try {
+      const updated = await midiaService.reorderMidias(imovelId, orderedMidias);
+      set({ items: updated, isLoading: false });
+    } catch (err) {
+      console.error("Erro ao reordenar mídias:", err);
+      set({ error: "Erro ao reordenar mídias", isLoading: false });
       throw err;
     }
   }

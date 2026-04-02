@@ -44,5 +44,10 @@ export const midiaService = {
 
   async delete(id: number): Promise<void> {
     await apiClient.delete(`/midia/${id}`);
+  },
+
+  async reorderMidias(imovelId: number, orderedMidias: Array<{ id: number; ordem: number }>): Promise<Midia[]> {
+    const response = await apiClient.put<Midia[]>("/midia/reorder", { imovelId, orderedMidias });
+    return response.data;
   }
 };
