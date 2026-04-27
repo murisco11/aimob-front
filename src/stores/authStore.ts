@@ -1,6 +1,6 @@
 import { create } from "zustand";
 import { persist } from "zustand/middleware";
-import axios from "axios"; // <-- Importação do Axios adicionada
+import axios from "axios";
 import { AuthUser, LoginInput, AuthResponse } from "@/services/types";
 import { authService } from "@/services/authService";
 import { apiClient } from "@/services/api";
@@ -14,6 +14,8 @@ export interface AuthStore {
   login: (credentials: LoginInput) => Promise<void>;
   logout: () => Promise<void>;
   checkAuth: () => Promise<void>;
+  resetPassword: (token: string, newPassword: string) => Promise<void>;
+  requestPasswordReset: (email: string) => Promise<void>;
   setError: (error: string | null) => void;
 }
 
@@ -30,7 +32,6 @@ export const useAuthStore = create<AuthStore>()(
           set({ isLoading: true, error: null });
           const response: AuthResponse = await authService.login(credentials);
           apiClient.setToken(response.token);
-          console.log(response.user);
           set({
             user: response.user,
             isAuthenticated: true,
@@ -39,7 +40,7 @@ export const useAuthStore = create<AuthStore>()(
           });
         } catch (err) {
           console.log("Erro no login:", err);
-          
+
           let message = "Falha ao fazer login";
           if (axios.isAxiosError(err) && err.response?.data?.message) {
             message = err.response.data.message;
@@ -61,7 +62,44 @@ export const useAuthStore = create<AuthStore>()(
           throw err;
         }
       },
+      resetPassword: async (token: string, newPassword: string) => {
+        try {
+          set({ isLoading: true, error: null });
+          await authService.resetPassword(token, newPassword);
+          set({ isLoading: false });
+        } catch (err) {
+          console.log("Erro ao redefinir senha:", err);
 
+          let message = "Falha ao redefinir senha";
+          if (axios.isAxiosError(err) && err.response?.data?.message) {
+            message = err.response.data.message;
+          } else if (err instanceof Error) {
+            message = err.message;
+          }
+
+          set({ error: message, isLoading: false });
+          throw err;
+        }
+      },
+      requestPasswordReset: async (email: string) => {
+        try {
+          set({ isLoading: true, error: null });
+          await authService.requestPasswordReset(email);
+          set({ isLoading: false });
+        } catch (err) {
+          console.log("Erro ao solicitar redefinição:", err);
+
+          let message = "Falha ao solicitar redefinição de senha";
+          if (axios.isAxiosError(err) && err.response?.data?.message) {
+            message = err.response.data.message;
+          } else if (err instanceof Error) {
+            message = err.message;
+          }
+
+          set({ error: message, isLoading: false });
+          throw err;
+        }
+      },
       logout: async () => {
         try {
           set({ isLoading: true });
@@ -75,7 +113,7 @@ export const useAuthStore = create<AuthStore>()(
           });
         } catch (err) {
           console.log("Erro no logout:", err);
-          
+
           let message = "Falha ao fazer logout";
           if (axios.isAxiosError(err) && err.response?.data?.message) {
             message = err.response.data.message;
@@ -110,7 +148,7 @@ export const useAuthStore = create<AuthStore>()(
           }
         } catch (err) {
           apiClient.clearToken();
-          
+
           let message = "Falha ao verificar autenticação";
           if (axios.isAxiosError(err) && err.response?.data?.message) {
             message = err.response.data.message;
