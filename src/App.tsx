@@ -26,6 +26,7 @@ import Documents from "./pages/Documents";
 import Pricing from "./pages/Pricing";
 import SignUp from "./pages/SignUp";
 import Success from "./pages/Success";
+import ResetPassword from "./pages/ResetPassword";
 
 const queryClient = new QueryClient();
 
@@ -65,6 +66,10 @@ const AppRoutes = () => {
             <Transactions />
           </ProtectedRoute>
         }
+      />
+      <Route
+        path="/reset-password"
+        element={<ResetPassword />}
       />
       <Route
         path="/documents"

@@ -15,7 +15,13 @@ export const authService = {
     const response = await apiClient.post<AuthResponse>("/auth/register", data);
     return response.data;
   },
+  async requestPasswordReset(email: string): Promise<void> {
+    await apiClient.post("/auth/forgotpassword", { email });
+  },
 
+  async resetPassword(token: string, newPassword: string): Promise<void> {
+    await apiClient.post("/auth/resetpassword", { token, newPassword });
+  },
   async getCurrentUser(): Promise<AuthUser> {
     const response = await apiClient.get<AuthUser>("/auth/me");
     return response.data;
@@ -27,14 +33,6 @@ export const authService = {
 
   async verifyEmail(token: string): Promise<void> {
     await apiClient.post("/auth/verify-email", { token });
-  },
-
-  async requestPasswordReset(email: string): Promise<void> {
-    await apiClient.post("/auth/request-password-reset", { email });
-  },
-
-  async resetPassword(token: string, newPassword: string): Promise<void> {
-    await apiClient.post("/auth/reset-password", { token, newPassword });
   },
 
   async updateProfile(data: Partial<AuthUser>): Promise<AuthUser> {
