@@ -1,7 +1,7 @@
 import { Flame, Thermometer, Snowflake } from "lucide-react";
 
 interface LeadStatusBadgeProps {
-  status: "hot" | "warm" | "cold";
+  status?: string | null;
 }
 
 const config = {
@@ -11,7 +11,9 @@ const config = {
 };
 
 const LeadStatusBadge = ({ status }: LeadStatusBadgeProps) => {
-  const { icon: Icon, label, className } = config[status];
+  const statusKey = status?.toLowerCase() as keyof typeof config | undefined;
+  const { icon: Icon, label, className } = config[statusKey ?? "cold"] ?? config.cold;
+
   return (
     <span className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium ${className}`}>
       <Icon className="w-3 h-3" />
